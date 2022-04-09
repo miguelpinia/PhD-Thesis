@@ -1,0 +1,31 @@
+#+title: Notes about concurrent programming
+#+author: Miguel Piña
+#+date: [2022-04-09 sáb 14:57]
+
+* Registers
+
+* Cache memory
+
+** Multiple caches
+
+** Cache coherence protocols
+
+*** MESI
+
+*** MOESI
+
+** Store Buffers
+
+* Reordering (CPU or Compiler)
+
+* Memory Barriers
+
+** X86 and TSO architectures
+
+** Memory Fences
+
+* Read-Modify-Write Operations
+
+* Bibliography
+
+  - https://blog.the-pans.com/std-atomic-from-bottom-up/
