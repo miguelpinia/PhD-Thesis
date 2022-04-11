@@ -2,30 +2,125 @@
 #+author: Miguel Piña
 #+date: [2022-04-09 sáb 14:57]
 
-* Registers
+* Notes
 
-* Cache memory
+** Registers
 
-** Multiple caches
+** Cache memory
 
-** Cache coherence protocols
+*** Multiple caches
 
-*** MESI
+*** Cache coherence protocols
 
-*** MOESI
 
-** Store Buffers
+**** MESI
 
-* Reordering (CPU or Compiler)
+**** MOESI
 
-* Memory Barriers
+*** Store Buffers
 
-** X86 and TSO architectures
+** Reordering (CPU or Compiler)
 
-** Memory Fences
+** Memory Barriers
 
-* Read-Modify-Write Operations
+*** X86 and TSO architectures
 
-* Bibliography
+*** Memory Fences
 
-  - https://blog.the-pans.com/std-atomic-from-bottom-up/
+** Read-Modify-Write Operations
+
+** Bibliography
+
+   - https://blog.the-pans.com/std-atomic-from-bottom-up/
+
+
+* Advanced topics in Multi-Core Architecture and Software Systems
+
+** Introduction
+
+   - [[https://www.cs.tau.ac.il/~mad/publications/atc2018-bst.pdf][Getting to the root of concurrent binary search tree performance]]
+   - [[http://supertech.csail.mit.edu/papers/cilk5.pdf][The implementation of the cilk-5 multithreaded language]]
+   - [[http://www.srl.inf.ethz.ch/papers/idempotentWSQ09.pdf][Idempotent Work-Stealing]]
+   - [[http://www.srl.inf.ethz.ch/papers/laworder-journal.pdf][Laws of Order: Synchronization in Concurrent Algorithms]]
+   - [[http://www.cs.tau.ac.il/~mad/publications/asplos2014-ffwsq.pdf][Fence-Free Work-Stealing on Bounded TSO Processors]]
+
+** Out-of-order execution and memory-level parallelism
+
+   - [[https://www.cs.tau.ac.il/~mad/publications/sosp2021-CT.pdf][Cuckoo trie: Exploiting Memory-Level Parallelism for Efficient DRAM Indexing]]
+
+** Speculative execution attacks and defenses
+
+   - [[https://eprint.iacr.org/2013/448.pdf][FLUSH + RELOAD: A High Resolution, Low Noise L3 Cache Side-Channel Attack]]
+   - [[https://spectreattack.com/spectre.pdf][Spectre attacks: Exploiting Speculative Execution]]
+   - [[https://meltdownattack.com/meltdown.pdf][Meltdown: Reading Kernel Memory From User Space]]
+   - [[https://www.cs.tau.ac.il/~mad/publications/micro2019-stt.pdf][Speculative Taint Tracking (STT): A Comprehensive Protection for
+     Speculatively Accesed Data]]
+
+** Reasoning about concurrency (linearizability)
+
+   - [[http://cs.brown.edu/~mph/HerlihyW90/p463-herlihy.pdf][Linearizability: A Correctness Condition for Concurrent Objects]]
+   - [[http://people.csail.mit.edu/shanir/publications/Lazy_Concurrent.pdf][A Lazy Concurrent List-Based Set Algorithm]]
+
+** Cache Coherence
+
+   - [[https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph_tau01003094500&context=L&vid=TAU2&search_scope=Blended&tab=default_tab&lang=iw_IL][A Primer on Memory Consistency and Cache Coherence (Chap 2, 6-8)]]
+   -
+
+** Serializing Efficiently
+
+   - [[http://www.cs.rochester.edu/~scott/papers/1991_TOCS_synch.pdf][Algorithms for scalable synchronization on shared-memory multiprocessors]]
+   - [[http://www.cs.rochester.edu/~scott/papers/1996_PODC_queues.pdf][Simple, Fast, and Practical Non-Blocking and Blocking Concurrent Queue Algorithms]]
+   - [[http://people.csail.mit.edu/shanir/publications/Flat%20Combining%20SPAA%2010.pdf][Flat Combining and the Synchronization-Parallelism Tradeof]]
+   - [[http://people.csail.mit.edu/nickolai/papers/boyd-wickizer-oplog-tr.pdf][OpLog: a library for scaling update-heavy data-structures]]
+   - [[http://www.cs.tau.ac.il/~mad/publications/ppopp2013-x86queues.pdf][Fast concurrent queues for x86 processors]]
+
+** Memory Consistency Models (Hardware)
+
+   - [[https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph_tau01003094500&context=L&vid=TAU2&search_scope=Blended&tab=default_tab&lang=iw_IL][A Primer on Memory Consistency and Cache Coherence (Chapters 3-5)]]
+   - [[http://iacoma.cs.uiuc.edu/iacoma-papers/isca13_2.pdf][WeeFence: Toward Making Fences Free in TSO]]
+
+** Memory Consistency Models (programming language)
+
+   - [[http://www.hpl.hp.com/techreports/2004/HPL-2004-209.pdf][Threads Cannot be Implemented as a Library]]
+   - [[http://rsim.cs.uiuc.edu/Pubs/popl05.pdf][The Java Memory Model]]
+   - [[http://www.hpl.hp.com/techreports/2008/HPL-2008-56.pdf][Foundations of The C++ Concurrency Memory Model]]
+
+** Safe Memory Reclamation
+
+   - [[http://www.research.ibm.com/people/m/michael/spaa-2002.pdf][High Performance Dynamic Lock-Free Hash Tables and List-Based Sets]]
+   - [[http://queue.acm.org/detail.cfm?id=2488549][Structured Deferral: Synchronization via Procrastination]] (explains RCU and
+     compares to Hazard Pointers).
+   - [[http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-579.pdf][Practical lock-freedom (Epoch-based reclamation, section 5.2.3)]]
+   - [[http://researchweb.watson.ibm.com/people/m/michael/ieeetpds-2004.pdf][Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects]]
+   - [[http://labs.oracle.com/pls/apex/f?p=labs:40150:0::::P40000_PUBLICATION_ID:4899][Fast non-intrusive memory reclamation for highly-concurrent data-structures]]
+   - [[http://www.cs.technion.ac.il/~sakogan/papers/spaa13.pdf][Drop the anchor: Lightweight Memory Management for Non-Blocking Data-Structures]]
+   - [[http://www.cs.technion.ac.il/~erez/Papers/oa-spaa-15.pdf][Efficient Memory Management for Lock-Free Data Structures with Optimistic Access]]
+   - [[http://people.csail.mit.edu/amatveev/StackTrack_EuroSys2014.pdf][StackTrack: An Automated Transactional Approach to Concurrent Memory Reclamation]]
+   - [[http://www.cs.utoronto.ca/~tabrown/debra/paper.pdf][Reclaiming Memory for Lock-Free Data Structures: There has to be a Better Way]]
+
+** Ordered Parallelism and Relaxed Data Structures
+
+   - [[https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-579.pdf][Skip Lists (Section 4.3.3 of the thesis)]]
+   - [[https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/SprayList_full.pdf][The SprayList: A Scalable Relaxed Priority Queue]]
+   - [[http://arxiv.org/pdf/1411.1209.pdf][MultiQueues: Simpler, Faster, and Better Relaxed Concurrent Priority Queues]]
+   - [[http://sigops.org/sosp/sosp13/papers/p456-nguyen.pdf][A Lightweight Infrastructure for Graph Analytics (Section 4.1)]]
+
+** Ordered Parallelism and Relaxed Data Structures
+
+   - [[https://people.csail.mit.edu/sanchez/papers/2015.swarm.micro.pdf][A Scalable Architecture for Ordered Parallelism]]
+
+** Transactional Memory
+
+   - [[http://people.cs.umass.edu/~moss/papers/isca-1993-trans-mem.pdf][Transactional Memory: Architectural Support For Lock-Free Data Structures]]
+   - [[http://pages.cs.wisc.edu/~rajwar/papers/micro01.pdf][Speculative Lock Elision: Enabling Highly Concurrent Multithreaded Execution]]
+   - [[http://www.cs.tau.ac.il/~shanir/nir-pubs-web/Papers/Transactional_Locking.pdf][Transactional Locking II]]
+   - [[https://people.csail.mit.edu/sanchez/papers/2016.tictoc.sigmod.pdf][TicToc: Time Traveling Optimisting Concurrency Control]]
+   - [[http://people.csail.mit.edu/amatveev/RH_NOrec_ASPLOS2015.pdf][Reduced Hardware NOrec: A Safe and Scalable Hybrid Transactional Memory]]
+   - [[https://people.eecs.berkeley.edu/~kubitron/cs258/handouts/papers/logtm-moore-hpca06.pdf][LogTM: Log-based Transactional Memory]]
+
+** Concurrent Search Trees
+
+   - [[http://ppl.stanford.edu/papers/ppopp207-bronson.pdf][A Practical Concurrent Binary Tree Search]]
+   - [[https://arxiv.org/abs/1712.06687][A General Technique for Non-Blocking Trees]]
+   - [[https://arxiv.org/abs/1712.06688][Pragmatic Primitives for Non-Blocking Data Structures]]
+   - [[http://www.cs.toronto.edu/~tabrown/ebrrq/paper.ppopp18.pdf][Harnessing Epoch-based Reclamation for Efficient Range Queries]]
