@@ -1,126 +1,609 @@
-#+title: Notes about concurrent programming
-#+author: Miguel Piña
-#+date: [2022-04-09 sáb 14:57]
+#+title: Notes about concurrent computing
+#+author: Miguel Angel Piña Avelino
+#+date: \today
 
-* Notes
+* Setup                                                            :noexport:
 
-** Registers
+** Startup
+
+   #+startup: noptag overview hideblocks
+
+
+** Org LaTeX Setup
+
+   #+latex_class: tufte-book
+   #+latex_class_options: [openany, a4paper]
+   #+latex_header: \usepackage{amsmath,amssymb,amsthm,geometry,hyperref,paralist,svg,thmtools,tikz,tikz-cd}
+   #+latex_header: \usepackage{mathtools}
+   #+latex_header: \usepackage[capitalise,noabbrev]{cleveref}
+   #+latex_header: \usepackage{environ} \NewEnviron{abmn}{\marginnote{\BODY}}
+   #+latex_header: \setcounter{tocdepth}{1}
+   #+latex_header: \newtheorem{theorem}{Theorem}
+   #+latex_header: \newtheorem{example}[theorem]{Example}
+   #+latex_header: \newtheorem{exmpl}[theorem]{Example}
+   #+latex_header: \newtheorem{definition}[theorem]{Definition}
+   #+latex_header: \newtheorem{proposition}[theorem]{Proposition}
+   #+latex_header: \newtheorem{lemma}[theorem]{Lemma}
+   #+latex_header: \newtheorem{exercise}[theorem]{Exercise}
+   #+latex_header: \usetikzlibrary{arrows,automata,positioning}
+
+
+** Export settings
+
+   Export into the artifacts directory
+   #+export_file_name: artifacts/notes
+
+   Add ~tufte-book~ to ~org-latex-classes~ and update ~org-latex-pdf-process~.
+   #+name: export-setup
+   #+begin_src emacs-lisp :results silent :var this-year="2022"
+     (add-to-list 'org-latex-classes
+               `("tufte-book"
+                 ,(string-join
+                   '("\\documentclass{tufte-book}"
+                     "\\usepackage{color}"
+                     "\\usepackage{amsmath,amssymb}")
+                   "\n")
+                 ("\\chapter{%s}" . "\\chapter*{%s}")
+                 ("\\section{%s}" . "\\section*{%s}")
+                 ("\\subsection{%s}" . "\\subsection*{%s}")
+                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+     (setq-local org-latex-pdf-process
+                 (let
+                     ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
+                                   " --synctex=1"
+                                   " -output-directory %o %f")))
+                   (list "cp refs.bib %o/"
+                         cmd
+                         cmd
+                         "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
+                         "cd %o; bibtex %b"
+                         cmd
+                         cmd
+                         "mv *.svg %o/"
+                         "rm -rf %o/svg-inkscape"
+                         "mv svg-inkscape %o/"
+                         "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
+                         (concat "cp %o/%b.pdf ../docs/" this-year "/notes-concurrent.pdf"))))
+
+     (setq-local org-latex-subtitle-format "\\\\\\medskip
+             \\noindent\\Huge %s")
+     (setq-local org-confirm-babel-evaluate nil)
+   #+end_src
+
+
+* Work-stealing algorithm analysis
+
+  We analyze the algorithms for work-stealing described in the article Fully
+  Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
+  called "Idempotent FIFO Work-Stealing", this because the algorithm have a
+  similar semantic than the prior algorithms.
+
+** Realistic model of computation
+
+   We consider a standard concurrent shared memory system with \(n \ge 2\)
+   /asynchronous/ processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
+   during an execution. The processes communicate with each other by invoking
+   atomic instructions of base objects: either simple Read/Write instructions to
+   *atomic objects*, or more powerful *Read-Modify-Write* instructions, such as
+   =Test-And-Set=, =Swap= or =Compare-And-Set=.
+
+   For simplicity we assume a single multicore chip where the processes run. In
+   our system we consider a memory hierarchy, where we have the following
+   elements in the hierarchy:
+
+   - Cache memory
+   - Memory bus
+   - Main memory
+
+   In this model, each processor core may read and
+   write to a single shared memory space. Usually each processor core has a
+   cache to operate with data from the shared memory. Often, this data is
+   transferred through a memory bus, allowing connect the processors with the
+   memory. In a simplified view, the figure \ref{fig:arch} shows a diagram of
+   this model.
+
+   #+begin_src dot :file architecture.svg :results silent
+     digraph Cache {
+     size="7,6";
+     concentrate=true;
+     compound=true;
+     {rank=same; cpu1; cpu2; cpuN;}
+     cpu1 [shape=box, label="CPU 1"];
+     cpu2 [shape=box, label="CPU 2"];
+     cpuN [shape=box, label="CPU N"];
+     cache1 [shape=box];
+     cache2 [shape=box];
+     cacheN [shape=box];
+     memory_bus [label="Memory bus"];
+     main_memory [label="Main memory"];
+     {rank=same; cache1; cache2; cacheN}
+     subgraph cluster0 {
+     style=filled;
+     cpu1 -> cache1;
+     cpu2 -> cache2;
+     cpuN -> cacheN;
+     cpu2 -> cpuN[style=dotted,arrowhead=none,minlen=6];
+     cache2 -> cacheN[style=dotted,arrowhead=none,minlen=6];
+     color=blue;
+     }
+     cache1 -> memory_bus;
+     cache2 -> memory_bus;
+     cacheN -> memory_bus[splines=ortho,nodesep=1];
+     memory_bus -> main_memory;
+     main_memory -> memory_bus;
+     }
+   #+end_src
+
+   #+begin_marginfigure
+   \begin{minipage}{\linewidth}
+     \includesvg[width=\linewidth]{architecture}
+   \end{minipage}
+   \caption{Simplified view of a modern computer system cache architecture}
+   \label{fig:arch}
+   #+end_marginfigure
+
+*** Cache memory
+
+    The cache memory is a special very high-speed memory that is very close to
+    the processor and the processes can access it very fast. The caches are used
+    to reduce average latencies to access storage structures
+    [[cite:&DBLP_series_synthesis_2020Nagarajan]]. In recent multicore chips, the
+    cache memory is divided in three levels, two private levels (L1 and L2) for
+    each processor and a third level (L3) that is shared by the cores. The
+    purpose of the first two levels is to provide fast access to data and
+    instructions for the processors.
+
+    Each processor use the first level of cache to get the data and instructions
+    to execute them, usually the access to this level of cache is very fast
+    respect to the access to other levels.  The second level is often more
+    capacious than first level and is used to store data and instructions that
+    are close to be executed. In the third level, this cache is shared by many
+    processors and is used as feeder for the L2 cache.
+
+
+*** Memory bus
+
+    Is a computer bus that allows transfer data from the primary memory to the
+    CPU and the cache memory. It is made up of two parts: the data bus and the
+    address bus. The data bus is in charge of transfer information between the
+    primary memory and the correspondent chipset.
+    The address bus is used to retrieve information about the location of stored
+    information.
+
+
+*** Main memory
+
+    Is the responsible of hold the data that CPU need to access frequently, such
+    as instructions or data currently being processed. The CPU can access to
+    this information faster than the access to secondary memory.
+
+** Consistency Memory Model and Cache Coherence
+
+*** Consistency memory model
+
+    Following the simplified view of the cache architecture, we want to have a
+    correct shared memory. And what this means? The correctness of the shared
+    memory can be separated into two sub-issues: /consistency/ and /correctness/.
+
+    The consistency (definitions) provide rules about loads and stores (memory
+    reads and writes) and how they act upon memory. These definitions must take
+    into account the behaviour of those operations on memory through access of
+    multiple threads or even a single thread. The consistency models define
+    correct shared memory behavior in terms of loads and stores, without
+    reference to caches or coherence [[cite:&DBLP_series_synthesis_2020Nagarajan]].
+    Shared memory correctness is specified by a memory consistency model (or
+    memory model). This specifies the allowed behavior of multithreaded programs
+    executing with shared memory.
+
+    The most intuitive and strongest memory model is the /Sequential Consistency/
+    (SC). Another memory model used by systems /x86/ and /SPARC/ is /Total Store Order/
+    (TSO), motivated by the desire of use /first-in-first-out/ write buffers to
+    hold the results of committed stores before writing results to the caches.
+    Additional to the prior memory model, "relaxed" or "weak" memory models are
+    considered, because these models shows that most memory orderings in strong
+    models are unnecessary [[cite:&DBLP_series_synthesis_2020Nagarajan]].
+
+*** Cache coherence
+
+    Cache coherence protocols born in response to solve a coherence problem in
+    cache. For example, a coherence problem can arise if multiple cores have
+    access to multiple copies of a datum, each one in a core, and at least one
+    them is a write access. The cache coherence protocols prevent the access to
+    stale data (incoherent data); this can be done using a set of rules
+    implemented by the distributed set of cores within a system. These protocols
+    use the common MOESI coherence states: modified (M), owned (O), exclusive
+    (E), shared (S) and invalid (I). The protocol acts like a state machine,
+    moving from one state to another based on the conditions of the data and the
+    cache memory.
+
+
+
+** Pseudocode for Work-Stealing with Weak Multiplicity
+
+  #+begin_src language
+
+  #+end_src
+
+
+
+* Some Foundations
+
+
+
+
 
 ** Cache memory
 
+   The cache memory
+
 *** Multiple caches
+
 
 *** Cache coherence protocols
 
 
+
 **** MESI
+
 
 **** MOESI
 
+
 *** Store Buffers
+
 
 ** Reordering (CPU or Compiler)
 
+
 ** Memory Barriers
+
 
 *** X86 and TSO architectures
 
+
 *** Memory Fences
 
+
 ** Read-Modify-Write Operations
+
 
 ** Bibliography
 
    - https://blog.the-pans.com/std-atomic-from-bottom-up/
 
 
+** Memory management
+
+   To implement efficiently the idempotent algorithms in an enviroment without
+   garbage collection, it's necessary use some technique or metodology to
+   provide garbage collection when atomic pointers are used or when distinct
+   threads want to reclaim the memory of the object associated to the pointer.
+
+*** Strategies to delete shared pointers
+
+    - Add pointers to list to safety delete.
+    - Do this when there aren't more threads accessing to methods.
+      - Increase the counter when a thread enter to the method and decrease when
+        it exits.
+      - Delete all pointers when the counter be equal to zero.
+
+
+*** Hazard pointers
+
+    The /Hazard Pointers/ is a technique to manage memory in languages where there
+    are not a garbage collector. This technique was proposed by Maged
+    Michael cite:&DBLP_journals_tpds_Michael04. They are so called because
+    deleting a pointer that might be referenced by other thread(s) is
+    dangerous. If another threads keep holding references to that pointer and
+    proceed to access to that pointer after be deleted, you have a undefined
+    behavior cite:&DBLP_journals_tpds_Michael04.
+
+    The basic idea of this technique is the following:
+
+    - If a thread want to use a pointer that another thread might want to
+      delete, it first sets a hazard pointer to the pointer, informing to the
+      other thread that deleting the pointer would be dangerous. Once the object
+      is not longer needed, the hazard pointer is cleared.
+    - When a thread wants to delete the pointer, it must check if the hazard
+      pointers belonging to the other threads in the system. If no one has a
+      reference to the pointer, then, it's safe to delete the
+      pointer. Otherwise, it must be left until later.
+    - Periodically, we must check the list of objects that have been left until
+      later to see if any of them can be deleted now.
+
+    A general pseudocode for this technique could be the following:
+
+    #+begin_src c++
+      void func() {
+          std::atomic<void*>& hp = get_hazard_pointer_for_current_thread();
+          void* old_data = data.load();
+          do {
+              void* temp;
+              do{ // Loop until you've set the hazard pointer
+                  temp = old_data;
+                  hp.store(old_data);
+                  old_data = data.load();
+              } while (old_data != temp);
+                }while (old_data &&
+                  !data.compare_exchange_strong(old_data, old_data->next);
+          // Do something with old_data
+          hp.store(nullptr); // clearing usage of hazard pointer
+          // Trying clearing
+          if (outstanding_hazard_pointers_for(old_head))
+          {
+              reclaim_later(old_data);
+          }
+          else
+          {
+              delete old_data;
+          }
+          delete_nodes_with_no_hazards();
+      }
+    #+end_src
+
+
+*** Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
+
+
+    When a memory region is reclaimed, the programmer cannot know how that
+    region of memory will be reused or if even whether it is reused. We need a
+    way of developing a (general) solution to prevent the sorts of races
+    when a memory region is reclaimed by many threads asynchronously. We can to
+    do this by delaying reclamation.
+    Thinking in terms of pending operations on a concurrent data structure, a
+    sufficient condition is that /memmory is only reclaimed when it is impossible
+    for any pending operation to access in the future/.
+
+    This property could be also achieved by /reference counting/. In a reference
+    counted implementation of a data-structure (like a list), a counter of type
+    atomic<int> is associated with each node. Whenever a reference to node N is
+    created
+
+
+** C++ Memory model
+
+*** Memory model basics
+
+**** Objects and memory locations
+
+
+**** Objects, memory locations, and concurrency
+
+
+**** Modification orders
+
+
+*** Atomic operations and types in C++
+
+
+**** The standard atomic types
+
+**** Operations on std::atomic_flag
+
+**** Operations on std::atomic<boolean>
+
+**** Operations on std::atomic<T*>: pointer arithmetic
+
+**** Operations on standard atomic integral types
+
+**** The std::atomic<> primary class template
+
+**** Free functions for atomic operations
+
+*** Synchronizing operations and enforcing ordering
+
+**** The synchronization relationship
+
+**** The happens-before relationship
+
+**** Memory ordering for atomic operations
+
+**** Release sequences and synchronizes-with
+
+**** Fences
+
+**** Ordering non-atomic operations with atomics
+
+**** Ordering non-atomic operations
+
+
+** Guidelines for designing data-structures for concurrency
+
+   - Ensure that no thread can see a state where the invariants of the
+     data-structure have been broken by the action of the another thread.
+
+   - Take care to avoid race conditions inherent in the interface to the
+     data-structure by providing functions for complete operations rather than
+     for operations steps.
+
+   - Pay attention to how the data-structure behaves in the presence of
+     exceptions to ensure that the invariants are not broken.
+
+   - Minimize the opportunities for deadlock when using the data-structure by
+     restricting the scope of locks and avoiding nested locks where possible.
+
+
+
+
 * Advanced topics in Multi-Core Architecture and Software Systems
 
 ** Introduction
 
-   - [[https://www.cs.tau.ac.il/~mad/publications/atc2018-bst.pdf][Getting to the root of concurrent binary search tree performance]]
-   - [[http://supertech.csail.mit.edu/papers/cilk5.pdf][The implementation of the cilk-5 multithreaded language]]
-   - [[http://www.srl.inf.ethz.ch/papers/idempotentWSQ09.pdf][Idempotent Work-Stealing]]
-   - [[http://www.srl.inf.ethz.ch/papers/laworder-journal.pdf][Laws of Order: Synchronization in Concurrent Algorithms]]
-   - [[http://www.cs.tau.ac.il/~mad/publications/asplos2014-ffwsq.pdf][Fence-Free Work-Stealing on Bounded TSO Processors]]
+   - [ ] [[https://www.cs.tau.ac.il/~mad/publications/atc2018-bst.pdf][Getting to the root of concurrent binary search tree performance]]
+   - [ ] [[http://supertech.csail.mit.edu/papers/cilk5.pdf][The implementation of the cilk-5 multithreaded language]]
+   - [ ] [[http://www.srl.inf.ethz.ch/papers/idempotentWSQ09.pdf][Idempotent Work-Stealing]]
+   - [ ] [[http://www.srl.inf.ethz.ch/papers/laworder-journal.pdf][Laws of Order: Synchronization in Concurrent Algorithms]]
+   - [ ] [[http://www.cs.tau.ac.il/~mad/publications/asplos2014-ffwsq.pdf][Fence-Free Work-Stealing on Bounded TSO Processors]]
+
 
 ** Out-of-order execution and memory-level parallelism
 
-   - [[https://www.cs.tau.ac.il/~mad/publications/sosp2021-CT.pdf][Cuckoo trie: Exploiting Memory-Level Parallelism for Efficient DRAM Indexing]]
+   - [ ] [[https://www.cs.tau.ac.il/~mad/publications/sosp2021-CT.pdf][Cuckoo trie: Exploiting Memory-Level Parallelism for Efficient DRAM Indexing]]
+
 
 ** Speculative execution attacks and defenses
 
-   - [[https://eprint.iacr.org/2013/448.pdf][FLUSH + RELOAD: A High Resolution, Low Noise L3 Cache Side-Channel Attack]]
-   - [[https://spectreattack.com/spectre.pdf][Spectre attacks: Exploiting Speculative Execution]]
-   - [[https://meltdownattack.com/meltdown.pdf][Meltdown: Reading Kernel Memory From User Space]]
-   - [[https://www.cs.tau.ac.il/~mad/publications/micro2019-stt.pdf][Speculative Taint Tracking (STT): A Comprehensive Protection for
+   - [ ] [[https://eprint.iacr.org/2013/448.pdf][FLUSH + RELOAD: A High Resolution, Low Noise L3 Cache Side-Channel Attack]]
+   - [ ] [[https://spectreattack.com/spectre.pdf][Spectre attacks: Exploiting Speculative Execution]]
+   - [ ] [[https://meltdownattack.com/meltdown.pdf][Meltdown: Reading Kernel Memory From User Space]]
+   - [ ] [[https://www.cs.tau.ac.il/~mad/publications/micro2019-stt.pdf][Speculative Taint Tracking (STT): A Comprehensive Protection for
      Speculatively Accesed Data]]
+
 
 ** Reasoning about concurrency (linearizability)
 
-   - [[http://cs.brown.edu/~mph/HerlihyW90/p463-herlihy.pdf][Linearizability: A Correctness Condition for Concurrent Objects]]
-   - [[http://people.csail.mit.edu/shanir/publications/Lazy_Concurrent.pdf][A Lazy Concurrent List-Based Set Algorithm]]
+   - [ ] [[http://cs.brown.edu/~mph/HerlihyW90/p463-herlihy.pdf][Linearizability: A Correctness Condition for Concurrent Objects]]
+   - [ ] [[http://people.csail.mit.edu/shanir/publications/Lazy_Concurrent.pdf][A Lazy Concurrent List-Based Set Algorithm]]
+
 
 ** Cache Coherence
 
-   - [[https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph_tau01003094500&context=L&vid=TAU2&search_scope=Blended&tab=default_tab&lang=iw_IL][A Primer on Memory Consistency and Cache Coherence (Chap 2, 6-8)]]
-   -
+   - [ ] [[https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph_tau01003094500&context=L&vid=TAU2&search_scope=Blended&tab=default_tab&lang=iw_IL][A Primer on Memory Consistency and Cache Coherence (Chap 2, 6-8)]]
+
 
 ** Serializing Efficiently
 
-   - [[http://www.cs.rochester.edu/~scott/papers/1991_TOCS_synch.pdf][Algorithms for scalable synchronization on shared-memory multiprocessors]]
-   - [[http://www.cs.rochester.edu/~scott/papers/1996_PODC_queues.pdf][Simple, Fast, and Practical Non-Blocking and Blocking Concurrent Queue Algorithms]]
-   - [[http://people.csail.mit.edu/shanir/publications/Flat%20Combining%20SPAA%2010.pdf][Flat Combining and the Synchronization-Parallelism Tradeof]]
-   - [[http://people.csail.mit.edu/nickolai/papers/boyd-wickizer-oplog-tr.pdf][OpLog: a library for scaling update-heavy data-structures]]
-   - [[http://www.cs.tau.ac.il/~mad/publications/ppopp2013-x86queues.pdf][Fast concurrent queues for x86 processors]]
+   - [ ] [[http://www.cs.rochester.edu/~scott/papers/1991_TOCS_synch.pdf][Algorithms for scalable synchronization on shared-memory multiprocessors]]
+   - [ ] [[http://www.cs.rochester.edu/~scott/papers/1996_PODC_queues.pdf][Simple, Fast, and Practical Non-Blocking and Blocking Concurrent Queue Algorithms]]
+   - [ ] [[http://people.csail.mit.edu/shanir/publications/Flat%20Combining%20SPAA%2010.pdf][Flat Combining and the Synchronization-Parallelism Tradeof]]
+   - [ ] [[http://people.csail.mit.edu/nickolai/papers/boyd-wickizer-oplog-tr.pdf][OpLog: a library for scaling update-heavy data-structures]]
+   - [ ] [[http://www.cs.tau.ac.il/~mad/publications/ppopp2013-x86queues.pdf][Fast concurrent queues for x86 processors]]
+
 
 ** Memory Consistency Models (Hardware)
 
-   - [[https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph_tau01003094500&context=L&vid=TAU2&search_scope=Blended&tab=default_tab&lang=iw_IL][A Primer on Memory Consistency and Cache Coherence (Chapters 3-5)]]
-   - [[http://iacoma.cs.uiuc.edu/iacoma-papers/isca13_2.pdf][WeeFence: Toward Making Fences Free in TSO]]
+   - [ ] [[https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph_tau01003094500&context=L&vid=TAU2&search_scope=Blended&tab=default_tab&lang=iw_IL][A Primer on Memory Consistency and Cache Coherence (Chapters 3-5)]]
+   - [ ] [[http://iacoma.cs.uiuc.edu/iacoma-papers/isca13_2.pdf][WeeFence: Toward Making Fences Free in TSO]]
+
 
 ** Memory Consistency Models (programming language)
 
-   - [[http://www.hpl.hp.com/techreports/2004/HPL-2004-209.pdf][Threads Cannot be Implemented as a Library]]
-   - [[http://rsim.cs.uiuc.edu/Pubs/popl05.pdf][The Java Memory Model]]
-   - [[http://www.hpl.hp.com/techreports/2008/HPL-2008-56.pdf][Foundations of The C++ Concurrency Memory Model]]
+   - [ ] [[http://www.hpl.hp.com/techreports/2004/HPL-2004-209.pdf][Threads Cannot be Implemented as a Library]]
+   - [ ] [[http://rsim.cs.uiuc.edu/Pubs/popl05.pdf][The Java Memory Model]]
+   - [ ] [[http://www.hpl.hp.com/techreports/2008/HPL-2008-56.pdf][Foundations of The C++ Concurrency Memory Model]]
+   - [ ] [[https://en.cppreference.com/w/cpp/language/memory_model][Memory Model C++]]
+   - [ ] [[https://en.cppreference.com/w/cpp/atomic/memory_order][Memory Order C++]]
+
 
 ** Safe Memory Reclamation
 
-   - [[http://www.research.ibm.com/people/m/michael/spaa-2002.pdf][High Performance Dynamic Lock-Free Hash Tables and List-Based Sets]]
-   - [[http://queue.acm.org/detail.cfm?id=2488549][Structured Deferral: Synchronization via Procrastination]] (explains RCU and
-     compares to Hazard Pointers).
-   - [[http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-579.pdf][Practical lock-freedom (Epoch-based reclamation, section 5.2.3)]]
-   - [[http://researchweb.watson.ibm.com/people/m/michael/ieeetpds-2004.pdf][Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects]]
-   - [[http://labs.oracle.com/pls/apex/f?p=labs:40150:0::::P40000_PUBLICATION_ID:4899][Fast non-intrusive memory reclamation for highly-concurrent data-structures]]
-   - [[http://www.cs.technion.ac.il/~sakogan/papers/spaa13.pdf][Drop the anchor: Lightweight Memory Management for Non-Blocking Data-Structures]]
-   - [[http://www.cs.technion.ac.il/~erez/Papers/oa-spaa-15.pdf][Efficient Memory Management for Lock-Free Data Structures with Optimistic Access]]
-   - [[http://people.csail.mit.edu/amatveev/StackTrack_EuroSys2014.pdf][StackTrack: An Automated Transactional Approach to Concurrent Memory Reclamation]]
-   - [[http://www.cs.utoronto.ca/~tabrown/debra/paper.pdf][Reclaiming Memory for Lock-Free Data Structures: There has to be a Better Way]]
+   - [ ] [[http://www.research.ibm.com/people/m/michael/spaa-2002.pdf][High Performance Dynamic Lock-Free Hash Tables and List-Based Sets]]
+   - [ ] [[http://queue.acm.org/detail.cfm?id=2488549][Structured Deferral: Synchronization via Procrastination]] (explains RCU and
+         compares to Hazard Pointers).
+   - [ ] [[http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-579.pdf][Practical lock-freedom (Epoch-based reclamation, section 5.2.3)]]
+   - [ ] [[http://researchweb.watson.ibm.com/people/m/michael/ieeetpds-2004.pdf][Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects]]
+   - [ ] [[http://labs.oracle.com/pls/apex/f?p=labs:40150:0::::P40000_PUBLICATION_ID:4899][Fast non-intrusive memory reclamation for highly-concurrent data-structures]]
+   - [ ] [[http://www.cs.technion.ac.il/~sakogan/papers/spaa13.pdf][Drop the anchor: Lightweight Memory Management for Non-Blocking Data-Structures]]
+   - [ ] [[http://www.cs.technion.ac.il/~erez/Papers/oa-spaa-15.pdf][Efficient Memory Management for Lock-Free Data Structures with Optimistic Access]]
+   - [ ] [[http://people.csail.mit.edu/amatveev/StackTrack_EuroSys2014.pdf][StackTrack: An Automated Transactional Approach to Concurrent Memory Reclamation]]
+   - [ ] [[http://www.cs.utoronto.ca/~tabrown/debra/paper.pdf][Reclaiming Memory for Lock-Free Data Structures: There has to be a Better Way]]
+
 
 ** Ordered Parallelism and Relaxed Data Structures
 
-   - [[https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-579.pdf][Skip Lists (Section 4.3.3 of the thesis)]]
-   - [[https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/SprayList_full.pdf][The SprayList: A Scalable Relaxed Priority Queue]]
-   - [[http://arxiv.org/pdf/1411.1209.pdf][MultiQueues: Simpler, Faster, and Better Relaxed Concurrent Priority Queues]]
-   - [[http://sigops.org/sosp/sosp13/papers/p456-nguyen.pdf][A Lightweight Infrastructure for Graph Analytics (Section 4.1)]]
+   - [ ] [[https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-579.pdf][Skip Lists (Section 4.3.3 of the thesis)]]
+   - [ ] [[https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/SprayList_full.pdf][The SprayList: A Scalable Relaxed Priority Queue]]
+   - [ ] [[http://arxiv.org/pdf/1411.1209.pdf][MultiQueues: Simpler, Faster, and Better Relaxed Concurrent Priority Queues]]
+   - [ ] [[http://sigops.org/sosp/sosp13/papers/p456-nguyen.pdf][A Lightweight Infrastructure for Graph Analytics (Section 4.1)]]
+
 
 ** Ordered Parallelism and Relaxed Data Structures
 
-   - [[https://people.csail.mit.edu/sanchez/papers/2015.swarm.micro.pdf][A Scalable Architecture for Ordered Parallelism]]
+   - [ ] [[https://people.csail.mit.edu/sanchez/papers/2015.swarm.micro.pdf][A Scalable Architecture for Ordered Parallelism]]
+
 
 ** Transactional Memory
 
-   - [[http://people.cs.umass.edu/~moss/papers/isca-1993-trans-mem.pdf][Transactional Memory: Architectural Support For Lock-Free Data Structures]]
-   - [[http://pages.cs.wisc.edu/~rajwar/papers/micro01.pdf][Speculative Lock Elision: Enabling Highly Concurrent Multithreaded Execution]]
-   - [[http://www.cs.tau.ac.il/~shanir/nir-pubs-web/Papers/Transactional_Locking.pdf][Transactional Locking II]]
-   - [[https://people.csail.mit.edu/sanchez/papers/2016.tictoc.sigmod.pdf][TicToc: Time Traveling Optimisting Concurrency Control]]
-   - [[http://people.csail.mit.edu/amatveev/RH_NOrec_ASPLOS2015.pdf][Reduced Hardware NOrec: A Safe and Scalable Hybrid Transactional Memory]]
-   - [[https://people.eecs.berkeley.edu/~kubitron/cs258/handouts/papers/logtm-moore-hpca06.pdf][LogTM: Log-based Transactional Memory]]
+   - [ ] [[http://people.cs.umass.edu/~moss/papers/isca-1993-trans-mem.pdf][Transactional Memory: Architectural Support For Lock-Free Data Structures]]
+   - [ ] [[http://pages.cs.wisc.edu/~rajwar/papers/micro01.pdf][Speculative Lock Elision: Enabling Highly Concurrent Multithreaded Execution]]
+   - [ ] [[http://www.cs.tau.ac.il/~shanir/nir-pubs-web/Papers/Transactional_Locking.pdf][Transactional Locking II]]
+   - [ ] [[https://people.csail.mit.edu/sanchez/papers/2016.tictoc.sigmod.pdf][TicToc: Time Traveling Optimisting Concurrency Control]]
+   - [ ] [[http://people.csail.mit.edu/amatveev/RH_NOrec_ASPLOS2015.pdf][Reduced Hardware NOrec: A Safe and Scalable Hybrid Transactional Memory]]
+   - [ ] [[https://people.eecs.berkeley.edu/~kubitron/cs258/handouts/papers/logtm-moore-hpca06.pdf][LogTM: Log-based Transactional Memory]]
+
 
 ** Concurrent Search Trees
 
-   - [[http://ppl.stanford.edu/papers/ppopp207-bronson.pdf][A Practical Concurrent Binary Tree Search]]
-   - [[https://arxiv.org/abs/1712.06687][A General Technique for Non-Blocking Trees]]
-   - [[https://arxiv.org/abs/1712.06688][Pragmatic Primitives for Non-Blocking Data Structures]]
-   - [[http://www.cs.toronto.edu/~tabrown/ebrrq/paper.ppopp18.pdf][Harnessing Epoch-based Reclamation for Efficient Range Queries]]
+   - [ ] [[http://ppl.stanford.edu/papers/ppopp207-bronson.pdf][A Practical Concurrent Binary Tree Search]]
+   - [ ] [[https://arxiv.org/abs/1712.06687][A General Technique for Non-Blocking Trees]]
+   - [ ] [[https://arxiv.org/abs/1712.06688][Pragmatic Primitives for Non-Blocking Data Structures]]
+   - [ ] [[http://www.cs.toronto.edu/~tabrown/ebrrq/paper.ppopp18.pdf][Harnessing Epoch-based Reclamation for Efficient Range Queries]]
+
+
+* Other links
+
+** Youtube videos
+
+   - [ ] [[https://www.youtube.com/watch?v=drXrIVfBKaQ][Safe Memory Reclamation (Hazard Pointers)]]
+   - [ ] [[https://www.youtube.com/watch?v=cYDMq5FOiw4][Safe Memory Reclamation (Epoch-Based Reclamation)]]
+   - [ ] [[https://www.microsoft.com/en-us/research/video/rdma-provably-more-powerful-communication/][RDMA: Provably More Powerful Communication]]
+
+
+** Tools
+
+   - [ ] [[https://valgrind.org/docs/manual/cg-manual.html][Cachegrind]]
+   - [ ] [[https://github.com/kokkos/kokkos-tutorials/wiki/Kokkos-Lecture-Series][Kokkos lectures]]
+   -
+
+
+** Readings
+
+   - [ ] [[https://frankdenneman.nl/2016/07/07/numa-deep-dive-part-1-uma-numa/][Numa Deep Dive Part 1: From UMA To NUMA]]
+   - [ ] [[https://frankdenneman.nl/2016/07/08/numa-deep-dive-part-2-system-architecture/][Numa Deep Dive Part 2: System Architecture]]
+   - [ ] [[https://frankdenneman.nl/2016/07/11/numa-deep-dive-part-3-cache-coherency/][Numa Deep Dive 3 Part 3: Cache Coherence]]
+   - [ ] [[https://frankdenneman.nl/2016/07/13/numa-deep-dive-4-local-memory-optimization/][Numa Deep Dive Part 4: Local Memory Optimization]]
+
+
+** Clojure things
+
+   - [ ] [[https://github.com/jepsen-io/jepsen][Jepsen: Clojure library to set up a distributed system and verify if an
+         execution is linearizable]]
+   - [ ] [[https://medium.com/@siddontang/use-chaos-to-test-the-distributed-system-linearizability-4e0e778dfc7d][Chaos to test the distributed system linearizability]]
+   - [ ] [[https://clojure-doc.org/articles/language/concurrency_and_parallelism/][Concurrency and parallelism in clojure]]
+   - [ ] [[https://ericnormand.me/guide/clojure-concurrency#atom][Clojure concurrency guide]]
+
+
+** Python things
+
+   - [ ] [[https://bytes.yingw787.com/posts/2019/01/11/concurrency_with_python_why/][Concurrency with python series]]
+
+
+** CPP Things
+
+   - [ ] [[https://www.mygreatlearning.com/blog/cpp-interview-questions/?gl_blog_id=25150][CPP interview]]
+
+   \bibliographystyle{plain}
+   \bibliography{refs}
+
+* Footnotes
+
+[fn:binary] Writing a positive integer \(n\) as the sum of distinct powers of two is also called /binary writing/. There are several ways to obtain it. For example, we can follow the following recursive algorithm: if \(n\) is even, we write it as \(2m\), and if \(n\) is odd, we write it as \(2m + 1\). Repeating the process on the \(m\) obtained until we reach \(1\), we obtain an expression which expands to a sum of distinct powers of two. For example,
+\begin{align*}
+7 &= 2(3)+1 = 2(2(1)+1)+1\\
+&= 4 + 2 + 1.
+\end{align*}
+
+[fn:infty] We use the symbol \(\infty\) as a placeholder for an extremely large number: for any real number \(r\) in our calculations, we  will set \(r + \infty = \infty\) and \(\operatorname{min}\{r,\infty\} = r\).
+
+
+[fn:partition] If \(S = S_1 \cup \cdots \cup S_n\), we say that it is a /partition/ if \(S_i \cap S_j = \emptyset\) for \(i \neq j\). In this case we write \(S = S_1 \sqcup \cdots \sqcup S_n\), or more concisely, \(S = \bigsqcup_{i = 1}^n S_i\).
+
+[fn:closures] Think about when it makes sense to ask for the closure of a relation with respect to a property, and when you can expect it to exist uniquely. For example, it doesn't really make sense to ask for the anti-symmetric closure of a relation. Do you see why?
+
+[fn:equiv-classes] The idea is that we can treat all elements of one equivalence class as being interchangeable in some sense.
+
+[fn:vacuous] We say that a statement of type "if ... then ...", or equivalently "for every ... we have ..." is /vacuously true/ if nothing satisfies the "if" or "for every" condition.
+
+[fn:nary-rel] This is a binary relation because we are looking at a subset of the product of two copies of \(S\). An \(n\)-ary relation on \(S\) would just be a subset of the product of \(n\) copies of \(S\).
+
+[fn:dichotomy] A situation in which exactly one of two possible options is true.
+
+[fn:set-naming-convention] This is just a convention. In fact, sets are often elements of other sets, so there is no clear distinction between sets and potential elements.
+
+[fn:zfc] Historical remarks and something about ZFC?
+
+* Local variables                                                  :noexport:
+# Local variables:
+# eval: (add-hook 'org-export-before-processing-hook (lambda (be) (org-babel-ref-resolve "export-setup")) nil t)
+# End:
