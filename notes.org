@@ -11,12 +11,13 @@
 
 ** Org LaTeX Setup
 
-   #+latex_class: tufte-book
+   #+latex_class: book
    #+latex_class_options: [openany, a4paper]
    #+latex_header: \usepackage{amsmath,amssymb,amsthm,geometry,hyperref,paralist,svg,thmtools,tikz,tikz-cd}
    #+latex_header: \usepackage{mathtools}
    #+latex_header: \usepackage[capitalise,noabbrev]{cleveref}
    #+latex_header: \usepackage{environ} \NewEnviron{abmn}{\marginnote{\BODY}}
+   #+latex_header: \usepackage{url}
    #+latex_header: \setcounter{tocdepth}{1}
    #+latex_header: \newtheorem{theorem}{Theorem}
    #+latex_header: \newtheorem{example}[theorem]{Example}
@@ -36,18 +37,18 @@
    Add ~tufte-book~ to ~org-latex-classes~ and update ~org-latex-pdf-process~.
    #+name: export-setup
    #+begin_src emacs-lisp :results silent :var this-year="2022"
-     (add-to-list 'org-latex-classes
-               `("tufte-book"
-                 ,(string-join
-                   '("\\documentclass{tufte-book}"
-                     "\\usepackage{color}"
-                     "\\usepackage{amsmath,amssymb}")
-                   "\n")
-                 ("\\chapter{%s}" . "\\chapter*{%s}")
-                 ("\\section{%s}" . "\\section*{%s}")
-                 ("\\subsection{%s}" . "\\subsection*{%s}")
-                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+     ;;(add-to-list 'org-latex-classes
+     ;;          `("tufte-book"
+     ;;            ,(string-join
+     ;;              '("\\documentclass{tufte-book}"
+     ;;                "\\usepackage{color}"
+     ;;                "\\usepackage{amsmath,amssymb}")
+     ;;              "\n")
+     ;;            ("\\chapter{%s}" . "\\chapter*{%s}")
+     ;;            ("\\section{%s}" . "\\section*{%s}")
+     ;;            ("\\subsection{%s}" . "\\subsection*{%s}")
+     ;;            ("\\paragraph{%s}" . "\\paragraph*{%s}")
+     ;;            ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
      (setq-local org-latex-pdf-process
                  (let
                      ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
@@ -71,77 +72,79 @@
      (setq-local org-confirm-babel-evaluate nil)
    #+end_src
 
+* Introduction
 
-* Work-stealing algorithm analysis
+** Work-stealing algorithm analysis
 
-  We analyze the algorithms for work-stealing described in the article Fully
-  Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
-  called "Idempotent FIFO Work-Stealing", this because the algorithm have a
-  similar semantic than the prior algorithms.
+   We analyze the algorithms for work-stealing described in the article Fully
+   Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
+   called "Idempotent FIFO Work-Stealing", this because the algorithm have a
+   similar semantic than the prior algorithms.
 
-** Realistic model of computation
+*** Realistic model of computation
 
-   We consider a standard concurrent shared memory system with \(n \ge 2\)
-   /asynchronous/ processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
-   during an execution. The processes communicate with each other by invoking
-   atomic instructions of base objects: either simple Read/Write instructions to
-   *atomic objects*, or more powerful *Read-Modify-Write* instructions, such as
-   =Test-And-Set=, =Swap= or =Compare-And-Set=.
+    We consider a standard concurrent shared memory system with \(n \ge 2\)
+    /asynchronous/ processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
+    during an execution. The processes communicate with each other by invoking
+    atomic instructions of base objects: either simple Read/Write instructions to
+    *atomic objects*, or more powerful *Read-Modify-Write* instructions, such as
+    =Test-And-Set=, =Swap= or =Compare-And-Set=.
 
-   For simplicity we assume a single multicore chip where the processes run. In
-   our system we consider a memory hierarchy, where we have the following
-   elements in the hierarchy:
+    For simplicity we assume a single multicore chip where the processes run. In
+    our system we consider a memory hierarchy, where we have the following
+    elements in the hierarchy:
 
-   - Cache memory
-   - Memory bus
-   - Main memory
+    - Cache memory
+    - Memory bus
+    - Main memory
 
-   In this model, each processor core may read and
-   write to a single shared memory space. Usually each processor core has a
-   cache to operate with data from the shared memory. Often, this data is
-   transferred through a memory bus, allowing connect the processors with the
-   memory. In a simplified view, the figure \ref{fig:arch} shows a diagram of
-   this model.
+    In this model, each processor core may read and
+    write to a single shared memory space. Usually each processor core has a
+    cache to operate with data from the shared memory. Often, this data is
+    transferred through a memory bus, allowing connect the processors with the
+    memory. The figure \ref{fig:arch} shows a simplified view of this model. In
+    the sections: [[*Cache memory][Cache memory]], [[*Memory bus][Memory bus]] and [[*Main memory][Main memory]], we explain more in
+    detail the meaning of each bullet of the list.
 
-   #+begin_src dot :file architecture.svg :results silent
-     digraph Cache {
-     size="7,6";
-     concentrate=true;
-     compound=true;
-     {rank=same; cpu1; cpu2; cpuN;}
-     cpu1 [shape=box, label="CPU 1"];
-     cpu2 [shape=box, label="CPU 2"];
-     cpuN [shape=box, label="CPU N"];
-     cache1 [shape=box];
-     cache2 [shape=box];
-     cacheN [shape=box];
-     memory_bus [label="Memory bus"];
-     main_memory [label="Main memory"];
-     {rank=same; cache1; cache2; cacheN}
-     subgraph cluster0 {
-     style=filled;
-     cpu1 -> cache1;
-     cpu2 -> cache2;
-     cpuN -> cacheN;
-     cpu2 -> cpuN[style=dotted,arrowhead=none,minlen=6];
-     cache2 -> cacheN[style=dotted,arrowhead=none,minlen=6];
-     color=blue;
-     }
-     cache1 -> memory_bus;
-     cache2 -> memory_bus;
-     cacheN -> memory_bus[splines=ortho,nodesep=1];
-     memory_bus -> main_memory;
-     main_memory -> memory_bus;
-     }
-   #+end_src
+    #+begin_src dot :file architecture.svg :results silent
+      digraph Cache {
+      size="7,6";
+      concentrate=true;
+      compound=true;
+      {rank=same; cpu1; cpu2; cpuN;}
+      cpu1 [shape=box, label="CPU 1"];
+      cpu2 [shape=box, label="CPU 2"];
+      cpuN [shape=box, label="CPU N"];
+      cache1 [shape=box];
+      cache2 [shape=box];
+      cacheN [shape=box];
+      memory_bus [label="Memory bus"];
+      main_memory [label="Main memory"];
+      {rank=same; cache1; cache2; cacheN}
+      subgraph cluster0 {
+      style=filled;
+      cpu1 -> cache1;
+      cpu2 -> cache2;
+      cpuN -> cacheN;
+      cpu2 -> cpuN[style=dotted,arrowhead=none,minlen=6];
+      cache2 -> cacheN[style=dotted,arrowhead=none,minlen=6];
+      color=blue;
+      }
+      cache1 -> memory_bus;
+      cache2 -> memory_bus;
+      cacheN -> memory_bus[splines=ortho,nodesep=1];
+      memory_bus -> main_memory;
+      main_memory -> memory_bus;
+      }
+    #+end_src
 
-   #+begin_marginfigure
-   \begin{minipage}{\linewidth}
-     \includesvg[width=\linewidth]{architecture}
-   \end{minipage}
-   \caption{Simplified view of a modern computer system cache architecture}
-   \label{fig:arch}
-   #+end_marginfigure
+    #+begin_figure
+    \begin{minipage}{\linewidth}
+      \includesvg[width=\linewidth]{architecture}
+    \end{minipage}
+    \caption{Simplified view of a modern computer system cache architecture}
+    \label{fig:arch}
+    #+end_figure
 
 *** Cache memory
 
@@ -178,187 +181,285 @@
     as instructions or data currently being processed. The CPU can access to
     this information faster than the access to secondary memory.
 
-** Consistency Memory Model and Cache Coherence
+*** Consistency Memory Model and Cache Coherence
 
-*** Consistency memory model
+**** Consistency memory model
 
-    Following the simplified view of the cache architecture, we want to have a
-    correct shared memory. And what this means? The correctness of the shared
-    memory can be separated into two sub-issues: /consistency/ and /correctness/.
+     Following the simplified view of the cache architecture, we want to have a
+     correct shared memory. And what this means? The correctness of the shared
+     memory can be separated into two sub-issues: /consistency/ and /correctness/.
 
-    The consistency (definitions) provide rules about loads and stores (memory
-    reads and writes) and how they act upon memory. These definitions must take
-    into account the behaviour of those operations on memory through access of
-    multiple threads or even a single thread. The consistency models define
-    correct shared memory behavior in terms of loads and stores, without
-    reference to caches or coherence [[cite:&DBLP_series_synthesis_2020Nagarajan]].
-    Shared memory correctness is specified by a memory consistency model (or
-    memory model). This specifies the allowed behavior of multithreaded programs
-    executing with shared memory.
+     The consistency (definitions) provide rules about loads and stores (memory
+     reads and writes) and how they act upon memory. These definitions must take
+     into account the behaviour of those operations on memory through access of
+     multiple threads or even a single thread. The consistency models define
+     correct shared memory behavior in terms of loads and stores, without
+     reference to caches or coherence [[cite:&DBLP_series_synthesis_2020Nagarajan]].
+     Shared memory correctness is specified by a memory consistency model (or
+     memory model). This specifies the allowed behavior of multithreaded programs
+     executing with shared memory.
 
-    The most intuitive and strongest memory model is the /Sequential Consistency/
-    (SC). Another memory model used by systems /x86/ and /SPARC/ is /Total Store Order/
-    (TSO), motivated by the desire of use /first-in-first-out/ write buffers to
-    hold the results of committed stores before writing results to the caches.
-    Additional to the prior memory model, "relaxed" or "weak" memory models are
-    considered, because these models shows that most memory orderings in strong
-    models are unnecessary [[cite:&DBLP_series_synthesis_2020Nagarajan]].
+     The most intuitive and strongest memory model is the /Sequential Consistency/
+     (SC). Another memory model used by systems /x86/ and /SPARC/ is /Total Store Order/
+     (TSO), motivated by the desire of use /first-in-first-out/ write buffers to
+     hold the results of committed stores before writing results to the caches.
+     Additional to the prior memory model, "relaxed" or "weak" memory models are
+     considered, because these models shows that most memory orderings in strong
+     models are unnecessary [[cite:&DBLP_series_synthesis_2020Nagarajan]].
 
-*** Cache coherence
+**** Cache coherence
 
-    Cache coherence protocols born in response to solve a coherence problem in
-    cache. For example, a coherence problem can arise if multiple cores have
-    access to multiple copies of a datum, each one in a core, and at least one
-    them is a write access. The cache coherence protocols prevent the access to
-    stale data (incoherent data); this can be done using a set of rules
-    implemented by the distributed set of cores within a system. These protocols
-    use the common MOESI coherence states: modified (M), owned (O), exclusive
-    (E), shared (S) and invalid (I). The protocol acts like a state machine,
-    moving from one state to another based on the conditions of the data and the
-    cache memory.
+     Cache coherence protocols are used in response to solve a coherence problem
+     in cache. For example, a coherence problem can arise if multiple cores have
+     access to multiple copies of a datum, each one in a core, and at least one
+     them is a write access. The cache coherence protocols prevent the access to
+     stale data (incoherent data); this can be done using a set of rules
+     implemented by the distributed set of cores within a system. These
+     protocols use the common MOESI coherence states: modified (M), owned (O),
+     exclusive (E), shared (S) and invalid (I). The protocol acts like a state
+     machine, moving from one state to another based on the conditions of the
+     data and the cache memory [[cite:&DBLP_series_synthesis_2020Nagarajan]].
 
+*** Memory fences
 
+     A memory fence is a barrier instruction that causes a CPU or compiler to
+     enforce a an ordering constraint on memory operations (loads and stores)
+     issued before and after the barrier instruction.
 
-** Pseudocode for Work-Stealing with Weak Multiplicity
+     These instructions are necessary because most modern CPUs or compilers
+     employ performance optimizations, changing the order of the instructions on
+     one program, that could result in out-of-order execution. Normally these
+     optimizations are unnoticed in a single thread program, but can cause an
+     unpredictable behavior in concurrent programs.
 
-  #+begin_src language
+     For example, consider the following multi-thread program, with 2
+     threads, each one running in one core in a concurrent way:
 
-  #+end_src
+     Thread 1, core 1
+     #+begin_src c++
+       while (z == 0);
+       print(y);
+     #+end_src
 
+     Thread 2, core 2
+     #+begin_src c++
+       y = 30;
+       z = 1;
+     #+end_src
 
+     In this case, we might expect that the =print(y)= always print the number 30,
+     nevertheless, the compiler or the CPU could change the order of the
+     instructions for the thread 2, giving as result an execution where the value
+     for =y= is undefined and the instructions could be interleaved as follows:
 
-* Some Foundations
+     #+begin_src c++
+       z = 1; // Thread 2
+       while (z == 0); // Thread 1
+       print(y); // Thread 1
+       y = 30; // Thread 2
+     #+end_src
 
+     This execution is sequentially consistent, but is an out-of-order
+     execution producing an undefined result. With the use of memory barriers, we
+     can ensure that instructions don't be reordered. For example, our code could
+     be rewrite as follows:
 
+     Thread 1, core 1.
+     #+begin_src c++
+       while (z == 0);
+       fence()
+       print(y);
+     #+end_src
 
-
-
-** Cache memory
-
-   The cache memory
-
-*** Multiple caches
-
-
-*** Cache coherence protocols
-
-
-
-**** MESI
-
-
-**** MOESI
-
-
-*** Store Buffers
-
-
-** Reordering (CPU or Compiler)
-
-
-** Memory Barriers
-
-
-*** X86 and TSO architectures
-
-
-*** Memory Fences
-
-
-** Read-Modify-Write Operations
-
-
-** Bibliography
-
-   - https://blog.the-pans.com/std-atomic-from-bottom-up/
-
-
-** Memory management
-
-   To implement efficiently the idempotent algorithms in an enviroment without
-   garbage collection, it's necessary use some technique or metodology to
-   provide garbage collection when atomic pointers are used or when distinct
-   threads want to reclaim the memory of the object associated to the pointer.
-
-*** Strategies to delete shared pointers
-
-    - Add pointers to list to safety delete.
-    - Do this when there aren't more threads accessing to methods.
-      - Increase the counter when a thread enter to the method and decrease when
-        it exits.
-      - Delete all pointers when the counter be equal to zero.
+     Thread 2, core 2.
+     #+begin_src c++
+       y = 30;
+       fence();
+       z = 1;
+     #+end_src
 
 
-*** Hazard pointers
+     Languages as ~Java~ or ~C++~ provide instructions to establish synchronization
+     and ordering constraints between threads without an atomic operation. These
+     instructions have semantics well defined for
 
-    The /Hazard Pointers/ is a technique to manage memory in languages where there
-    are not a garbage collector. This technique was proposed by Maged
-    Michael cite:&DBLP_journals_tpds_Michael04. They are so called because
-    deleting a pointer that might be referenced by other thread(s) is
-    dangerous. If another threads keep holding references to that pointer and
-    proceed to access to that pointer after be deleted, you have a undefined
-    behavior cite:&DBLP_journals_tpds_Michael04.
+     In the case of Java, we have static methods of the class VarHandle
+     (=java.lang.invoke.VarHandle=) that are refered as memory fence methods which
+     helps to provide fine-grained control of memory ordering. These statics
+     methods are [[cite:&varHandleJdk92017]]:
 
-    The basic idea of this technique is the following:
+     - fullFence :: Ensures that loads and stores before the fence will not be
+       reordered with loads and stores after the fence. This method has memory
+       ordering effects compatible with
+       ~atomic_thread_fence(memory_order_seq_cst)~.
+     - acquireFence :: Ensures that loads before the fence will not be reordered
+       with loads and stores after the fence. This method has memory ordering
+       effects compatible with ~atomic_thread_fence(memory_order_acquire)~.
+     - releaseFence :: Ensures that loads and stores before the fence will not
+       be reordered with stores after the fence. This method has memory ordering
+       effects compatible with ~atomic_thread_fence(memory_order_release)~.
+     - loadLoadFence :: Ensures that loads before the fence will not be
+       reordered with loads after the fence.
+     - storeStoreFence :: Ensures that stores before the fence will not be
+       reordered with stores after the fence.
 
-    - If a thread want to use a pointer that another thread might want to
-      delete, it first sets a hazard pointer to the pointer, informing to the
-      other thread that deleting the pointer would be dangerous. Once the object
-      is not longer needed, the hazard pointer is cleared.
-    - When a thread wants to delete the pointer, it must check if the hazard
-      pointers belonging to the other threads in the system. If no one has a
-      reference to the pointer, then, it's safe to delete the
-      pointer. Otherwise, it must be left until later.
-    - Periodically, we must check the list of objects that have been left until
-      later to see if any of them can be deleted now.
+    For C++, we have the function
+    ~std::atomic_thread_fence~[[cite:&threadFenceCpp2020]], which establishes
+    memory synchronization ordering of non-atomic and relaxed atomic access, as
+    instructed by order, without an associated atomic operation. The type of
+    synchronization that can handle are the following:
 
-    A general pseudocode for this technique could be the following:
+    - Fence-atomic synchronization
+    - Atomic-fence synchronization
+    - Fence-Fence Synchronization
 
-    #+begin_src c++
-      void func() {
-          std::atomic<void*>& hp = get_hazard_pointer_for_current_thread();
-          void* old_data = data.load();
-          do {
-              void* temp;
-              do{ // Loop until you've set the hazard pointer
-                  temp = old_data;
-                  hp.store(old_data);
-                  old_data = data.load();
-              } while (old_data != temp);
-                }while (old_data &&
-                  !data.compare_exchange_strong(old_data, old_data->next);
-          // Do something with old_data
-          hp.store(nullptr); // clearing usage of hazard pointer
-          // Trying clearing
-          if (outstanding_hazard_pointers_for(old_head))
-          {
-              reclaim_later(old_data);
-          }
-          else
-          {
-              delete old_data;
-          }
-          delete_nodes_with_no_hazards();
-      }
-    #+end_src
+    And using a memory order[[cite:&memoryOrderCpp2020]], it can specifies how
+    memory accesses, including regular, non atomic memory accesses, are to be
+    ordered around an atomic operation. In total are six orders, from the
+    relaxed memory order to the sequential consistent memory order. They are:
+    ~memory_order_relaxed~, ~memory_order_consume~, ~memory_order_acquire~,
+    ~memory_order_acq_rel~ and ~memory_order_seq_cst~. A note about
+    ~atomic_thread_fence~ functions, is that on x86 (x86_64), these functions
+    issue no CPU instructions and only affect compile time code, with exception
+    for ~std::atomic_thread_fence(std::memory_order::seq_cst)~, which issue the
+    full memory fence instruction ~MFENCE~. For other archict
+
+*** Pseudocode for Work-Stealing with Weak Multiplicity
+
+   #+begin_src language
+
+   #+end_src
 
 
-*** Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
+
+** Some Foundations
+
+*** Cache memory
+
+    The cache memory
+
+**** Multiple caches
 
 
-    When a memory region is reclaimed, the programmer cannot know how that
-    region of memory will be reused or if even whether it is reused. We need a
-    way of developing a (general) solution to prevent the sorts of races
-    when a memory region is reclaimed by many threads asynchronously. We can to
-    do this by delaying reclamation.
-    Thinking in terms of pending operations on a concurrent data structure, a
-    sufficient condition is that /memmory is only reclaimed when it is impossible
-    for any pending operation to access in the future/.
+**** Cache coherence protocols
 
-    This property could be also achieved by /reference counting/. In a reference
-    counted implementation of a data-structure (like a list), a counter of type
-    atomic<int> is associated with each node. Whenever a reference to node N is
-    created
+
+
+***** MESI
+
+
+***** MOESI
+
+
+**** Store Buffers
+
+
+*** Reordering (CPU or Compiler)
+
+
+*** Memory Barriers
+
+
+**** X86 and TSO architectures
+
+
+**** Memory Fences
+
+
+*** Read-Modify-Write Operations
+
+
+*** Bibliography
+
+    - https://blog.the-pans.com/std-atomic-from-bottom-up/
+
+
+*** Memory management
+
+    To implement efficiently the idempotent algorithms in an enviroment without
+    garbage collection, it's necessary use some technique or metodology to
+    provide garbage collection when atomic pointers are used or when distinct
+    threads want to reclaim the memory of the object associated to the pointer.
+
+**** Strategies to delete shared pointers
+
+     - Add pointers to list to safety delete.
+     - Do this when there aren't more threads accessing to methods.
+       - Increase the counter when a thread enter to the method and decrease when
+         it exits.
+       - Delete all pointers when the counter be equal to zero.
+
+
+**** Hazard pointers
+
+     The /Hazard Pointers/ is a technique to manage memory in languages where there
+     are not a garbage collector. This technique was proposed by Maged
+     Michael cite:&DBLP_journals_tpds_Michael04. They are so called because
+     deleting a pointer that might be referenced by other thread(s) is
+     dangerous. If another threads keep holding references to that pointer and
+     proceed to access to that pointer after be deleted, you have a undefined
+     behavior cite:&DBLP_journals_tpds_Michael04.
+
+     The basic idea of this technique is the following:
+
+     - If a thread want to use a pointer that another thread might want to
+       delete, it first sets a hazard pointer to the pointer, informing to the
+       other thread that deleting the pointer would be dangerous. Once the object
+       is not longer needed, the hazard pointer is cleared.
+     - When a thread wants to delete the pointer, it must check if the hazard
+       pointers belonging to the other threads in the system. If no one has a
+       reference to the pointer, then, it's safe to delete the
+       pointer. Otherwise, it must be left until later.
+     - Periodically, we must check the list of objects that have been left until
+       later to see if any of them can be deleted now.
+
+     A general pseudocode for this technique could be the following:
+
+     #+begin_src c++
+       void func() {
+           std::atomic<void*>& hp = get_hazard_pointer_for_current_thread();
+           void* old_data = data.load();
+           do {
+               void* temp;
+               do{ // Loop until you've set the hazard pointer
+                   temp = old_data;
+                   hp.store(old_data);
+                   old_data = data.load();
+               } while (old_data != temp);
+                 }while (old_data &&
+                   !data.compare_exchange_strong(old_data, old_data->next);
+           // Do something with old_data
+           hp.store(nullptr); // clearing usage of hazard pointer
+           // Trying clearing
+           if (outstanding_hazard_pointers_for(old_head))
+           {
+               reclaim_later(old_data);
+           }
+           else
+           {
+               delete old_data;
+           }
+           delete_nodes_with_no_hazards();
+       }
+     #+end_src
+
+
+**** Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
+
+
+     When a memory region is reclaimed, the programmer cannot know how that
+     region of memory will be reused or if even whether it is reused. We need a
+     way of developing a (general) solution to prevent the sorts of races
+     when a memory region is reclaimed by many threads asynchronously. We can to
+     do this by delaying reclamation.
+     Thinking in terms of pending operations on a concurrent data structure, a
+     sufficient condition is that /memmory is only reclaimed when it is impossible
+     for any pending operation to access in the future/.
+
+     This property could be also achieved by /reference counting/. In a reference
+     counted implementation of a data-structure (like a list), a counter of type
+     atomic<int> is associated with each node. Whenever a reference to node N is
+     created
 
 
 ** C++ Memory model
@@ -553,6 +654,12 @@
    - [ ] [[https://frankdenneman.nl/2016/07/08/numa-deep-dive-part-2-system-architecture/][Numa Deep Dive Part 2: System Architecture]]
    - [ ] [[https://frankdenneman.nl/2016/07/11/numa-deep-dive-part-3-cache-coherency/][Numa Deep Dive 3 Part 3: Cache Coherence]]
    - [ ] [[https://frankdenneman.nl/2016/07/13/numa-deep-dive-4-local-memory-optimization/][Numa Deep Dive Part 4: Local Memory Optimization]]
+   - [ ] [[https://mechanical-sympathy.blogspot.com/2011/07/memory-barriersfences.html][Memory Barriers/Fences]]
+   - [ ] [[https://www.infoq.com/articles/memory_barriers_jvm_concurrency/][Memory Barriers and JVM Concurrency]]
+   - [ ] [[https://stackoverflow.com/questions/286629/what-is-a-memory-fence][What is a memory fence (stackoverflow).]]
+   - [ ] [[https://en.wikipedia.org/wiki/Memory_ordering#Compile-time_memory_ordering][Memory orderings]]
+   - [ ] [[https://www.cl.cam.ac.uk/~pes20/weakmemory/][Relaxed Memory Concurrency]]
+   - [ ] [[https://en.wikipedia.org/wiki/Instruction_set_architecture#Instructions][Instruction set architecture (ISA)]]
 
 
 ** Clojure things
@@ -572,8 +679,9 @@
 ** CPP Things
 
    - [ ] [[https://www.mygreatlearning.com/blog/cpp-interview-questions/?gl_blog_id=25150][CPP interview]]
+   - [ ] [[https://www.cl.cam.ac.uk/~pes20/cpp/cpp0xmappings.html][CPP Mappings to processors (fences)]]
 
-   \bibliographystyle{plain}
+   \bibliographystyle{plainurl}
    \bibliography{refs}
 
 * Footnotes
