@@ -37,18 +37,18 @@
    Add ~tufte-book~ to ~org-latex-classes~ and update ~org-latex-pdf-process~.
    #+name: export-setup
    #+begin_src emacs-lisp :results silent :var this-year="2022"
-     ;;(add-to-list 'org-latex-classes
-     ;;          `("tufte-book"
-     ;;            ,(string-join
-     ;;              '("\\documentclass{tufte-book}"
-     ;;                "\\usepackage{color}"
-     ;;                "\\usepackage{amsmath,amssymb}")
-     ;;              "\n")
-     ;;            ("\\chapter{%s}" . "\\chapter*{%s}")
-     ;;            ("\\section{%s}" . "\\section*{%s}")
-     ;;            ("\\subsection{%s}" . "\\subsection*{%s}")
-     ;;            ("\\paragraph{%s}" . "\\paragraph*{%s}")
-     ;;            ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+     ;; (add-to-list 'org-latex-classes
+     ;;           `("tufte-book"
+     ;;             ,(string-join
+     ;;               '("\\documentclass{tufte-book}"
+     ;;                 "\\usepackage{color}"
+     ;;                 "\\usepackage{amsmath,amssymb}")
+     ;;               "\n")
+     ;;             ("\\chapter{%s}" . "\\chapter*{%s}")
+     ;;             ("\\section{%s}" . "\\section*{%s}")
+     ;;             ("\\subsection{%s}" . "\\subsection*{%s}")
+     ;;             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+     ;;             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
      (setq-local org-latex-pdf-process
                  (let
                      ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
@@ -71,6 +71,7 @@
              \\noindent\\Huge %s")
      (setq-local org-confirm-babel-evaluate nil)
    #+end_src
+
 
 * Introduction
 
@@ -462,6 +463,22 @@
      created
 
 
+** Memory management for work-stealing algorithms
+
+   It is well known that C++ does not have a garbage collector like Java. Since
+   the publish of the [[https://en.cppreference.com/w/cpp/11][Standard C++11]], new features for memory management were
+   added. For example, a concurrency support library and smart pointers. These
+   last are used to help ensure that programs are free of memory and resources
+   leaks and are exception safe.
+
+   For algorithms like Chaselev[[cite:&circular.work.stealing]],
+   cilk[[cite:&implementation_cilk5]], Idempotent FIFO and Idempotent
+   LIFO[[cite:&maged.vechev.2009]], whose specification describe the use of simple
+   structures and variables, we can manage them using smart pointers to avoid
+   problems with memory management, but in the case of Idempotent
+   DEQUE[[cite:&maged.vechev.2009]], it need to use a more complex structure to
+   avoid problems like the [[https://www.stroustrup.com/isorc2010.pdf][ABA problem]].
+
 ** C++ Memory model
 
 *** Memory model basics
@@ -536,6 +553,7 @@
    - [ ] [[http://www.srl.inf.ethz.ch/papers/idempotentWSQ09.pdf][Idempotent Work-Stealing]]
    - [ ] [[http://www.srl.inf.ethz.ch/papers/laworder-journal.pdf][Laws of Order: Synchronization in Concurrent Algorithms]]
    - [ ] [[http://www.cs.tau.ac.il/~mad/publications/asplos2014-ffwsq.pdf][Fence-Free Work-Stealing on Bounded TSO Processors]]
+   - [ ] [[https://www.cl.cam.ac.uk/~pes20/weakmemory/x86tso-paper.tphols.pdf][A better x86 memory model: x86TSO]]
 
 
 ** Out-of-order execution and memory-level parallelism
@@ -631,6 +649,96 @@
    - [ ] [[https://arxiv.org/abs/1712.06688][Pragmatic Primitives for Non-Blocking Data Structures]]
    - [ ] [[http://www.cs.toronto.edu/~tabrown/ebrrq/paper.ppopp18.pdf][Harnessing Epoch-based Reclamation for Efficient Range Queries]]
 
+* Work-stealing
+
+  #+begin_src plantuml :file objects.png :results silent
+    interface WorkStealing {
+       boolean put(Task x)
+       Task take()
+       Task steal()
+    }
+
+    class WSNCMULT implements WorkStealing {
+        Task tasks[]
+        int head[]
+        atomic<int> Head
+        int tail
+        int size
+        boolean put(Task x)
+        Task take()
+        Task steal()
+        void resize()
+    }
+
+    class BWSNCMULT implements WorkStealing {
+        Task tasks[]
+        boolean taken[]
+        int head[]
+        atomic<int> Head
+        int tail
+        int size
+
+        boolean put(Task x)
+        Task take()
+        Task steal()
+        void resize()
+    }
+
+    class NodeWS {
+       Task values[]
+       NodeWS* next
+    }
+
+    note left of NodeWS
+       Using overloading operator,
+       the access to values could be
+       done as if we use an array, by
+       example: val = node[idx]
+    end note
+
+
+    class WSNCMULTLA implements WorkStealing {
+        NodeWS* tasks[]
+        Thread::ID head[]
+        atomic<int> Head
+        int tail
+        int nodes
+        int length
+
+        boolean put(Task x)
+        Task take()
+        Task steal()
+        void resize()
+    }
+
+    class MemoryManagement {
+      NodeWS* headOfPool;
+      NodeWS* headOfUnreclaimed;
+
+      NodeWSMM allocate()
+      void deallocate()
+      boolean isFreeToDelete(NodeWS* pointer)
+      void reclaimLater(NodeWS* pointer)
+      void mark(NodeWS* pointer)
+      void unmark(NodeWS* pointer)
+      void freeAll()
+    }
+
+    class WSNCMULTLAMM implements WorkStealing {
+      MemoryManagement pool
+      NodeWS* tasks[]
+      int head[]
+      atomic<int> Head
+      int tail
+      int nodes
+      int length
+
+      boolean put(Task x)
+      Task take()
+      Task steal()
+      void resize()
+    }
+  #+end_src
 
 * Other links
 
@@ -639,6 +747,10 @@
    - [ ] [[https://www.youtube.com/watch?v=drXrIVfBKaQ][Safe Memory Reclamation (Hazard Pointers)]]
    - [ ] [[https://www.youtube.com/watch?v=cYDMq5FOiw4][Safe Memory Reclamation (Epoch-Based Reclamation)]]
    - [ ] [[https://www.microsoft.com/en-us/research/video/rdma-provably-more-powerful-communication/][RDMA: Provably More Powerful Communication]]
+   - [ ] [[https://www.youtube.com/watch?v=FYvoBi89wsE][Java Concurrency and Spring]]
+   - [ ] [[https://www.youtube.com/watch?v=XvWyLAW_U0Q][CppCon 2019: Pete Isensee "Destructor Case Studies: Best Practices for
+     Safe and Efficient Teardown"]]
+   - [ ] [[https://www.youtube.com/watch?app=desktop&v=A8eCGOqgvH4][C++ and Beyond 2012: Herb Sutter - atomic Weapons 1 of 2]]
 
 
 ** Tools
@@ -656,10 +768,20 @@
    - [ ] [[https://frankdenneman.nl/2016/07/13/numa-deep-dive-4-local-memory-optimization/][Numa Deep Dive Part 4: Local Memory Optimization]]
    - [ ] [[https://mechanical-sympathy.blogspot.com/2011/07/memory-barriersfences.html][Memory Barriers/Fences]]
    - [ ] [[https://www.infoq.com/articles/memory_barriers_jvm_concurrency/][Memory Barriers and JVM Concurrency]]
+   - [ ] [[http://www.rdrop.com/users/paulmck/scalability/paper/whymb.2010.07.23a.pdf][Memory barriers: a Hardware View for Software Hackers]]
    - [ ] [[https://stackoverflow.com/questions/286629/what-is-a-memory-fence][What is a memory fence (stackoverflow).]]
    - [ ] [[https://en.wikipedia.org/wiki/Memory_ordering#Compile-time_memory_ordering][Memory orderings]]
    - [ ] [[https://www.cl.cam.ac.uk/~pes20/weakmemory/][Relaxed Memory Concurrency]]
    - [ ] [[https://en.wikipedia.org/wiki/Instruction_set_architecture#Instructions][Instruction set architecture (ISA)]]
+   - [ ] [[https://docs.microsoft.com/en-us/windows/win32/dxtecharts/lockless-programming?redirectedfrom=MSDN][Lockless programming considerations for xbox 360 and microsoft windows]]
+   - [ ] [[https://preshing.com/20120913/acquire-and-release-semantics/][Acquire and release semantics]]
+   - [ ] [[https://stackoverflow.com/questions/38984153/how-can-i-implement-aba-counter-with-c11-cas/38991835#38991835][How can I implement ABA counter with C++11 CAS?]]
+   - [ ] [[https://corensic.wordpress.com/2011/05/23/non-serializable-executions-of-single-instructions/][Non-serializable executions of single instructixons]]
+   - [ ] [[https://blog.the-pans.com/std-atomic-from-bottom-up/][std::atomic from bottom-up]]
+   - [ ] [[https://github.com/donnemartin/system-design-primer][System Design Primer]]
+   - [ ] [[https://github.com/jwasham/coding-interview-university][Coding interview]]
+   - [ ] [[https://github.com/yangshun/tech-interview-handbook][Tech interview handbook]]
+   - [ ] [[https://github.com/yangshun/front-end-interview-handbook][Front-end interview Handbook]]
 
 
 ** Clojure things
@@ -669,6 +791,7 @@
    - [ ] [[https://medium.com/@siddontang/use-chaos-to-test-the-distributed-system-linearizability-4e0e778dfc7d][Chaos to test the distributed system linearizability]]
    - [ ] [[https://clojure-doc.org/articles/language/concurrency_and_parallelism/][Concurrency and parallelism in clojure]]
    - [ ] [[https://ericnormand.me/guide/clojure-concurrency#atom][Clojure concurrency guide]]
+   - [ ] [[https://www.youtube.com/watch?v=jm0RXmyjRJ8][Create a password manager with clojure using babashka, sqlite, honeysql and stash]]
 
 
 ** Python things
@@ -681,35 +804,337 @@
    - [ ] [[https://www.mygreatlearning.com/blog/cpp-interview-questions/?gl_blog_id=25150][CPP interview]]
    - [ ] [[https://www.cl.cam.ac.uk/~pes20/cpp/cpp0xmappings.html][CPP Mappings to processors (fences)]]
 
-   \bibliographystyle{plainurl}
-   \bibliography{refs}
+
+* Notes and other text about my phd
+
+** Concurrent computing
+
+*** Work-Stealing
+
+*** Article
+**** Work-stealing with multiplicity
+
+***** Experiments C++
+******  What to use?
+
+      - std::thread
+        * Pro :: Is standard; guaranteed to be on all conforming platforms
+        * Con :: Requires C++ > 11, so it cannot be used with ancient
+          compilers. Only basic, lowest common denominator features. However,
+          platform specifics features can still be used through
+          std::thread::native_handle
+      - boost::thread
+        * Pro :: Is cross platform, is supported on ancient compilers
+        * Con :: Is not standard, requires an external dependency. Similar feature
+          set as standard threads.
+      - pthread
+        * Pro :: Has more features such scheduling policy
+        * Con :: Is only on POSIX systems, which excludes Windows. No RAII
+          Interface.
+
+      std::thread is often a good default. If it's needed features of pthread that
+      are not standard, you can use them with the help of std::thread::native_handle
+      (this with all implications that come with it). There no reason to use
+      pthreads directly.
+
+
+****** Why are important tests in concurrent code
+
+       [[https://www.youtube.com/watch?v=tRe3ddG8O1Y][Unit testing patterns for concurrent code]]
+
+******* The dark art of concurrent code
+
+        - Several actions at the same time
+        - Hard to follow code path
+        - Non-deterministic executions
+
+******* A good unit test must be:
+
+        - Trustworthy
+        - Maintainable
+        - Readable
+
+******* Concurrency test "smells"
+
+        - Inconsistent results
+        - Untraceable fail
+        - Long running tests
+        - Test freeze
+
+******* Test smell - using "sleep" in test
+
+        - Time based - fail/pass inconsistently
+        - Test runs for too long
+        - Hard to investigate failures
+
+        In concurrent programming if something *can happen*, then sooner or later
+        *it will*, probably at the most inconvenient moment.
+
+        Avoid concurrent code.
+        - [[http://xunitpatterns.com/Humble%20Object.html][Humble object pattern]] :: We extract all the logic from the hard-to-test
+          component into a component that is testeable via synchronous tests.
+
+******* Model
+
+       #+begin_src plantuml :file scheme.png
+
+       #+end_src
+
+
+******* Technology to use
+
+        - Google Test
+        - CMake
+        - Standard Library For Threads (STL)
+
+
+*** Related topics
+    - [[https://epub.jku.at/obvulihs/download/pdf/6196854?originalFilename=true][Thesis]] on the use of work-stealing applied to garbage collection. In this
+      thesis they mention how to implement Garbage Collector Garbage First (G1)
+      in the HotSpot virtual machine of the Open JDK.
+
+*** Links
+**** Philosophy
+
+     - [[https://assets.bitbashing.io/papers/concurrency-primer.pdf][What every systems programmer should know about concurrency]]
+     - [[https://www.freecodecamp.org/news/concurrency-ideologies-of-programming-languages-java-c-c-c-go-and-rust-bd4671d943f/][Concurrency ideologies of programming languages (Java, C#, C, C++, Go and Rust)]]
+
+**** Courses
+     - [[https://ocw.mit.edu/courses/find-by-topic/#cat=engineering&subcat=computerscience&spec=algorithmsanddatastructures][Cursos MIT CS]]
+     -
+
+**** Programming Languages                                    :cpp:java:rust:
+***** C/C++/Java
+      - [[https://www.linuxjournal.com/article/6700][Cross-Platform Software Development Using CMake]]
+      - [[https://atomheartother.github.io/c++/2018/07/12/CPPDynLib.html][Writing a cross platform dynamic library]]
+      - [[https://www.quora.com/Why-is-C-faster-than-Java-1][Why is C faster than Java?]]
+      - https://trucosinformaticos.wordpress.com/2010/05/02/por-que-usar-const-en-c/
+      - [[https://stackoverflow.com/questions/42310768/segmentation-fault-due-to-free-or-malloc][Segmentation fault due to malloc or free]]
+      - [[https://stackoverflow.com/questions/15604127/do-a-getter-for-an-object][Do a geter for an object]]
+      - [[https://google.github.io/googletest/][Google tests]]
+      - [[https://groups.google.com/g/comp.lang.c++.moderated/c/EA3TJcbZ73c/m/QfVUa73nwbgJ][Is all this fancy C++ stuff used in the real world?]]
+      - [[https://gitlab.com/CLIUtils/modern-cmake/-/tree/master/examples/extended-project][extended project cmake]]
+      - [[https://cliutils.gitlab.io/modern-cmake/][Modern Cmake]]
+      - [[https://github.com/Pipe-Runner-Lab/sample_cmake][Sample cmake]]
+      - [[https://medium.com/@onur.dundar1/cmake-tutorial-585dd180109b][Cmake tutorial]]
+      - [[https://developer.ibm.com/articles/au-googletestingframework/][Why use the google c++ testing framework]]
+      - [[https://www.geeksforgeeks.org/stack-vs-heap-memory-allocation/][Stack vs heap memory allocation]]
+      - [[https://thecandcppclub.com/deepeshmenon/chapter-8-the-philosophy-of-generic-programming-in-c/709/][The C and CPP Club]]
+
+****** STL C++
+       - [[https://www.geeksforgeeks.org/vector-in-cpp-stl/][vector]]
+       - [[https://www.geeksforgeeks.org/list-cpp-stl/?ref=lbp][List]]
+       - [[https://www.geeksforgeeks.org/smart-pointers-cpp/][Smart pointers]]
+       - [[https://www.geeksforgeeks.org/memory-leak-in-c-and-how-to-avoid-it/#:~:text=Memory%20leakage%20occurs%20in%20C%2B%2B,by%20using%20wrong%20delete%20operator.][Memory leakage]]
+       - [[https://www.geeksforgeeks.org/few-bytes-on-null-pointer-in-c/][Null pointers]]
+       - [[https://www.geeksforgeeks.org/encapsulation-in-c/?ref=lbp][Encapsulation]]
+       - [[https://en.cppreference.com/w/cpp/memory/shared_ptr][Shared pointer]]
+       - [[https://en.cppreference.com/w/cpp/memory/unique_ptr][unique_ptr]]
+       - [[https://en.cppreference.com/w/cpp/memory/weak_ptr][weak_ptr]]
+         [[https://gist.github.com/Zitrax/a2e0040d301bf4b8ef8101c0b1e3f1d5][string_format]]
+
+***** Techniques
+      - [[https://mziccard.me/2015/05/08/modulo-and-division-vs-bitwise-operations/][Modulo and Division vs Bitwise Operations]]
+      - https://en.wikipedia.org/wiki/Locality_of_reference
+        - Temporal locality
+        - Spatial locality
+
+**** Others
+     - [[https://ariannadanielle.com/why-you-need-a-website-how-to-create-your-own-website-in-a-day-for-free/][Why you need a website as phd]]
+
+**** Techniques                                                         :cpp:
+     - [[https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.395.378&rep=rep1&type=pdf][Hazard pointers: Safe memory reclamation for lock-free objects]]
+     - [[https://comp.lang.cpp.moderated.narkive.com/vAi9h9q9/lock-free-programming-with-boost-shared-ptr-instead-of-hazard-pointers][Shared pointers vs hazard pointers]]
+     - [[https://arxiv.org/pdf/1910.11714.pdf][Pointer life cycle types for lock-free data structures with memory
+       reclamation]]
+     - [[http://www.cs.tau.ac.il/~afek/Maged64bit-disc-2004.pdf][Practical Lock-Free and Wait-Free LL/SC/VL]]
+     - [[https://www.modernescpp.com/index.php/fences-as-memory-barriers][Fences as memory barriers]]
+     - [[http://concurrencyfreaks.blogspot.com/2016/08/hazard-pointers-vs-rcu.html][Hazard Pointers vs RCU]]
+
+
+
+** Notes
+
+*** Git
+****  Write git messages that your colleagues will love
+     - Why git commit messages are important
+     - Reading vs writing code
+     - How to write good git commit messages
+     - Focus on the why
+     - Use imperative mood in the subject line
+     - Restrict subject line length to 50 characters
+
+
+** Statistics
+
+*** Temario tentativo
+
+
+   - C01. Introducción a R.
+   - C02. **Estadística Descriptiva.
+   - C03. Gráficos.
+   - **C04. **Probabilidad.
+   - C05. Ajuste de distribuciones.
+   - C06. Simulaciones.
+   - C07. Pruebas de Hipxótesis e intervalos de confianza.
+   - C08. ANOVA.
+   - C09. Regresiones lineales.
+   - C10. Regresiones múltiples.
+   - C11. Regresiones logísticas.
+
+*** [[https://www.youtube.com/watch?v=kS7nIEzyAcU][Estadística para diseños experimentales]]
+
+**** Diseño experimental
+     - Población objetivo
+       - Control
+       - Tratamiento
+       - Seguimiento
+     - Análisis
+       - Figuras descriptivas
+       - Pruebas estadísticas
+
+**** Distribución de frecuencias
+
+     - Distribución normal
+       - 2 parámetros
+         - Promedio (mu)
+         - Varianza
+       - 1 o dos colas
+     - Distribución t-student (Prueba t-student) Teorema de límite central
+       - 3 parámetros
+         - Promedio (mu)
+         - Varianza (sigma cuadrada)
+         - Grados de libertad (Tamaño de muestra)
+       - Una o dos colas
+     - Distribución F
+       - 2 grados de libertad
+     - Distribución Chi-cuadrada (pruebas de hipótesis nula)
+       - 1 grado de libertad
+
+**** Pruebas de hipótesis
+
+     2 Hipótesis
+     - Hipótesis nula
+     - Hipótesis alternativa
+
+     Valor crítica (alpha)
+     - \(\alpha = 5\%\) (cuando rechazar o no la hipótesis nula)
+
+     Valor de probabilidad (p)
+     - \(p > 0.05\)
+     - \(p < 0.05\)
+
+**** Pruebas estadísticas
+
+***** Pruebas para dos grupos (muestras)
+
+      - T de student (versión paramétrica)
+        - Normalidad
+        - Homocedasticidad
+        - \(H_0 = \mu_1 - \mu_2 \neq 0\)
+        - Estadístico *t*
+
+      - Mann-Whitney (versión no-paramétrica)
+        - Distribución similar de ambos grupos
+        - \(H_0 = mediana_1 = mediana_2\)
+        - Estadistico: *U*
+
+***** Pruebas para más de dos grupos
+
+***** Pruebas para variables continuas y categóricas
+
+
+
+*** Estadística para ciencia de datos
+
+
+**** Data Science
+
+     - ¿Qué es ciencia de datos?
+     - Minería de datos :: El conocimiento valioso se obtiene después de saber
+       como se comporta nuestra materia prima.
+
+***** Estadística básica
+
+      - Variable :: Características de un objeto o individuo que pueden medirse y
+        cuyo valor puede variar de acuerdo a la observación o registro.
+      - Parámetros :: Resume el comportamiento general de las variables, en pocas
+        palabras, resume la información describe a un individuo, objeto o
+        situación.
+      - Distribución :: El saber la distribución de la variable, nos permitirá
+        calcular la probabilidad de que la variable obtenga cierto valor o
+        aquellos valores que estén por debajo.
+
+
+**** Data Science Steps
+
+**** Main Concepts
+
+**** Match Between Statistic and Data Science
+
+
+
+
+
+* Plan last 2 semesters
+
+  - [ ] Plan de experimentos para colas concurrentes
+    + [ ] Experimentos de LL/IC
+      * [ ] Cambios en el número de K
+    + [ ] Experimentos sobre baskets
+    + [ ] Experimentos sobre colas
+  - [ ] Documento de avances semestral para evaluación por comité tutoral
+  - [ ] Actualización código work-stealing en C++
+    - [ ] Implementación lock-free de hazard pointers
+    - [ ]
+  - [ ]
+  - [ ] Plan de
+  -
 
 * Footnotes
 
-[fn:binary] Writing a positive integer \(n\) as the sum of distinct powers of two is also called /binary writing/. There are several ways to obtain it. For example, we can follow the following recursive algorithm: if \(n\) is even, we write it as \(2m\), and if \(n\) is odd, we write it as \(2m + 1\). Repeating the process on the \(m\) obtained until we reach \(1\), we obtain an expression which expands to a sum of distinct powers of two. For example,
-\begin{align*}
-7 &= 2(3)+1 = 2(2(1)+1)+1\\
-&= 4 + 2 + 1.
-\end{align*}
+* Articles to begin with
 
-[fn:infty] We use the symbol \(\infty\) as a placeholder for an extremely large number: for any real number \(r\) in our calculations, we  will set \(r + \infty = \infty\) and \(\operatorname{min}\{r,\infty\} = r\).
+  Seed Papers
+TITLE	FIRST AUTHOR	YEAR	CITED BY
 
 
-[fn:partition] If \(S = S_1 \cup \cdots \cup S_n\), we say that it is a /partition/ if \(S_i \cap S_j = \emptyset\) for \(i \neq j\). In this case we write \(S = S_1 \sqcup \cdots \sqcup S_n\), or more concisely, \(S = \bigsqcup_{i = 1}^n S_i\).
 
-[fn:closures] Think about when it makes sense to ask for the closure of a relation with respect to a property, and when you can expect it to exist uniquely. For example, it doesn't really make sense to ask for the anti-symmetric closure of a relation. Do you see why?
 
-[fn:equiv-classes] The idea is that we can treat all elements of one equivalence class as being interchangeable in some sense.
 
-[fn:vacuous] We say that a statement of type "if ... then ...", or equivalently "for every ... we have ..." is /vacuously true/ if nothing satisfies the "if" or "for every" condition.
 
-[fn:nary-rel] This is a binary relation because we are looking at a subset of the product of two copies of \(S\). An \(n\)-ary relation on \(S\) would just be a subset of the product of \(n\) copies of \(S\).
+The Google file system	GhemawatSanjay	2003	4980
+Enhancing Productivity and Performance Portability of General-Purpose Parallel Programming	Alexandros Tzannes	2012	6
+Scaling up parallel GC work-stealing in many-core environments	Michihiro Horie	2019	0
+Idempotent work stealing	Maged M. Michael	2009	124
+Defining Correctness Conditions for Concurrent Objects in Multicore Architectures	Brijesh Dongol	2015	12
+Axioms for concurrent objects	Maurice Herlihy	1987	198
+Reaching approximate agreement in the presence of faults	Danny Dolev	1986	484
+The notions of consistency and predicate locks in a database system	Kapali P. Eswaran	1976	2052
+Fence-free work stealing on bounded TSO processors	Adam Morrison	2014	19
+Wait-free synchronization	Maurice Herlihy	1991	1918
+Modeling of the Memory Management Process for Dynamic Work-Stealing Schedulers	Elena A. Aksenova	2017	6
+Relaxed Queues and Stacks from Read/Write Operations	Armando Castaneda	2020	1
+Concurrent reading and writing	Leslie Lamport	1977	295
+Efficient Work Stealing for Fine Grained Parallelism	Karl-Filip Faxén	2010	46
+On the minimal synchronism needed for distributed consensus	Danny Dolev	1983	694
+Impossibility and universality results for wait-free synchronization	Maurice Herlihy	1988	229
+Improving Load Balancing during the Marking Phase of Garbage Collection.	Erik Helin	2012	4
+Concurrent Reading While Writing	Gary L. Peterson	1983	205
+What Can Be Done with Consensus Number One: Relaxed Queues and Stacks	Armando Castaneda	2020	1
+Efficient Synchronization-Free Work Stealing	Umut A. Acar	2011	2
+Scheduling parallel programs by work stealing with private deques	Umut A. Acar	2013	121
+Cilk: An Efficient Multithreaded Runtime System	Robert D. Blumofe	1996	1880
+The structure of the “THE”-multiprogramming system	Edsger W. Dijkstra	1968	1189
+How to Make a Multiprocessor Computer That Correctly Executes Multiprocess Programs	Leslie Lamport	1979	2754
+Algorithms for scalable synchronization on shared-memory multiprocessors	John M. Mellor-Crummey	1991	1355
+Work-Stealing for Multi-socket Architecture	Quan Chen	2017	0
+Simple, fast, and practical non-blocking and blocking concurrent queue algorithms	Maged M. Michael	1996	836
+Fully Read/Write Fence-Free Work-Stealing with Multiplicity	Armando Castaneda	2021	0
 
-[fn:dichotomy] A situation in which exactly one of two possible options is true.
-
-[fn:set-naming-convention] This is just a convention. In fact, sets are often elements of other sets, so there is no clear distinction between sets and potential elements.
-
-[fn:zfc] Historical remarks and something about ZFC?
+* Bibliography
+  \bibliographystyle{plainurl}
+  \bibliography{refs}
 
 * Local variables                                                  :noexport:
 # Local variables:

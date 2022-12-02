@@ -31,7 +31,7 @@
 ** Export settings
 
    Export into the artifacts directory
-   #+export_file_name: artifacts/notes
+   #+export_file_name: artifacts/main
 
    Add ~tufte-book~ to ~org-latex-classes~ and update ~org-latex-pdf-process~.
    #+name: export-setup
