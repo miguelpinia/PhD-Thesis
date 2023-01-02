@@ -17,7 +17,6 @@
    #+latex_class: book
    #+latex_class_options: [openany, a4paper]
    #+latex_header: \usepackage{amsmath,amssymb,amsthm,geometry,hyperref,paralist,svg,thmtools,tikz,tikz-cd}
-   #+latex_header: \usepackage[AUTO]{babel}
    #+latex_header: \usepackage{mathtools}
    #+latex_header: \usepackage[capitalise,noabbrev]{cleveref}
    #+latex_header: \usepackage{mdframed} \usepackage{svg}
@@ -106,14 +105,66 @@
 
 * Introduction
 
-** About concurrent computing
+** About Concurrent Computing
 
-** Work-stealing algorithm analysis
+   What is concurrent computing? This is a good question. We should first talk
+   about single-core and multi-core processors manufactured by the computer
+   industry. After the second world war and until the 90's the general purpose
+   cpus were single-core. All processes were executed in a single-core, and the
+   operating systems simulated concurrency using schedulers and other
+   techniques. In 2001, IBM introduce the first multi-core processor
+   [[cite:&ibmIBM100Power]], it allows that two processors work together at a very
+   high bandwidth (for the epoch) with large on-chip memories and with
+   high-speed buses. Since then, the amount of cores in each processors has been
+   increasing. We must consider as well the Moore's law, loosely speaking, this
+   law tells us that each year more and more transistors are placed into the
+   same space (i.e. electronic components and circuits are reduced in size), but
+   their speed cannot be increased without overheating. Consequently, the
+   industry move to ``multi-core'' architectures. In this architecture multiple
+   processors communicate through shared memory (RAM, hardware caches),
+   permitting make computing more effectively using /parallelism/, where the
+   processors work together on a single task [[cite:&DBLP_books_daglib_0020056]].
 
-   We analyze the algorithms for work-stealing described in the article Fully
-   Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
-   called "Idempotent FIFO Work-Stealing", this because the algorithm have a
-   similar semantic than the prior algorithms.
+   # Explain why the increase of cores in the processors should studied to know
+   # how we develop software
+
+*** Classic concurrent computing
+
+    - [ ] Basic Definitions
+    - [ ] FLP impossibility result
+    - [ ] Asynchronous Shared Memory
+    - [ ] Primitive Synchronization Operations and Consensus
+
+    # Definitions
+    # FLP result
+
+*** Relaxed concurrent computing
+
+    - [ ] Relaxing the problem
+    - [ ] Multiplicity preliminaries
+    - [ ] Another relaxations?
+
+*** Work-stealing
+
+    - [ ] How it works the work-stealing
+    - [ ] Classic algorithms
+    - [ ] Idempotent algorithms
+    - [ ] Work-stealing with multiplicity
+
+*** Data-Structures
+
+    - [ ] Queues with multiplicity
+    - [ ]
+
+*** Contributions
+
+*** Organization
+
+** Preliminaries
+
+
+*** Mathematical model
+
 
 *** Realistic model of computation
 
@@ -180,6 +231,7 @@
     \label{fig:arch}
     #+end_figure
 
+
 *** Cache memory
 
     The cache memory is a special very high-speed memory that is very close to
@@ -197,7 +249,6 @@
     capacious than first level and is used to store data and instructions that
     are close to be executed. In the third level, this cache is shared by many
     processors and is used as feeder for the L2 cache.
-
 
 *** Memory bus
 
@@ -253,6 +304,8 @@
      exclusive (E), shared (S) and invalid (I). The protocol acts like a state
      machine, moving from one state to another based on the conditions of the
      data and the cache memory [[cite:&DBLP_series_synthesis_2020Nagarajan]].
+
+
 
 *** Memory fences
 
@@ -358,6 +411,119 @@
     for ~std::atomic_thread_fence(std::memory_order::seq_cst)~, which issue the
     full memory fence instruction ~MFENCE~. For other archict
 
+
+
+** Work-Stealing
+
+   We analyze the algorithms for work-stealing described in the article Fully
+   Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
+   called "Idempotent FIFO Work-Stealing", this because the algorithm have a
+   similar semantic than the prior algorithms.
+
+  #+begin_src plantuml :file objects.png :results silent
+    interface WorkStealing {
+       boolean put(Task x)
+       Task take()
+       Task steal()
+    }
+
+    class WSNCMULT implements WorkStealing {
+        Task tasks[]
+        int head[]
+        atomic<int> Head
+        int tail
+        int size
+        boolean put(Task x)
+        Task take()
+        Task steal()
+        void resize()
+    }
+
+    class BWSNCMULT implements WorkStealing {
+        Task tasks[]
+        boolean taken[]
+        int head[]
+        atomic<int> Head
+        int tail
+        int size
+
+        boolean put(Task x)
+        Task take()
+        Task steal()
+        void resize()
+    }
+
+    class NodeWS {
+       Task values[]
+       NodeWS* next
+    }
+
+    note left of NodeWS
+       Using overloading operator,
+       the access to values could be
+       done as if we use an array, by
+       example: val = node[idx]
+    end note
+
+
+    class WSNCMULTLA implements WorkStealing {
+        NodeWS* tasks[]
+        Thread::ID head[]
+        atomic<int> Head
+        int tail
+        int nodes
+        int length
+
+        boolean put(Task x)
+        Task take()
+        Task steal()
+        void resize()
+    }
+
+    class MemoryManagement {
+      NodeWS* headOfPool;
+      NodeWS* headOfUnreclaimed;
+
+      NodeWSMM allocate()
+      void deallocate()
+      boolean isFreeToDelete(NodeWS* pointer)
+      void reclaimLater(NodeWS* pointer)
+      void mark(NodeWS* pointer)
+      void unmark(NodeWS* pointer)
+      void freeAll()
+    }
+
+    class WSNCMULTLAMM implements WorkStealing {
+      MemoryManagement pool
+      NodeWS* tasks[]
+      int head[]
+      atomic<int> Head
+      int tail
+      int nodes
+      int length
+
+      boolean put(Task x)
+      Task take()
+      Task steal()
+      void resize()
+    }
+  #+end_src
+
+  #+begin_figure
+   \begin{minipage}{\linewidth}
+     \includegraphics[width=\linewidth]{figs/objects.png}
+   \end{minipage}
+   \caption{Simplified view of a modern computer system cache architecture}
+   \label{fig:arch}
+  #+end_figure
+
+
+*** Model
+
+    # TSO? x86
+
+*** Known algorithms
+
 *** Pseudocode for Work-Stealing with Weak Multiplicity
 
    #+begin_src language
@@ -366,7 +532,13 @@
 
 
 
-** Some Foundations
+** Data-Structures
+
+*** Queues
+
+*** Stacks
+
+** Some Hardware Foundations
 
 *** Cache memory
 
@@ -684,102 +856,6 @@
 
 * Work-stealing
 
-  #+begin_src plantuml :file objects.png :results silent
-    interface WorkStealing {
-       boolean put(Task x)
-       Task take()
-       Task steal()
-    }
-
-    class WSNCMULT implements WorkStealing {
-        Task tasks[]
-        int head[]
-        atomic<int> Head
-        int tail
-        int size
-        boolean put(Task x)
-        Task take()
-        Task steal()
-        void resize()
-    }
-
-    class BWSNCMULT implements WorkStealing {
-        Task tasks[]
-        boolean taken[]
-        int head[]
-        atomic<int> Head
-        int tail
-        int size
-
-        boolean put(Task x)
-        Task take()
-        Task steal()
-        void resize()
-    }
-
-    class NodeWS {
-       Task values[]
-       NodeWS* next
-    }
-
-    note left of NodeWS
-       Using overloading operator,
-       the access to values could be
-       done as if we use an array, by
-       example: val = node[idx]
-    end note
-
-
-    class WSNCMULTLA implements WorkStealing {
-        NodeWS* tasks[]
-        Thread::ID head[]
-        atomic<int> Head
-        int tail
-        int nodes
-        int length
-
-        boolean put(Task x)
-        Task take()
-        Task steal()
-        void resize()
-    }
-
-    class MemoryManagement {
-      NodeWS* headOfPool;
-      NodeWS* headOfUnreclaimed;
-
-      NodeWSMM allocate()
-      void deallocate()
-      boolean isFreeToDelete(NodeWS* pointer)
-      void reclaimLater(NodeWS* pointer)
-      void mark(NodeWS* pointer)
-      void unmark(NodeWS* pointer)
-      void freeAll()
-    }
-
-    class WSNCMULTLAMM implements WorkStealing {
-      MemoryManagement pool
-      NodeWS* tasks[]
-      int head[]
-      atomic<int> Head
-      int tail
-      int nodes
-      int length
-
-      boolean put(Task x)
-      Task take()
-      Task steal()
-      void resize()
-    }
-  #+end_src
-
-  #+begin_figure
-   \begin{minipage}{\linewidth}
-     \includegraphics[width=\linewidth]{figs/objects.png}
-   \end{minipage}
-   \caption{Simplified view of a modern computer system cache architecture}
-   \label{fig:arch}
-  #+end_figure
 
 * Other links
 
@@ -1126,6 +1202,215 @@
   - [ ]
   - [ ] Plan de
   -
+- Article [[file:~/src/phd/article/main.pdf]]
+  - Change article's format following the [[https://www.elsevier.com/journals/journal-of-parallel-and-distributed-computing/0743-7315/guide-for-authors][JPDC]]'s guide authors.
+  - Current sections
+    + [ ] Introduction
+    + [ ] Preliminaries
+    + [ ] Work-Stealing With Multiplicity
+    + [ ] Work-Stealing With Weak-Multiplicity
+    + [ ] Bounding the multiplicity
+    + [ ] Coping with realistic assumptions
+      - [ ] Memory management in C++
+    + [ ] Idempotent \(\neq\) Multiplicity
+    + [ ] Experiments
+    + [ ] Final discussion
+
+
+  - Experiments
+    - Review statistics for experiments
+    - Read the article Statistically Rigorous Java Performance Evaluation
+      [[cite:&DBLP_conf_oopsla_GeorgesBE07]]
+    - Design new experiments
+  - New Sections
+    - How to deal with realistic assumptions
+    - Experiments
+
+** Memory management
+
+*** A study of dynamic memory management in C++ programs (2002)
+    :PROPERTIES:
+    :TITLE:     A study of dynamic memory management in C++ programs
+    :CITE:      [[cite:&LEE2002237]]
+    :BTYPE:     article
+    :CUSTOM_ID: LEE2002237
+    :JOURNAL:   Computer Languages, Systems & Structures
+    :VOLUME:    28
+    :NUMBER:    3
+    :PAGES:     237-272
+    :YEAR:      2002
+    :ISSN:      1477-8424
+    :DOI:       https://doi.org/10.1016/S0096-0551(02)00015-2
+    :URL:       https://www.sciencedirect.com/science/article/pii/S0096055102000152
+    :AUTHOR:    Woo Hyong Lee and Morris Chang
+    :KEYWORDS:  Dynamic memory management, Life-span, Garbage collection
+    :ABSTRACT:  Recently, the importance of dynamic memory management has been increased significantly as there is a growing number of development in object-oriented programs. Many studies show that dynamic memory management is one of the most expensive components in many software systems. It can consume up to 30\% of the program execution time. Especially, in C++ programs, it tends to have object creation and deletion prolifically. These objects tend to have short life-spans. This paper describes an integrated study of the C++'s memory allocation behavior, a memory tracing tool and memory managements based on the empirical study of C++ programs. First, this paper summarizes the hypothesis of situations that invoke the dynamic memory management explicitly and implicitly. They are: constructors, copy constructors, overloading assignment operator=, type conversions and application specific member functions. Second, a dynamic memory tracing tool, called mtrace++, is introduced to study the dynamic memory allocation behavior in C++ programs. Third, a dynamic memory allocation strategy, called O-Reuse, to reuse the allocated objects to speed up the object management. At the later part of this paper, an automatic dynamic memory management, called GC++, is discussed. GC++ collects unreferenced objects automatically with high speed of allocation/deallocation processes. The performance gains of O-Reuse and GC++ are come from the utilization of memory allocation/deallocation behavior.
+    :END:
+
+**** Main ideas
+
+     - Dynamic memory management has been a high cost component in many software
+       systems.
+     - A study has shown that memory intensive C programs can consume up to 30%
+       of the program runtime in memory allocaltion and liberation.
+     - The object-oriented programming language system tends to have object
+       creation and deletion prolifically.
+     - Operations that involve dynamic memory management in C++:
+       + Constructors
+       + Copy constructors
+       + use of assigment operator
+     - A garbage collector should have two main policies:
+       + Simple allocation/deallocation :: This allows to make
+         allocation/deallocation faster. It reduces the number of =malloc()= /
+         =free()= calls.
+       + Object-reuse :: Reusing objects, it accelerates the allocation
+         speed. The object deletion process through the overloaded *delete*
+         operator will be deferred. The objects to be deleted will be put back
+         to a free-list which is maintained by the *overloaded new operator*.
+     - Cases of dynamic memory allocation in C++:
+       + Constructors
+       + Copy Constructor
+       + Overloading assigment operator
+       + Type conversion
+       + User defined member function that invoke *new operator explicitly*.
+
+**** Garbage Collector Design
+
+    - The garbage collector maintains objects with segregated memory blocks. In
+      these memory blocks, objects are stored consecutively. Each memory block
+      contains information about node, size and others. It has a data-structure
+      to create and manipulate objects. Inside of the encapsulated data
+      structure, the garbage collector /(/GC/) stores the requested object pointer,
+      the requested object size, and the reusable object pointer. With this
+      information, we can know the size of each object and decide whether the
+      object can be reused.
+
+    - So, basically, in the garbage collector, we have a list of objects that
+      can be reused, and at each moment that we call *delete* explicitly, the
+      objects are re-inserted in the list.
+
+
+
+*** Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects
+    :PROPERTIES:
+    :TITLE:    Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects
+    :BTYPE:    article
+    :CUSTOM_ID: DBLP_journals_tpds_Michael04
+    :AUTHOR:   Maged M. Michael
+    :YEAR:     2004
+    :VOLUME:   15
+    :NUMBER:   6
+    :PAGES:    491-504
+    :DOI:      10.1109/TPDS.2004.8
+    :URL:      https://doi.org/10.1109/TPDS.2004.x8
+    :JOURNAL:  {IEEE} Trans. Parallel Distributed Syst.
+    :TIMESTAMP: Fri, 02 Oct 2020 14:40:06 +0200
+    :BIBURL:   https://dblp.org/rec/journals/tpds/Michael04.bib
+    :BIBSOURCE: dblp computer science bibliography, https://dblp.org
+    :END:
+
+
+**** Main ideas
+
+     - In languages without automatic memory reclamation or support for
+       automatic garbage collection, it is difficult design strategies to
+       reclaim objects from the memory when these are used by more than one
+       thread.
+     - Prior methods for allowing node reuse in dynamic lock-free objects fall
+       into three main categories:
+       1. The IBM tag method (update counter), which hinders memory reclamation
+          for arbitrary reuse and requires double width instructions. [11]
+       2. Lock-free reference counting methods [3, 29], which are inefficient
+          and use unavailable strong multi-address atomic primitives in order to
+          allow memory reclamation.
+       3. Methods that depend on aggregate reference counters or per-thread
+          timestamps [4, 5, 13].
+       Without special scheduler support, these methods are blocking.
+
+     *Important sections* of the article:
+
+     - 3. The Methodology
+     - 3.1 The algorithm
+     - 3.2 Algorithm extensions
+     - 3.3 The condition
+     - 4.4 Single-Writer Multi-reader Dynamic Structures
+
+**** Model
+
+     - The model
+     - Atomic Primitives
+       + CAS
+       + LL/SC
+     - ABA Problem
+
+**** The Methodology
+     - Associate hazard pointers with threads. A hazard pointer is a single
+       write multireader pointer. The number of hazard pointers per thread
+       depends on the algorithm. Typically 1 or 2, but for analysis, the number
+       of hazard pointers will be K.
+     - The methodology communicates with the associated algorithms only through
+       hazard pointers and a procedure /RetireNode/ that is called by threads to
+       pass the addresses of retired nodes. The methodology consists of two
+       parts:
+       1. The algorithm for processing retired nodes, and
+       2. The condition that lock-free algorithms must satisfy in order to
+          guarantee the safety of memory reclamation and ABA prevention.
+
+     - Shared and private structures used by the algorithm:
+       #+begin_src cpp
+         #include <list>
+
+         const int K = 2;
+         struct HPRecType {
+             void* HP[K];
+             HPRecType* Next;
+         };
+
+         HPRecType* HeadHPRec;
+
+         void Scan(HPRecType* head);
+
+         std::list<void*> rlist = {};
+         int rcount = 0;
+         int R = THRESHOLD;
+
+         void RetireNode(void* node) {
+             rlist.push_back(node);
+             rcount++;
+             if (rcount >= R) {
+                 Scan(HeadHPRec);
+             }
+         }
+
+         void scaScan(HPRecType* head) {
+             // Stage 1
+             plist.init();
+             HPRecType* hprec = head;
+             while (hprec != null) {
+                 for(int i = 0; i < K - 1; i++) {
+                     void* hptr = hprec->HP[i];
+                     if (hptr != null) {
+                         plist.push(hptr);
+                     }
+                 }
+                 hprec = hprec->Next;
+             }
+             std::list<void*> tmplist = rlist.popAll();
+             rcount = 0;
+             void* node = tmplist.pop();
+             while (node != null) {
+                 if (plist.lockup(node)) {
+                     rlist.push(node);
+                     rcount++;
+                 } else {
+                     PrepareForReuse(node);
+                 }
+                 node = tmplist.pop();
+             }
+             plist.free();
+         }
+       #+end_src
+
 
 * Footnotes
 
