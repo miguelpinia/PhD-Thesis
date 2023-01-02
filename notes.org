@@ -95,6 +95,7 @@
                               "rm -rf %o/svg-inkscape"
                               "mv svg-inkscape %o/"
                               "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
+                              "cp %o/%b.tex main.tex"
                               (concat "cp %o/%b.pdf ../docs/" this-year "/thesis-notes.pdf")))
                       org-latex-subtitle-format "\\\\\\medskip\\noindent\\Huge %s"
                       org-confirm-babel-evaluate nil)
@@ -102,6 +103,8 @@
 
 
 * Introduction
+
+** About concurrent computing
 
 ** Work-stealing algorithm analysis
 
