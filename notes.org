@@ -28,9 +28,7 @@
    #+latex_header: \usepackage{multicol}
    #+latex_header: \usepackage{url}
    #+latex_header: \lstset{ basicstyle=\ttfamily, mathescape=true, frame=Trbl, numbers=left}
-   #+latex_header: \renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}
    #+latex_header: \renewcommand{\lstlistingname}{Pseudocódigo}
-   #+latex_header: \counterwithin{lstlisting}{section}
    #+latex_header: \setcounter{tocdepth}{1}
    #+latex_header: \newtheoremstyle{break}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{\newline}{}
    #+latex_header: \theoremstyle{break}
@@ -53,9 +51,10 @@
    #+latex_header: \NewEnviron{obs}{\begin{mdframed}\begin{remark} \BODY \end{remark}\end{mdframed}}
    #+latex_header: \NewEnviron{nota}{\begin{mdframed}\begin{note} \BODY \end{note}\end{mdframed}}
    #+latex_header: \renewcommand{\qedsymbol}{\textbf{\therefore}}
-   #+latex_header: \NewEnviron{myproof}[1][\proofname]{\begin{proof}[#1]$ $\par\nobreak\ignorespaces}{\end{proof}}
    #+latex_header: \NewEnviron{blk}{\begin{mdframed}\BODY\end{mdframed}}
    #+latex_header: \newcommand{\nimplies}{\;\not\nobreak\!\!\!\!\implies}
+   #+latex_header: \AtBeginDocument{\renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}}
+   #+latex_header: \AtBeginDocument{\counterwithin{lstlisting}{section}}
 
 
 ** Export settings
@@ -66,40 +65,42 @@
    Add ~tufte-book~ to ~org-latex-classes~ and update ~org-latex-pdf-process~.
    #+name: export-setup
    #+begin_src emacs-lisp :results silent :var this-year="2023"
-          ;; (add-to-list 'org-latex-classes
-               ;;           `("tufte-book"
-               ;;             ,(string-join
-               ;;               '("\\documentclass{tufte-book}"
-               ;;                 "\\usepackage{color}"
-               ;;                 "\\usepackage{amsmath,amssymb}")
-               ;;               "\n")
-               ;;             ("\\chapter{%s}" . "\\chapter*{%s}")
-               ;;             ("\\section{%s}" . "\\section*{%s}")
-               ;;             ("\\subsection{%s}" . "\\subsection*{%s}")
-               ;;             ("\\paragraph{%s}" . "\\paragraph*{%s}")
-               ;;             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-               (setq-local org-latex-pdf-process
-                           (let
-                               ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
-                                             " --synctex=1"
-                                             " -output-directory %o %f")))
-                             (list "cp ~/Dropbox/org/phd/research/refs.bib refs.bib"
-                                   "cp refs.bib %o/"
-                                   cmd
-                                   cmd
-                                   "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
-                                   "cd %o; bibtex %b"
-                                   cmd
-                                   cmd
-                                   "mv *.svg %o/"
-                                   "mv *.png %o/"
-                                   "rm -rf %o/svg-inkscape"
-                                   "mv svg-inkscape %o/"
-                                   "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
-                                   "cp %o/%b.tex main.tex"
-                                   (concat "cp %o/%b.pdf ../docs/" this-year "/thesis-notes.pdf")))
-                           org-latex-subtitle-format "\\\\\\medskip\\noindent\\Huge %s"
-                           org-confirm-babel-evaluate nil)
+     ;; (add-to-list 'org-latex-classes
+          ;;           `("tufte-book"
+          ;;             ,(string-join
+          ;;               '("\\documentclass{tufte-book}"
+          ;;                 "\\usepackage{color}"
+          ;;                 "\\usepackage{amsmath,amssymb}")
+          ;;               "\n")
+          ;;             ("\\chapter{%s}" . "\\chapter*{%s}")
+          ;;             ("\\section{%s}" . "\\section*{%s}")
+          ;;             ("\\subsection{%s}" . "\\subsection*{%s}")
+          ;;             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+          ;;             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+          (setq-local org-latex-pdf-process
+                      (let
+                          ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
+                                        " --synctex=1"
+                                        " -output-directory %o %f")))
+                        (list "cp ~/Dropbox/org/phd/research/refs.bib refs.bib"
+                              "cp refs.bib %o/"
+                              "cp *.svg figs/"
+                              "cp *.png figs/"
+                              "mv *.svg %o/figs"
+                              "mv *.png %o/figs"
+                              cmd
+                              cmd
+                              "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
+                              "cd %o; bibtex %b"
+                              cmd
+                              cmd
+                              "rm -rf %o/svg-inkscape"
+                              "mv svg-inkscape %o/"
+                              "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
+                              "cp %o/%b.tex main.tex"
+                              (concat "cp %o/%b.pdf ../docs/" this-year "/thesis-notes.pdf")))
+                      org-latex-subtitle-format "\\\\\\medskip\\noindent\\Huge %s"
+                      org-confirm-babel-evaluate nil)
    #+end_src
 
 
@@ -173,7 +174,7 @@
 
     #+begin_figure
     \begin{minipage}{\linewidth}
-      \includesvg[width=\linewidth]{architecture}
+      \includesvg[width=\linewidth]{figs/architecture}
     \end{minipage}
     \caption{Simplified view of a modern computer system cache architecture}
     \label{fig:arch}
@@ -771,6 +772,14 @@
       void resize()
     }
   #+end_src
+
+  #+begin_figure
+   \begin{minipage}{\linewidth}
+     \includegraphics[width=\linewidth]{figs/objects.png}
+   \end{minipage}
+   \caption{Simplified view of a modern computer system cache architecture}
+   \label{fig:arch}
+  #+end_figure
 
 * Other links
 
