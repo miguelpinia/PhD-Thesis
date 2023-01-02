@@ -917,11 +917,6 @@
 
 ******* Model
 
-       #+begin_src plantuml :file scheme.png
-
-       #+end_src
-
-
 ******* Technology to use
 
         - Google Test
