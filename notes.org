@@ -66,39 +66,40 @@
    Add ~tufte-book~ to ~org-latex-classes~ and update ~org-latex-pdf-process~.
    #+name: export-setup
    #+begin_src emacs-lisp :results silent :var this-year="2023"
-     ;; (add-to-list 'org-latex-classes
-          ;;           `("tufte-book"
-          ;;             ,(string-join
-          ;;               '("\\documentclass{tufte-book}"
-          ;;                 "\\usepackage{color}"
-          ;;                 "\\usepackage{amsmath,amssymb}")
-          ;;               "\n")
-          ;;             ("\\chapter{%s}" . "\\chapter*{%s}")
-          ;;             ("\\section{%s}" . "\\section*{%s}")
-          ;;             ("\\subsection{%s}" . "\\subsection*{%s}")
-          ;;             ("\\paragraph{%s}" . "\\paragraph*{%s}")
-          ;;             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-          (setq-local org-latex-pdf-process
-                      (let
-                          ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
-                                        " --synctex=1"
-                                        " -output-directory %o %f")))
-                        (list "cp refs.bib %o/"
-                              cmd
-                              cmd
-                              "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
-                              "cd %o; bibtex %b"
-                              cmd
-                              cmd
-                              "mv *.svg %o/"
-                              "mv *.png %o/"
-                              "rm -rf %o/svg-inkscape"
-                              "mv svg-inkscape %o/"
-                              "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
-                              "cp %o/%b.tex main.tex"
-                              (concat "cp %o/%b.pdf ../docs/" this-year "/thesis-notes.pdf")))
-                      org-latex-subtitle-format "\\\\\\medskip\\noindent\\Huge %s"
-                      org-confirm-babel-evaluate nil)
+          ;; (add-to-list 'org-latex-classes
+               ;;           `("tufte-book"
+               ;;             ,(string-join
+               ;;               '("\\documentclass{tufte-book}"
+               ;;                 "\\usepackage{color}"
+               ;;                 "\\usepackage{amsmath,amssymb}")
+               ;;               "\n")
+               ;;             ("\\chapter{%s}" . "\\chapter*{%s}")
+               ;;             ("\\section{%s}" . "\\section*{%s}")
+               ;;             ("\\subsection{%s}" . "\\subsection*{%s}")
+               ;;             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+               ;;             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+               (setq-local org-latex-pdf-process
+                           (let
+                               ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
+                                             " --synctex=1"
+                                             " -output-directory %o %f")))
+                             (list "cp ~/Dropbox/org/phd/research/refs.bib refs.bib"
+                                   "cp refs.bib %o/"
+                                   cmd
+                                   cmd
+                                   "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
+                                   "cd %o; bibtex %b"
+                                   cmd
+                                   cmd
+                                   "mv *.svg %o/"
+                                   "mv *.png %o/"
+                                   "rm -rf %o/svg-inkscape"
+                                   "mv svg-inkscape %o/"
+                                   "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
+                                   "cp %o/%b.tex main.tex"
+                                   (concat "cp %o/%b.pdf ../docs/" this-year "/thesis-notes.pdf")))
+                           org-latex-subtitle-format "\\\\\\medskip\\noindent\\Huge %s"
+                           org-confirm-babel-evaluate nil)
    #+end_src
 
 
