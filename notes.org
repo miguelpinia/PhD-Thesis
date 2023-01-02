@@ -7,6 +7,9 @@
 ** Startup
 
    #+startup: noptag overview hideblocks
+   #+language: es
+   #+OPTIONS: -:nil
+   #+BIND: org-latex-image-default-width "0.45\\linewidth"
 
 
 ** Org LaTeX Setup
@@ -14,62 +17,87 @@
    #+latex_class: book
    #+latex_class_options: [openany, a4paper]
    #+latex_header: \usepackage{amsmath,amssymb,amsthm,geometry,hyperref,paralist,svg,thmtools,tikz,tikz-cd}
+   #+latex_header: \usepackage[AUTO]{babel}
    #+latex_header: \usepackage{mathtools}
    #+latex_header: \usepackage[capitalise,noabbrev]{cleveref}
+   #+latex_header: \usepackage{mdframed} \usepackage{svg}
    #+latex_header: \usepackage{environ} \NewEnviron{abmn}{\marginnote{\BODY}}
    #+latex_header: \usepackage{url}
+   #+latex_header: \usepackage{color}
+   #+latex_header: \usepackage{listings,chngcntr}% http://ctan.org/pkg/listings
+   #+latex_header: \usepackage{multicol}
+   #+latex_header: \usepackage{url}
+   #+latex_header: \lstset{ basicstyle=\ttfamily, mathescape=true, frame=Trbl, numbers=left}
+   #+latex_header: \renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}
+   #+latex_header: \renewcommand{\lstlistingname}{Pseudocódigo}
+   #+latex_header: \counterwithin{lstlisting}{section}
    #+latex_header: \setcounter{tocdepth}{1}
+   #+latex_header: \newtheoremstyle{break}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{\newline}{}
+   #+latex_header: \theoremstyle{break}
    #+latex_header: \newtheorem{theorem}{Theorem}
-   #+latex_header: \newtheorem{example}[theorem]{Example}
-   #+latex_header: \newtheorem{exmpl}[theorem]{Example}
-   #+latex_header: \newtheorem{definition}[theorem]{Definition}
+   #+latex_header: \newtheorem{corollary}[theorem]{Corollary}
    #+latex_header: \newtheorem{proposition}[theorem]{Proposition}
+   #+latex_header: \newtheorem{definition}[theorem]{Definition}
    #+latex_header: \newtheorem{lemma}[theorem]{Lemma}
-   #+latex_header: \newtheorem{exercise}[theorem]{Exercise}
+   #+latex_header: \newtheorem{affirmation}[theorem]{Affirmation}
+   #+latex_header: \theoremstyle{example}
+   #+latex_header: \newtheorem{example}{Example}
+   #+latex_header: \newtheorem{exmpl}{Example}
+   #+latex_header: \theoremstyle{note}
+   #+latex_header: \newtheorem{note}{Note}
+   #+latex_header: \theoremstyle{break}
+   #+latex_header: \newtheorem{remark}{Remark}
+   #+latex_header: \theoremstyle{exercise}
+   #+latex_header: \newtheorem{exercise}{Exercise}
    #+latex_header: \usetikzlibrary{arrows,automata,positioning}
+   #+latex_header: \NewEnviron{obs}{\begin{mdframed}\begin{remark} \BODY \end{remark}\end{mdframed}}
+   #+latex_header: \NewEnviron{nota}{\begin{mdframed}\begin{note} \BODY \end{note}\end{mdframed}}
+   #+latex_header: \renewcommand{\qedsymbol}{\textbf{\therefore}}
+   #+latex_header: \NewEnviron{myproof}[1][\proofname]{\begin{proof}[#1]$ $\par\nobreak\ignorespaces}{\end{proof}}
+   #+latex_header: \NewEnviron{blk}{\begin{mdframed}\BODY\end{mdframed}}
+   #+latex_header: \newcommand{\nimplies}{\;\not\nobreak\!\!\!\!\implies}
 
 
 ** Export settings
 
    Export into the artifacts directory
-   #+export_file_name: artifacts/notes
+   #+export_file_name: artifacts/thesis-notes
 
    Add ~tufte-book~ to ~org-latex-classes~ and update ~org-latex-pdf-process~.
    #+name: export-setup
-   #+begin_src emacs-lisp :results silent :var this-year="2022"
+   #+begin_src emacs-lisp :results silent :var this-year="2023"
      ;; (add-to-list 'org-latex-classes
-     ;;           `("tufte-book"
-     ;;             ,(string-join
-     ;;               '("\\documentclass{tufte-book}"
-     ;;                 "\\usepackage{color}"
-     ;;                 "\\usepackage{amsmath,amssymb}")
-     ;;               "\n")
-     ;;             ("\\chapter{%s}" . "\\chapter*{%s}")
-     ;;             ("\\section{%s}" . "\\section*{%s}")
-     ;;             ("\\subsection{%s}" . "\\subsection*{%s}")
-     ;;             ("\\paragraph{%s}" . "\\paragraph*{%s}")
-     ;;             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-     (setq-local org-latex-pdf-process
-                 (let
-                     ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
-                                   " --synctex=1"
-                                   " -output-directory %o %f")))
-                   (list "cp refs.bib %o/"
-                         cmd
-                         cmd
-                         "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
-                         "cd %o; bibtex %b"
-                         cmd
-                         cmd
-                         "mv *.svg %o/"
-                         "rm -rf %o/svg-inkscape"
-                         "mv svg-inkscape %o/"
-                         "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
-                         (concat "cp %o/%b.pdf ../docs/" this-year "/notes-concurrent.pdf"))))
-
-     (setq-local org-latex-subtitle-format "\\\\\\medskip
-             \\noindent\\Huge %s")
-     (setq-local org-confirm-babel-evaluate nil)
+          ;;           `("tufte-book"
+          ;;             ,(string-join
+          ;;               '("\\documentclass{tufte-book}"
+          ;;                 "\\usepackage{color}"
+          ;;                 "\\usepackage{amsmath,amssymb}")
+          ;;               "\n")
+          ;;             ("\\chapter{%s}" . "\\chapter*{%s}")
+          ;;             ("\\section{%s}" . "\\section*{%s}")
+          ;;             ("\\subsection{%s}" . "\\subsection*{%s}")
+          ;;             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+          ;;             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+          (setq-local org-latex-pdf-process
+                      (let
+                          ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
+                                        " --synctex=1"
+                                        " -output-directory %o %f")))
+                        (list "cp refs.bib %o/"
+                              cmd
+                              cmd
+                              "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
+                              "cd %o; bibtex %b"
+                              cmd
+                              cmd
+                              "mv *.svg %o/"
+                              "mv *.png %o/"
+                              "rm -rf %o/svg-inkscape"
+                              "mv svg-inkscape %o/"
+                              "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
+                              (concat "cp %o/%b.pdf ../docs/" this-year "/thesis-notes.pdf")))
+                      org-latex-subtitle-format "\\\\\\medskip\\noindent\\Huge %s"
+                      org-confirm-babel-evaluate nil)
    #+end_src
 
 
@@ -1138,5 +1166,7 @@ Fully Read/Write Fence-Free Work-Stealing with Multiplicity	Armando Castaneda	20
 
 * Local variables                                                  :noexport:
 # Local variables:
-# eval: (add-hook 'org-export-before-processing-hook (lambda (be) (org-babel-ref-resolve "export-setup")) nil t)
+# org-export-initial-scope: buffer
+# eval: (org-babel-ref-resolve "export-setup")
+# eval: (setq-local org-ref-default-bibliography "./refs.bib")
 # End:
