@@ -54,7 +54,8 @@
    #+latex_header: \newcommand{\nimplies}{\;\not\nobreak\!\!\!\!\implies}
    #+latex_header: \AtBeginDocument{\renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}}
    #+latex_header: \AtBeginDocument{\counterwithin{lstlisting}{section}}
-
+   #+latex_header: \newcommand{\R}{{\sf \small Read}\xspace}
+   #+latex_header: \newcommand{\W}{{\sf \small Write}\xspace}
 
 ** Export settings
 
@@ -854,7 +855,102 @@
    - [ ] [[https://arxiv.org/abs/1712.06688][Pragmatic Primitives for Non-Blocking Data Structures]]
    - [ ] [[http://www.cs.toronto.edu/~tabrown/ebrrq/paper.ppopp18.pdf][Harnessing Epoch-based Reclamation for Efficient Range Queries]]
 
+
 * Work-stealing
+
+* Modular Basket Queues
+
+** Modular Basket Queues
+
+   A modular version of the basket queues of Hoffman, Shalev and Shavit is
+   presented. It manipulates the head and tail using a novel object called
+   load-link/incremental-conditional, which can be implemented using only
+   READ/WRITE instructions, and admits implementations that spread
+   contention. This suggest that there might be an alternative to the seemingly
+   inherent bottleneck in previous queue implementations that manipulate the head
+   and the tail using /read-modify-write/ instructions over a single shared
+   register.
+
+*** TODO Review LL/IC implementations
+
+    The specification of =LL/IC= satisfies the next properties, where the state of
+    the object is an integer R, initialized to zero, and assuming that any
+    process invokes IC only if it has invoked LL before:
+
+    - LL() :: Returns the current value in \(R\).
+    - IC() :: If \(R\) has not been incremented since the last LL of the invoking
+      process, then do \(R = R + 1\); in any case return =OK=.
+
+*** LL/IC Implementations
+
+    - CAS based implementation :: It uses a shared register \(R\) initialized to
+      zero. =LL= first reads \(R\) and stores the value in a persistent variable
+      \(r_p\) of \(p\), and then returns \(r_p\). =IC= first reads \(R\) and if
+      that value is equals to \(r_p\), then it performs \(CAS(R, r_p, r_p +
+      1)\); in any case returns =OK=.
+    - READ/WRITE based implementation :: It uses a shared array \(M\) with \(n\)
+      entries initialized to zero. =LL= first reads all entries of M (in some
+      order) and stores the maximum value in a persistent variable \(max_p\) of
+      \(p\), and then returns \(max_p\). =IC= first reads all entries of \(M\),
+      and if the maximum among these values is equals to \(max_p\), it performs
+      \(\W(M[p], max_p + 1)\); in any case returns =OK=.
+    - Mixed implementation :: It uses a shared array \(M\) with \(K < n\)
+      entries initialized to zero. =LL= reads all entries of \(M\) and stores the
+      maximum value and its index in persistent variables \(max_p\) and
+      \(indmax_p\). =IC= non-deterministically picks and index \(pos \in \{0, 1,
+      \ldots, K - 1\} \setminus \{indmax_p\}\). If \(M[pos]\) contains a value
+      \(x\) less than \(max_p + 1\), then it performs \(CAS(M[pos], x, max_p +
+      1)\); if the =CAS= is successful, it returns =OK=. Otherwise, it reads the
+      value in \(M[indmax_p]\), and if it is equals to \(max_p\), then it
+      performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
+      =OK=.
+
+*** TODO Basket implementations
+
+    - K-Basket from FAI and SWAP :: In this first implementation, the processes
+      use FAI to guarantee that at most two ``opposite'' operations ``compete''
+      for the same location in the shared array, which can be resolved with a
+      SWAP; the idea is similar to the approach in the LCRQ algorithm
+      [[cite:&ppopp2013x86queues]].
+    - n-Basket from CAS :: Each process has a dedicated location in the shared
+      array where it tries to put its item when it invokes =PUT=. When a process
+      invokes =TAKE=, it first tries to take an item from its dedicated location,
+      and if it does not succeed, it randomly picks non-previously-picked
+      location and does the same, and repeats until takes an item or all
+      locations have been canceled. Since several operations might ``compete''
+      for the same location, CAS is needed. This implementation is reminiscent
+      to /locally linearizable/ generic data structure implementations of
+      [[cite:&DBLP_conf_concur_HaasHHKLPSSV16]].
+
+*** TODO Update experiments
+
+    To update the experiments is necessary understand what are metrics that
+    allows us compare the algorithms designed for LL/IC objects and
+    Baskets. A common way to evaluate experimental results is the use of
+    measurements to understand what is the performance or the throughput of the
+    experiments; but, what are the meaning of performance and
+    throughput. According to the Cambridge Dictionary,
+    Throughput is the amount of work done in a particular period of time,
+    in other side, performance is how well someone o something functions, works,
+    etc.
+
+    # Rewrite and expand next paragraph, taken from wikipedia.
+    In [[https://en.wikipedia.org/wiki/Computer_performance][terms of computing]], the performance is refered to the amount of
+    useful work accomplished by a computer system. Computer performance is
+    measured in terms of accuracy, efficiency and speed of executing computer
+    program instructions. One or more of the following factor might be involved:
+
+    1. Short response time for a given piece of work.
+    2. High throughput.
+    3. Low utilization of computing resources.
+    4. High availability of a computing system.
+    5. High bandwidth.
+    6. Short data transmission time.
+
+
+
+*** TODO Add rigorous statistics evaluations
+
 
 
 * Other links
