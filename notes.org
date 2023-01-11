@@ -858,7 +858,134 @@
 
 * Work-stealing
 
+
+
+
 * Modular Basket Queues
+
+** Measuring Performance (Data-Science?)
+
+   When we perform experiments derived from our theoretical study, is necessary
+   the use of rigorous statistical methods and techniques to evaluate, analyze
+   and understand the performance of those experiments. To perform that, we need
+   to use practical methods to measure, simulate and model in an analytical
+   form.
+
+   The first thing that comes to mind is, how we can perform measurements in our
+   experiments that allow us understand the performance of those experiments? We
+   need understand what ``performance'' means; in [[https://en.wikipedia.org/wiki/Computer_performance][wikipedia]], ``performance'' is
+   referred as the amount of useful work accomplished by a computer
+   system. Computer performance is measured in terms of accuracy, efficiency and
+   speed of executing computer program instructions; in [[cite:&lilja2005measuring]]
+   they refer to /performance analysis/ as``... applied to experimental computer
+   science and engineering should be thought of as combination of measurement,
+   interpretation and communication of a computer system's 'speed' or 'size'
+   (sometimes referred to as its 'capacity')''. A important note about
+   performance measurement is that a large of creativity may be needed to
+   develop good measurement techniques that perturb the system as little as
+   possible while providing accurate, reproducible
+   results[[cite:&lilja2005measuring]].
+
+   Some common goal of performance analysis are (1) compare alternatives, (2)
+   determine the impact of a feature, (3) system tuning, (4) identify relative
+   performance, (5) performance debugging, and (6) set expectations. And when we
+   are confronted with a performance analysis problem, there are three
+   fundamental techniques used to find the desired solution: (1) measurements of
+   existing systems, (2) simulation and (3) analytical modeling. From
+   [[cite:&lilja2005measuring]] , we can observe a table about comparison of the
+   performance analysis solution techniques:
+
+   | Characteristic | Analytical modeling | Simulation | Measurement |
+   |----------------+---------------------+------------+-------------|
+   | Flexibility    | High                | High       | Low         |
+   | Cost           | Low                 | Medium     | High        |
+   | Believability  | Low                 | Medium     | High        |
+   | Accuracy       | Low                 | Medium     | High        |
+
+   It is important determine the basic characteristics that we need to measure
+   from a computer system. Tipically we want measure:
+
+   - a /count/ of how many times an event occurs,
+   - the /duration/ of some time interval, and
+   - the /size/ of some parameter.
+
+
+   From these types of measured values, we can derive the value that we wish to
+   describe the performance of the system. These type of values are known a
+   /performance metric/. Often, we are interested in normalize event counts to a
+   common time basis to provide a speed metric. These metrics are known as /rate
+   metrics/ or /throughput/. They are calculated by dividing the count of the
+   number of events that occur in a given interval by the time interval over
+   which events occur. By example a metric of this type could be the number of
+   operations executed per second. A good performance metric must satisfy at
+   least the following requirements. Have been observed metrics that does not
+   satisfy these requirements can often lead the analyst to make erroneous
+   conclusions.
+
+   1. Linearity: the metric should be linearly proportional to the actual
+      performance.
+   2. Reliability: a performance metric is reliable if system A always
+      outperforms system B when the corresponding values of the metric for both
+      systems indicate that system A should outperform system B.
+   3. Repeatability: a performance metric is repeatable if the same value of the
+      metric is measured each time the same experiment is performed. Note that
+      this also implies that a good metric is deterministic.
+   4. Easiness of measurement: if a metric is not easy to measure, it is
+      unlikely that anyone will actually use it.
+   5. Consistency: a consistent performance metric is one for which the units of
+      the metric and its precise definition are the same across different
+      systems and different configurations of the same system.
+   6. Independence: To prevent corruption of its meaning, a good metric should
+      be independent of such outside influences.
+
+   Some performance metrics used are:
+
+   1. The clock rate: the most prominent indication of performance is often the
+      frequency of the processor's central clock. This metrics is not good due
+      not satisfies linearity (characteristic 1) and reliability
+      (characteristic 2).
+   2. MIPS (millions of instructions executed per second): A throughput or
+      execution-rate performance metric is a measure of the amount of
+      computation performed per unit time. This metric is no good due not
+      satisfies linearity, reliability and consistency. This basically happens
+      due that different processors can do substantially different amount of
+      computations with a single instruction.
+   3. MFLOPS (millions of floating-point operations executed per second):
+      Defines an arithmetic operation on two floating-point quantities to be the
+      basic unit of 'distance'.
+   4. SPEC (System Performace Evaluation Cooperative)
+   5. QUIPS
+   6. Execution time
+   7. System /throughput/ is a measure of the number of jobs or operations that
+      are completed per unit time.
+
+   /Speedup/ and /relative change/ are useful for comparing systems since they
+   normalize performance to a common basis.
+
+   - Speedup :: The /speedup/ of system 2 with respect system 1 is defined to be a
+     value \(S_{2,1}\) such that \(R_2 = S_{2,1}R_1\), where \(R_1\) and \(R_2\)
+     are the /speed/ metrics being compared. Thus, we can say that system 2 is
+     \(S_{2,1}\) times faster than system 1.
+   - Relative change :: Another technique for normalizing performance is to
+     express the performance of a system as a percent change /relative/ to the
+     performance of another system.
+
+   In multiple occasions, mean values can be useful for performing coarse
+   comparisons. Sometimes we wish to summarize the performance of a system using
+   a single value that is somehow representative of the execution times of
+   several different benchmark programs running on that system. These values are
+   known as /indices of central tendency/ and they are:
+
+   - The sample mean
+   - The sample median
+   - The sample mode
+
+   So, how we can selecting among the mean, median, and mode? Categorical data
+   are those that can be grouped into distinct types of categories. Taking as
+   example, the number of different computers in a organization manufactured by
+   different companies would be the categorical data. The mode would be the
+   appropriate index to use in case to summarize the most common type of
+   computer the organization owns.
 
 ** Modular Basket Queues
 
@@ -947,10 +1074,18 @@
     5. High bandwidth.
     6. Short data transmission time.
 
+    To begin with a performance-analysis problem, there are three techniques
+    that can be used to find the desired solution:
+
+    1. Measurements of existing systems.
+    2. Simulation.
+    3. Analytical modeling.
+
+
+
 
 
 *** TODO Add rigorous statistics evaluations
-
 
 
 * Other links
