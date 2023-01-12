@@ -1048,7 +1048,75 @@
     \end{equation}
 
     And so provides a dimensionless value that compares the relative size of the
-    variation in the measurements with the mean vale of those measurements.
+    variation in the measurements with the mean value of those measurements.
+
+*** Errors in experimental measurements
+
+    In trying to measure and understand the performance of computer systems, we
+    are constantly confronted by the nitty-gritty details of the real
+    world. Unfortunately, these annoying details effectively introduce
+    uncertainty into our measurements. Any measurement tool has three important
+    characteristics that determine the overall quality of its measurements. The
+    first is the accuracy[fn:2]; accuracy is the absolute difference between a
+    measured value and the correspondent reference value. The second
+    characteristic is the precision; precision relates to repeatability of the
+    measurements made with the tool. /Imprecision/ is the amount of scatter in the
+    measurements obtained by making multiple measurements of a particular
+    characteristic of the system being tested. The last characteristic is
+    /resolution/ that is the smallest incremental change that can be detected and
+    displayed.
+
+    Beyond the measurement errors introduced by the accuracy, precision and
+    resolution of our measuring device, there are many other source of errors
+    introduced into the measurements process that can affect the final values
+    actually recorded. Source of errors can be classified into two different
+    types: (1) systematic errors, and (2) random errors. The systematic errors
+    are the result of some experimental 'mistake', such as some changes in the
+    experimental environment or an incorrect procedure, that introduces a bias
+    into the measurements. These errors affect the accuracy of the
+    measurements. It is up to the skill of the experimenter to control and
+    eliminate systematic errors. Random errors, on the other hand, are
+    completely unpredictable, non-deterministic, and need not be controllable.
+
+    By carefully controlling the experimental environment, the experimenter
+    tries to minimize the impact of systematic errors on the accuracy of the
+    measurements. When these sources of error can be eliminated or controlled,
+    the experimenter should at least be able to understand how these systematic
+    errors bias the results. Random errors, on the other hand, are, by
+    definition, unpredictable. As a result, they have unpredictable effects on
+    the outcomes of any measurements. Experimental errors are typically assumed
+    to be Gaussian. That is, if multiple measurements of the same value are
+    made, these measurements will tend to follow a Gaussian (also called normal)
+    distribution centered on the actual value x.
+
+    In general, it is very difficult to quantify the accuracy of our
+    measurements since the accuracy is a function of the bias introduced into
+    our measuring process due to systematic errors. To quantify this bias
+    require us to calibrate our measurement tools to some standard value, and to
+    carefully control our experimental procedure. We can use the model of
+    random errors describe above, however, to quantify the precision, or
+    repeatability, of our measurements using confidence intervals.
+
+    If the distribution of random errors in our measurements can be reasonably
+    approximated by a Gaussian distribution, we can use the unique properties of
+    this distribution to determine how well our estimate of the true value
+    approximates the actual true value. Specifically, we use statistical
+    confidence intervals to find a range of values that has a given probability
+    of including the actual.
+
+    - Case 1 (Number of measurements is large [\(n \ge 30\)] :: We use the
+      sample mean of our n measurements \(\hat{x}\), as the best approximation
+      of the true value x. If the \(x_1, x_2, \ldots, x_n\) samples used to
+      calculated \(\bar{x}\) are all independent and come from the same
+      population with mean \(\mu\) and standard deviation \(\sigma\), the
+      central limit theorem then assures us that, for large values of \(n\)
+      (typically assumed to mean \(n \ge 30\)), the sample mean \(\bar{x}\) is
+      approximately Gaussian distributed with mean \(\mu\) and standard
+      deviation $\frac{\sigma}{\sqrt{n}}$.
+
+    - Case 2 (Number of measurements is small [\(n < 30\)] :: When the number of
+      measurements is greater than approximately 30, the sample variance $s^2$
+      provides a good estimate...
 
 ** Modular Basket Queues
 
@@ -1707,9 +1775,11 @@
 
 
 * Footnotes
+
 [fn:1] A benchmark program is any program that is used to measure the
 performance of a computer system. Certain programs are sometimes defined as a
 standard reference that can be used for comparing performance results.
+[fn:2] Accuracy is translated as ``exactitud'' in spanish.
 
 * Articles to begin with
 
