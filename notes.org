@@ -1023,12 +1023,14 @@
     to find the variance. To facilitate calculate the variance, we can transform
     the equation for the variance as follows:
 
+    $$
     \begin{equation}
       \begin{align*}
         s^2 = \frac{\sum^n_{i = 1}(x_i - \hat{x})^2}{n - 1} = & \frac{1}{n - 1}\sum^n_{i = 1}(x_i^2-2\hat{x}x_i + \hat{x}^2)\\
         = & \frac{n\sum^n_{i = 1}x_i^2 - (\sum^n_{i = 1}x_i)^2}{n(n-1)}
       \end{align*}
     \end{equation}
+    $$
 
     A more useful metric for this type of comparison is the /standard deviation/,
     which is defined as the positive square root of the variance. That is, the
@@ -1117,6 +1119,23 @@
     - Case 2 (Number of measurements is small [\(n < 30\)] :: When the number of
       measurements is greater than approximately 30, the sample variance $s^2$
       provides a good estimate...
+
+    We can see from the confidence interval formula that the size of the
+    interval is inversely dependent on the square root of the number of
+    measurements that we make. Since we typically would like to minimize the
+    number of measurements, we can use this formula to determine how many
+    measurements are necessary to pruduce a confidence interval of a specified
+    width.
+
+*** Comparing alternatives
+
+    While these confidence interval tell us something about how much noise there
+    is in our measurements, we ultimately want to use these measurements to make
+    a decision about some aspect of the performance of one or more computer
+    systems. The hypothesis testing is a statistical technique for making
+    decisions. With this technique, mutually exclusive hypotheses are proposed
+    as statements on assumptions about the /population/ or /process/ that is being
+    measured. The null hypothesis
 
 ** Modular Basket Queues
 
