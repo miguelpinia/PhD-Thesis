@@ -1034,8 +1034,6 @@
     which is defined as the positive square root of the variance. That is, the
     sample deviation is:
 
-    $s = \sqrt{s^2} = \sqrt{\frac{\sum_{i=1}^n (x_i - \hat{x})^2}{n - 1}}$
-
     \begin{equation}
       s = \sqrt{s^2} = \sqrt{\frac{\sum_{i=1}^n (x_i - \hat{x})^2}{n - 1}}
     \end{equation}
@@ -1135,7 +1133,95 @@
     systems. The hypothesis testing is a statistical technique for making
     decisions. With this technique, mutually exclusive hypotheses are proposed
     as statements on assumptions about the /population/ or /process/ that is being
-    measured. The null hypothesis
+    measured. The null hypothesis is an hypothesis testing whose goal is to
+    determine whether it is likely that the null hypothesis is false, and,
+    consequently, that we have no evidence on the basis of which to reject the
+    alternative hypothesis. From this comparison, we can conclude whether the
+    results of our measurements are most likely due to random fluctuation (noise
+    or whether they are statistically significant so that we can reject the null
+    hypothesis. This chapter also introduce a general statistical analysis
+    technique called ``Analysis of Variance'' (ANOVA). ANOVA partitions the
+    total variation observed in a set of measurements into several meaningful
+    components. The simplest approach to using confidence intervals to compare
+    alternatives is to determine whether the confidence intervals for the two
+    sets of measurements being compared overlap. If they do, then it is
+    impossible to say that any differences seen in the mean value are not due to
+    random (chance) fluctuations. If they do not overlap, however, we conclude
+    that there is no evidence to suggest that there is not a statistically
+    significant difference. Note that careful phrasing of the second
+    conclusion. When the confidence intervals do not overlap, we cannot say with
+    complete assurance that there actually is a real difference between the
+    alternatives. We can only say that there is no reason to believe that there
+    is not a difference. There are more powerful statistical tools for comparing
+    two or more alternatives, such as the analysis of variance
+    (ANOVA). Nevertheless, the confidence interval approach for comparing two
+    alternatives is quick, simple, and intuitively satisfying. Additionally,
+    and, perhaps, more importantly, comparison tests using confidence intervals
+    are to explain to someone else.
+
+    Before-and-after comparison are commonly used to determine whether some
+    change made to a system has a statistically significant impact on its
+    performance. To determine whether there is a statistically significant
+    difference between the means of the two sets of measurements, we must find a
+    confidence interval for the /mean of the differences/ of the paired
+    observations. If this interval includes zero, we conclude that the measured
+    differences are not statistically significant.
+
+    In many situations, there is no direct correspondence between pair of
+    measurements. In fact, the number of measurements made to compare two
+    different system need not even be the same. In this case, we say that the
+    measurements are /noncorresponding/ or /unpaired/.
+    To compare two different systems, we first make \(n_1\) measurements of the
+    first system and \(n_2\) measurements of the second system. Since the
+    measurements can be directly paired in the before-after-situation, we could
+    first calculate the differences of each of the pairs of measurements. We
+    then found the mean and standard deviation of those differences. Since the
+    standard deviation is an indication of the error in the measurements, the
+    error in the difference of the means should be the sum of the error in each
+    set of measurements, weighted appropriately by the total number of
+    measurements in each set. If the resulting confidence interval includes 0,
+    we can conclude that, at the confidence level chosen, there is no
+    significant difference between the two sets of measurements, else, you can
+    conclude that there statistically difference between the two systems.
+
+    Analysis of variance: the ANOVA procedure then separates the total variation
+    observed in all of the measurements into (1) the variation observed /within/
+    each system, which is assumed to be caused only by measurement error, and
+    (2) the variation between systems. That is, are the differences among the
+    mean values observed for the alternatives due to real differences among the
+    alternatives, or are they simply due to measurement errors?
+
+    It is now helpful to pause and recall our overall goal in this analysis. At
+    this point, we have made \(n\) measurements on each of \(k\)
+    alternatives. There is some variation in the \(n\) measurements for each
+    alternative due to fluctuations (i.e. random errors) inherent in these types
+    of measurements. One of the simplest comparisons we can make is to find the
+    ratios of each of the components of variation, SSA and SSE, to the total
+    variation SST. Thus, \(\frac{SSA}{SST}\) is the fraction of the total
+    variation explained by the differences between the alternatives. Similarly,
+    \(\frac{SSE}{SST}\) is the fraction of the total variation that is due to
+    experimental error. However, the question whether the faction of total
+    variation explained by the alternatives is statistically significant still
+    remains. The statistical test that has been shown to be appropriate for this
+    comparison is called the /F-test/, which is based on the F distribution. This
+    is used to test whether two variances are significantly different. Since the
+    F statistic is computed as the ratio of two variances, *values close to 1
+    will indicate that no significant difference likely exists*. In our current
+    situation, we compute the ratio of the variance across  alternatives to the
+    variance due to experimental error. If this ratio is greater than the
+    critical value obtained from the F distribution at a given significance
+    level, we conclude that the difference in the variances is statistically
+    significant. Thus, we can conclude that there is a statistically
+    significance difference among the alternatives beyond the differences due to
+    experimental error. Estimates of the variances of SSA and SSE are found by
+    calculating their correspondent mean-square values. It is worthwhile to note
+    the total number of degrees of freedom for SST is kn-1 since there are kn
+    total measurements.
+
+
+
+
+
 
 ** Modular Basket Queues
 
