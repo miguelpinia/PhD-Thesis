@@ -1023,18 +1023,18 @@
     to find the variance. To facilitate calculate the variance, we can transform
     the equation for the variance as follows:
 
-    $$
     \begin{equation}
       \begin{align*}
         s^2 = \frac{\sum^n_{i = 1}(x_i - \hat{x})^2}{n - 1} = & \frac{1}{n - 1}\sum^n_{i = 1}(x_i^2-2\hat{x}x_i + \hat{x}^2)\\
         = & \frac{n\sum^n_{i = 1}x_i^2 - (\sum^n_{i = 1}x_i)^2}{n(n-1)}
       \end{align*}
     \end{equation}
-    $$
 
     A more useful metric for this type of comparison is the /standard deviation/,
     which is defined as the positive square root of the variance. That is, the
     sample deviation is:
+
+    $s = \sqrt{s^2} = \sqrt{\frac{\sum_{i=1}^n (x_i - \hat{x})^2}{n - 1}}$
 
     \begin{equation}
       s = \sqrt{s^2} = \sqrt{\frac{\sum_{i=1}^n (x_i - \hat{x})^2}{n - 1}}
