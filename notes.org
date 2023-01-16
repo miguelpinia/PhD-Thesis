@@ -58,6 +58,7 @@
    #+latex_header: \newcommand{\R}{{\sf \small Read}\xspace}
    #+latex_header: \newcommand{\W}{{\sf \small Write}\xspace}
 
+
 ** Export settings
 
    Export into the artifacts directory
@@ -866,42 +867,44 @@
 
 ** Measuring Performance
 
-   When we perform experiments derived from our theoretical study, is necessary
-   the use of rigorous statistical methods and techniques to evaluate, analyze
-   and understand the performance of those experiments. To perform that, we need
-   to use practical methods to measure, simulate and model in an analytical
-   form.
+*** Introduction
 
-   The first thing that comes to mind is, how we can perform measurements in our
-   experiments that allow us understand the performance of those experiments? We
-   need understand what ``performance'' means; in [[https://en.wikipedia.org/wiki/Computer_performance][wikipedia]], ``performance'' is
-   referred as the amount of useful work accomplished by a computer
-   system. Computer performance is measured in terms of accuracy, efficiency and
-   speed of executing computer program instructions; in [[cite:&lilja2005measuring]]
-   they refer to /performance analysis/ as``... applied to experimental computer
-   science and engineering should be thought of as combination of measurement,
-   interpretation and communication of a computer system's 'speed' or 'size'
-   (sometimes referred to as its 'capacity')''. A important note about
-   performance measurement is that a large of creativity may be needed to
-   develop good measurement techniques that perturb the system as little as
-   possible while providing accurate, reproducible
-   results[[cite:&lilja2005measuring]].
+    When we perform experiments derived from our theoretical study, is necessary
+    the use of rigorous statistical methods and techniques to evaluate, analyze
+    and understand the performance of those experiments. To perform that, we need
+    to use practical methods to measure, simulate and model in an analytical
+    form.
 
-   Some common goal of performance analysis are (1) compare alternatives, (2)
-   determine the impact of a feature, (3) system tuning, (4) identify relative
-   performance, (5) performance debugging, and (6) set expectations. And when we
-   are confronted with a performance analysis problem, there are three
-   fundamental techniques used to find the desired solution: (1) measurements of
-   existing systems, (2) simulation and (3) analytical modeling. From
-   [[cite:&lilja2005measuring]] , we can observe a table about comparison of the
-   performance analysis solution techniques:
+    The first thing that comes to mind is, how we can perform measurements in our
+    experiments that allow us understand the performance of those experiments? We
+    need understand what ``performance'' means; in [[https://en.wikipedia.org/wiki/Computer_performance][wikipedia]], ``performance'' is
+    referred as the amount of useful work accomplished by a computer
+    system. Computer performance is measured in terms of accuracy, efficiency and
+    speed of executing computer program instructions; in [[cite:&lilja2005measuring]]
+    they refer to /performance analysis/ as``... applied to experimental computer
+    science and engineering should be thought of as combination of measurement,
+    interpretation and communication of a computer system's 'speed' or 'size'
+    (sometimes referred to as its 'capacity')''. A important note about
+    performance measurement is that a large of creativity may be needed to
+    develop good measurement techniques that perturb the system as little as
+    possible while providing accurate, reproducible
+    results[[cite:&lilja2005measuring]].
 
-   | Characteristic | Analytical modeling | Simulation | Measurement |
-   |----------------+---------------------+------------+-------------|
-   | Flexibility    | High                | High       | Low         |
-   | Cost           | Low                 | Medium     | High        |
-   | Believability  | Low                 | Medium     | High        |
-   | Accuracy       | Low                 | Medium     | High        |
+    Some common goal of performance analysis are (1) compare alternatives, (2)
+    determine the impact of a feature, (3) system tuning, (4) identify relative
+    performance, (5) performance debugging, and (6) set expectations. And when we
+    are confronted with a performance analysis problem, there are three
+    fundamental techniques used to find the desired solution: (1) measurements of
+    existing systems, (2) simulation and (3) analytical modeling. From
+    [[cite:&lilja2005measuring]] , we can observe a table about comparison of the
+    performance analysis solution techniques:
+
+    | Characteristic | Analytical modeling | Simulation | Measurement |
+    |----------------+---------------------+------------+-------------|
+    | Flexibility    | High                | High       | Low         |
+    | Cost           | Low                 | Medium     | High        |
+    | Believability  | Low                 | Medium     | High        |
+    | Accuracy       | Low                 | Medium     | High        |
 
 
 *** Metrics of performance
@@ -1051,6 +1054,7 @@
     And so provides a dimensionless value that compares the relative size of the
     variation in the measurements with the mean value of those measurements.
 
+
 *** Errors in experimental measurements
 
     In trying to measure and understand the performance of computer systems, we
@@ -1125,6 +1129,7 @@
     number of measurements, we can use this formula to determine how many
     measurements are necessary to pruduce a confidence interval of a specified
     width.
+
 
 *** Comparing alternatives
 
@@ -1219,6 +1224,7 @@
     the total number of degrees of freedom for SST is kn-1 since there are kn
     total measurements.
 
+
 *** Measurement tools and techniques.
 
     - Events and measurements strategies
@@ -1281,6 +1287,7 @@
     you must always remain alert to how these perturbations may bias your
     measurements and, ultimately, the conclusions you are able to draw from your
     experiments.
+
 
 *** Benchmark programs
 
@@ -1411,6 +1418,24 @@
     | Application benchmark         | Reduced or scaled down version of an actual application that produces a useful result |
     | Your app program              | The best benchmark program                                                            |
     |-------------------------------+---------------------------------------------------------------------------------------|
+
+
+*** Linear Regression Models
+
+    Linear regression uses the least-squares-minimization technique to develop a
+    mathematical model of a system from a set of measured data values. This
+    model relates a single output response of a system to the values presented
+    at its inputs. Since this model is derived from measured data, which are
+    subject to measurement noise, confidence intervals are again used to
+    quantify the precision of the regression parameters. Confidence intervals
+    can also be calculated for output values predicted from the model. Before
+    blindly applying the linear-regression formulas, it is important to verify
+    that the output indeed appears to be linearly related to the inputs. The
+    coefficient of determination and the correlation coefficient provide
+    quantitative measures to the linearly between the output and the
+    inputs. Inputs and outputs that are not linearly related can often be
+    'linearized' by using an appropriate transformation. The linear regression
+    models then can be applied to the linearized data.
 
 
 ** Modular Basket Queues
