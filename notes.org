@@ -863,7 +863,7 @@
 
 * Modular Basket Queues
 
-** Measuring Performance (Data-Science?)
+** Measuring Performance
 
    When we perform experiments derived from our theoretical study, is necessary
    the use of rigorous statistical methods and techniques to evaluate, analyze
@@ -1218,8 +1218,68 @@
     the total number of degrees of freedom for SST is kn-1 since there are kn
     total measurements.
 
+*** Measurement tools and techniques.
 
+    - Events and measurements strategies
+      + Events type classification
+        * Event count metrics
+        * Secondary-event metrics
+        * Profiles
+      + Measurement stategies
+        * Event-driven
+        * Tracing
+        * Sampling
+        * Indirect
+    - Interval times
+      + Hardware timers
+      + Software timers
+      + Timer rollover
+      + Timer overhead:
+      + Quantization errors
+      + Statistical measures of short intervals
+    - Program profiling
+      + PC Sampling
+      + Basic-block counting
+    - Event tracing
+      + Trace generation
+        * Source-code modification
+        * Software exceptions
+        * Emulation
+        * Microcode modification
+        * Compiler modification
+      + Trace compression
+        * Online trace consumption
+        * Compression of data
+        * Abstract execution
+        * Trace sampling
+      + Indirect and ad hoc measurements
+      + Perturbation due to measuring
 
+    Event-drive measurement tools record information about the system being
+    tested whenever some predefined event occurs, such as a page fault or a
+    network operation, for instance. The information recorded may be a simple
+    count of the number of times the event occurred, or it may be a portion of
+    the system's state at the time the event occurred. A time-ordered list of
+    this recorded state information is called a trace. While event-driven tools
+    record all occurrences of the defined events, sampling tools query some
+    aspect of the system's state at fixed time intervals. Since this sampling
+    approach will not record every event, it provides a statistical view of the
+    system Indirect measurements tools are used to deduce some aspect of a
+    system's performance that it is difficult or impossible to measure directly.
+
+    Some perturbation of a system's behavior due to instrumentation is
+    unavoidable. Furthermore, and more difficult to compensate for, perhaps, is
+    the unpredictable relationship between the instrumentation and its impact on
+    performance. Through experience and creative use of measurement techniques,
+    the performance analyst can try to minimize the impact of these
+    perturbations, or can sometimes compensate of their effects.
+
+    It is important to bear in mind, though, that measuring a system alters
+    it. While you would like to measure a completely uninstrumented program,
+    what you actually end up measuring is the instrumented system. Consequently,
+    you must always remain alert to how these perturbations may bias your
+    measurements and, ultimately, the conclusions you are able to draw from your
+    experiments.
 
 
 
@@ -1323,6 +1383,11 @@
 
 *** TODO Add rigorous statistics evaluations
 
+
+** Clojure for data-science
+
+   To load, manipulate and display data, we use the /Incanter/ library. Incanter
+   is a modular suite of Clojure.
 
 * Other links
 
