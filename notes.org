@@ -26,6 +26,7 @@
    #+latex_header: \usepackage{listings,chngcntr}% http://ctan.org/pkg/listings
    #+latex_header: \usepackage{multicol}
    #+latex_header: \usepackage{url}
+   #+latex_header: \usepackage{tabularx}
    #+latex_header: \lstset{ basicstyle=\ttfamily, mathescape=true, frame=Trbl, numbers=left}
    #+latex_header: \renewcommand{\lstlistingname}{Pseudocódigo}
    #+latex_header: \setcounter{tocdepth}{1}
@@ -1281,6 +1282,135 @@
     measurements and, ultimately, the conclusions you are able to draw from your
     experiments.
 
+*** Benchmark programs
+
+    To measure the maximum speed of an automobile, it must be in
+    motion. Similarly, a computer must be executing some sort of program when
+    you attempt to measure any aspect of its performance. Owing to these
+    practical and logistical difficulties in running your application program on
+    the system or systems being evaluated, you instead are often force to rely
+    on making measurements while the computer system is executing some other
+    program. This surrogate program is referred to as a /benchmark program/ since
+    it is used as a standard reference for comparing performance results [fn:3].
+
+    One of the earliest and most commonly accepted measures of performance was
+    the time required to perform a single operation, such as an addition. Since
+    almost all of a computer's instructions required the same amount of time to
+    execute, knowing the time required to execute a single instruction was
+    sufficient to completely characterize the performance of the
+    system. Similarly, an addition instruction would be executed in less time
+    than a multiplication or a division instruction. These
+    performance-improvement techniques caused processors and systems to become
+    increasingly more complex. As a result, the execution time of a single
+    instruction was no longer adequate to summarize performance. The basic idea
+    of this instruction mix is to categorize all of the instructions into
+    different classes such that each instruction in the same class requires the
+    same number of processor cycles to execute. The number of instructions of
+    each class executed by a particular collection of programs is used to form a
+    weighted average. Furthermore, the number of instructions required to
+    execute a program is not constant across all systems. Other factor such the
+    capability of the computer to optimize the program's mix of instructions,
+    can further distort this measure. Finally, simple instruction mixes ignore
+    the important performance effects of input/output operations, complex memory
+    hierarchies, and so forth.
+
+    /Microbenchmarks/ are small, specially designed programs used to test some
+    specific portion of a system. For example, a small program written to test
+    only the processor-memory interface, the input/output subsystem, or the
+    floating-point-execution unit, independent of the other components of the
+    system, would be a microbenchmark. Microbenchmarks are typically used to
+    characterize the maximum possible performance that could be achieved if the
+    overall system performance were limited by that single component.
+    Writing this type of benchmark typically requires the programmer to have a
+    deep understanding of the system component to be tested.
+
+    /Kernel benchmarks/, are used to characterize the central of essential portion
+    of a specific type of application program. A kernel benchmark program is a
+    small program that has been extracted from a larger application program. It
+    may consist of the inner portion of a loop that consumes a large fraction of
+    the total execution time of a complete application program for instance. It
+    is hoped that, since this loop is executed frequently, it is somehow
+    characteristic of the most important operation performed by the overall
+    application program.
+
+    To improve on the limited capabilities of kernel and synthetic benchmarks,
+    standardized sets of real application programs have been collected into
+    various /application-program benchmark suites/. These applications are
+    complete, real programs that actually produce an useful result, in contrast
+    to kernel and synthetic benchmark programs.
+
+    /Benchmark strategies/. Three different strategies for using a benchmark
+    program to measure the performance of a computer system are the following:
+
+    1. Measure the time require to perform a /fixed amount of computation/.
+    2. Measure the amount of computation performed within a /fixed period of
+       time/.
+    3. /Allow both the amount of computation performed and the time to
+       vary/. Another measure of performance that is a function both of the time
+       elapsed and of the amount of computation performed then must be defined.
+
+
+    Fixed-computation benchmarks. What we would like to do is define a computer
+    system's speed or execution rate, denote \(R_1 = \frac{W_1}{T_1}\), where
+    \(T_1\) is the time required to execute the computation
+    \(W_1\). Unfortunately, for a given benchmark program, the value of \(W_1\)
+    is not precisely or commonly definable. To compensate for this problem, we
+    define the execution rate of another system to be \(R_2 = \frac{W_2}{T_2}\),
+    where \(T_2\) is the time required to execute the computation \(W_2\) on
+    this system. We then define the /speedup/ value \(S\) such that \(R_1 =
+    SR_2\). This value allows us to say that the execution rate, or speed, of
+    system 1 is \(S\) times faster than that of system 2.
+    The problem with this definition of relative speedup, though, is that we
+    still have no way to measure the actual amounts of computation performed by
+    each machine, \(W_1\) and \(W_2\). Instead, we define the amount of
+    computation performed by a specific program to be constant regardless of how
+    many instruction are actually required to execute program on either
+    system. Thus, we simply define the amount of computation completed by the
+    system when executing the benchmark program to be \(W\) so  that \(W_1 =
+    W_2 = W\). Then the speedup of machine 1 relative to machine 2 is
+
+    \begin{equation}
+      S = \frac{R_1}{R_2} = \frac{W/T_1}{W/T_2} = \frac{T_2}{T_1}
+    \end{equation}
+
+    By defining the amount of computation performed when executing a specific
+    benchmark program to be constant, we can use the time required to perform
+    this computation as a relative measure of performance.
+
+    *Paragraph about Amdahl's law*
+
+    Another type of benchmarks are:
+    - Fixed time benchmarks
+    - Scaling Amdahl's law
+    - Variable computation and variable time benchmarks
+
+    #+name: Benchmark programs can employ these strategies to measure preformance.
+    #+ATTR_LATEX: :environment tabularx :placement [h] :center t :width \linewidth :align |l|l|X|
+    |--------------------+-------------+-----------------------------------------------------------------------------|
+    | Benchmark Strategy |             | Performance Metric                                                          |
+    |--------------------+-------------+-----------------------------------------------------------------------------|
+    | Time               | Computation |                                                                             |
+    |--------------------+-------------+-----------------------------------------------------------------------------|
+    | Variable           | Fixed       | Total Execution Time                                                        |
+    | Fixed              | Variable    | Total amount of computation completed within the given time                 |
+    | Variable           | Variable    | Third dimension derived from the statement of the problem, such as /qualitiy/ |
+    |--------------------+-------------+-----------------------------------------------------------------------------|
+
+
+    #+name: A wide variety of benchmark programs has been developed to satisfy a range of specific needs and goals.
+    #+ATTR_LATEX: :environment tabularx :placement [h] :center t :width \linewidth :align |l|X|
+    |-------------------------------+---------------------------------------------------------------------------------------|
+    | Benchmark type                | Description                                                                           |
+    |-------------------------------+---------------------------------------------------------------------------------------|
+    | Instruction time              | Time required to execute one instruction                                              |
+    | Instruction-execution profile | Weighted average execution time                                                       |
+    | Microbenchmark                | Small program that exercises one specific component of a system                       |
+    | Program kernels               | Central or essential loop extracted from a larger program                             |
+    | Toy benchmark                 | Complete program that executes a small, often trivial operation                       |
+    | Synthetic benchmark           | Program that matches the execution profile of a set of real application programs      |
+    | Application benchmark         | Reduced or scaled down version of an actual application that produces a useful result |
+    | Your app program              | The best benchmark program                                                            |
+    |-------------------------------+---------------------------------------------------------------------------------------|
 
 
 ** Modular Basket Queues
@@ -1949,7 +2079,11 @@
 [fn:1] A benchmark program is any program that is used to measure the
 performance of a computer system. Certain programs are sometimes defined as a
 standard reference that can be used for comparing performance results.
-[fn:2] Accuracy is translated as ``exactitud'' in spanish.
+[fn:2] Accuracy is translated as ``exactitud'' in Spanish.
+[fn:3] The term ``benchmark'' was originally used by land surveyors to identify
+a mark made on some permanent object showing the elevation at that point. This
+mark is the used as the standard reference point in subsequent topological
+surveys.
 
 * Articles to begin with
 
