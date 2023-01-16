@@ -1438,6 +1438,69 @@
     models then can be applied to the linearized data.
 
 
+*** The design of experiments
+
+    The primary goal of the design of experiments is to determine the maximum
+    amount of information about a system with the minimum amount of effort. A
+    well-designed experiment guides the experimenter in choosing what
+    experiments actually need to be performed. From the resulting measurements,
+    the experimenter can determine the effects on performance of each individual
+    input factor, and the effects of their interactions. The form of the
+    experimental design also allows a quantitative evaluation of the error
+    inherent in the experimental measurements relative to the overall system
+    response.
+
+    A key assumption behind the design of experiments is that there is a nonzero
+    cost associated with performing an experiment. This cost includes the time
+    and effort required to gather the necessary data, plus the time and effort
+    needed to analyze these data to draw some appropriate conclusions.
+
+    Good experiment design allows the experimenter to:
+
+    - Isolate the effects of each individual input variable.
+    - Determine the effects due to interactions of the input variables.
+    - Determine the magnitude of the change in the system's output due to the
+      experimental error, and
+    - Obtain the maximum amount of information with the minimum amount of effort
+      by limiting and controlling the number of experiments that must be
+      performed.
+
+    Types of experiments, (1) experiment varies one input (factor); (2) full
+    factorial design with replication.
+
+    *Terminology*:
+
+    - The response variable :: Is the output value that is measured as the input
+      are changed.
+    - Factors :: Are the input variables of an experiment that can be controlled
+      or changed by the experimenter are called the factors.
+    - Levels :: Are the specific values to which it may be set. These values may
+      be continuous (or nearly so).
+    - Replication :: Is the ability of completely rerunning it with all of the
+      same input levels. Since the measurements of the response variable are
+      subject to random variation, replications of the response variable are
+      used to determine the impact of measurement error on response variable.
+    - Interaction :: An interaction between factor occurs when the effect of one
+      factor depends on the level of another factor.
+
+
+    Two-factor experiments. Interaction of factors. ANOVA for two factor
+    experiments. The need for replications. Generalized m-factor
+    experiments. \(n2^m\) experiments.
+
+    The design-of-experiments technique presented in this chapter extends the
+    one-factor ANOVA technique presented previously to \(m\) factors. This
+    extension allows us to isolate the effects on the system's output of each
+    individual input variable, the effects due to their interactions, and the
+    magnitude of the measurement errors. We can compare the relative importance
+    of these effects, and determine whether the effects are statistically
+    significant. Although the number of experiments that must be performed grows
+    very quickly with the number of factors and the number of levels of each
+    factor, the \(n2^m\) design provides a simplified analysis for quickly
+    isolating the most important factors and interactions. A complete analysis
+    on these factors alone can then be performed.
+
+
 ** Modular Basket Queues
 
    A modular version of the basket queues of Hoffman, Shalev and Shavit is
