@@ -163,6 +163,7 @@
 
 *** Organization
 
+
 ** Preliminaries
 
 
@@ -541,6 +542,7 @@
 
 *** Stacks
 
+
 ** Some Hardware Foundations
 
 *** Cache memory
@@ -686,6 +688,7 @@
    problems with memory management, but in the case of Idempotent
    DEQUE[[cite:&maged.vechev.2009]], it need to use a more complex structure to
    avoid problems like the [[https://www.stroustrup.com/isorc2010.pdf][ABA problem]].
+
 
 ** C++ Memory model
 
@@ -860,9 +863,6 @@
 
 * Work-stealing
 
-
-
-
 * Modular Basket Queues
 
 ** Measuring Performance
@@ -871,23 +871,23 @@
 
     When we perform experiments derived from our theoretical study, is necessary
     the use of rigorous statistical methods and techniques to evaluate, analyze
-    and understand the performance of those experiments. To perform that, we need
-    to use practical methods to measure, simulate and model in an analytical
-    form.
+    and understand the performance of those experiments. To perform that, we
+    need to use practical methods to measure, simulate and model in an
+    analytical form.
 
-    The first thing that comes to mind is, how we can perform measurements in our
-    experiments that allow us understand the performance of those experiments? We
-    need understand what ``performance'' means; in [[https://en.wikipedia.org/wiki/Computer_performance][wikipedia]], ``performance'' is
-    referred as the amount of useful work accomplished by a computer
-    system. Computer performance is measured in terms of accuracy, efficiency and
-    speed of executing computer program instructions; in [[cite:&lilja2005measuring]]
-    they refer to /performance analysis/ as``... applied to experimental computer
-    science and engineering should be thought of as combination of measurement,
-    interpretation and communication of a computer system's 'speed' or 'size'
-    (sometimes referred to as its 'capacity')''. A important note about
-    performance measurement is that a large of creativity may be needed to
-    develop good measurement techniques that perturb the system as little as
-    possible while providing accurate, reproducible
+    The first thing that comes to mind is, how we can perform measurements in
+    our experiments that allow us understand the performance of those
+    experiments? We need understand what ``performance'' means; in [[https://en.wikipedia.org/wiki/Computer_performance][wikipedia]],
+    ``performance'' is referred as the amount of useful work accomplished by a
+    computer system. Computer performance is measured in terms of accuracy,
+    efficiency and speed of executing computer program instructions; in
+    [[cite:&lilja2005measuring]] they refer to /performance analysis/ as``... applied
+    to experimental computer science and engineering should be thought of as
+    combination of measurement, interpretation and communication of a computer
+    system's 'speed' or 'size' (sometimes referred to as its 'capacity')''. A
+    important note about performance measurement is that a large of creativity
+    may be needed to develop good measurement techniques that perturb the system
+    as little as possible while providing accurate, reproducible
     results[[cite:&lilja2005measuring]].
 
     Some common goal of performance analysis are (1) compare alternatives, (2)
@@ -1508,8 +1508,8 @@
    load-link/incremental-conditional, which can be implemented using only
    READ/WRITE instructions, and admits implementations that spread
    contention. This suggest that there might be an alternative to the seemingly
-   inherent bottleneck in previous queue implementations that manipulate the head
-   and the tail using /read-modify-write/ instructions over a single shared
+   inherent bottleneck in previous queue implementations that manipulate the
+   head and the tail using /read-modify-write/ instructions over a single shared
    register.
 
 *** TODO Review LL/IC implementations
@@ -1519,8 +1519,8 @@
     process invokes IC only if it has invoked LL before:
 
     - LL() :: Returns the current value in \(R\).
-    - IC() :: If \(R\) has not been incremented since the last LL of the invoking
-      process, then do \(R = R + 1\); in any case return =OK=.
+    - IC() :: If \(R\) has not been incremented since the last LL of the
+      invoking process, then do \(R = R + 1\); in any case return =OK=.
 
 *** LL/IC Implementations
 
@@ -1566,20 +1566,37 @@
 *** TODO Update experiments
 
     To update the experiments is necessary understand what are metrics that
-    allows us compare the algorithms designed for LL/IC objects and
-    Baskets. A common way to evaluate experimental results is the use of
-    measurements to understand what is the performance or the throughput of the
-    experiments; but, what are the meaning of performance and
-    throughput. According to the Cambridge Dictionary,
-    Throughput is the amount of work done in a particular period of time,
-    in other side, performance is how well someone o something functions, works,
-    etc.
+    allows us compare the algorithms designed for LL/IC objects and Baskets. A
+    common way to evaluate experimental results is the use of measurements to
+    understand what is the performance or the throughput of the experiments;
+    but, what are the meaning of performance and throughput. According to the
+    Cambridge Dictionary, /Throughput/ is the amount of work done in a particular
+    period of time, in other side, performance is how well someone o something
+    functions, works, etc. By other side, /Performance/ is referred to the amount
+    of useful work accomplished by a system. Performance usually is measured in
+    terms of accuracy, efficiency and speed of executing instructions. From
+    [[cite:&lilja2005measuring]], some strategies for measurement are:
+
+    - Event driven :: It records the information necessary to calculate the
+      performance metric whenever an event occurs.
+    - Tracing :: Similarly to the previous, but, instead of recording the event
+      has occurred, a portion of the system is recorded to identify the event.
+    - Sampling :: This strategy records a portion of the system in a fixed time
+      interval.
+    - Indirect measurement :: This type occurs when the metric data is not
+      directly accessible and you must find another metric that can be measured
+      directly.
+
+    We can combine those strategies with the use of interval timers to measure
+    how much time take execute the program or some section of code, due this can
+    also provide a time basis for sampling.
+    # Expand previous
 
     # Rewrite and expand next paragraph, taken from wikipedia.
-    In [[https://en.wikipedia.org/wiki/Computer_performance][terms of computing]], the performance is refered to the amount of
-    useful work accomplished by a computer system. Computer performance is
-    measured in terms of accuracy, efficiency and speed of executing computer
-    program instructions. One or more of the following factor might be involved:
+    In [[https://en.wikipedia.org/wiki/Computer_performance][terms of computing]], the performance is refered to the amount of useful
+    work accomplished by a computer system. Computer performance is measured in
+    terms of accuracy, efficiency and speed of executing computer program
+    instructions. One or more of the following factor might be involved:
 
     1. Short response time for a given piece of work.
     2. High throughput.
@@ -1593,7 +1610,24 @@
 
     1. Measurements of existing systems.
     2. Simulation.
-    3. Analytical modeling.
+    3. Analytical modeling.2
+
+    # Benchmarking in articles about queues
+
+    Some benchmarks used to test concurrent queues are:
+
+    - enqueue - dequeue pairs:
+    - 50% enqueues
+
+    In both benchmarks, some work is added to avoid long run scenarios. This
+    anomaly is described in [[cite:&DBLP_conf_podc_MichaelS96]] and to avoid it, the
+    work added consists in spinning a small amount of time (6 \(\mu\)s) in an
+    empty loop. The idea behind of this is prevent long runs of queue operations
+    by the same process without this being interrupted, so, this would display
+    an overly-optimistic performance due to the lower cache miss rate.
+
+
+
 
 
 
@@ -1606,6 +1640,23 @@
 
    To load, manipulate and display data, we use the /Incanter/ library. Incanter
    is a modular suite of Clojure.
+
+
+* Concurrent course (2 days)
+
+  - Introduction to concurrency in Java
+    + What is concurrency?
+    + Processes and threads
+  - Basics
+    + Defining and starting a Thread
+    + Pause execution
+    + Thread management
+  - The concurrency package (java.util.concurrency)
+    + Locks (java.util.concurrency.locks)
+    + Atomics (java.util.concurrency.atomic)
+  - Some example
+
+
 
 * Other links
 
@@ -1672,16 +1723,18 @@
    - [ ] [[https://www.cl.cam.ac.uk/~pes20/cpp/cpp0xmappings.html][CPP Mappings to processors (fences)]]
 
 
-* Notes and other text about my phd
+* Notes
 
 ** Concurrent computing
 
 *** Work-Stealing
 
 *** Article
+
 **** Work-stealing with multiplicity
 
 ***** Experiments C++
+
 ******  What to use?
 
       - std::thread
@@ -1938,6 +1991,8 @@
 
 
 
+
+
 * Plan last 2 semesters
 
   - [ ] Plan de experimentos para colas concurrentes
@@ -2173,6 +2228,7 @@ a mark made on some permanent object showing the elevation at that point. This
 mark is the used as the standard reference point in subsequent topological
 surveys.
 
+
 * Articles to begin with
 
   Seed Papers
@@ -2212,9 +2268,11 @@ Work-Stealing for Multi-socket Architecture	Quan Chen	2017	0
 Simple, fast, and practical non-blocking and blocking concurrent queue algorithms	Maged M. Michael	1996	836
 Fully Read/Write Fence-Free Work-Stealing with Multiplicity	Armando Castaneda	2021	0
 
+
 * Bibliography
   \bibliographystyle{plainurl}
   \bibliography{refs}
+
 
 * Local variables                                                  :noexport:
 # Local variables:
