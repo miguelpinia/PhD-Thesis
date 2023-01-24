@@ -1,4 +1,4 @@
-#+title: Notes about concurrent computing
+#+title: A Study Of Concurrent Data Structures With Relaxed Semantics
 #+author: Miguel Angel Piña Avelino
 #+date: \today
 
@@ -14,7 +14,7 @@
 
 ** Org LaTeX Setup
 
-   #+latex_class: book
+   #+latex_class: book-noparts
    #+latex_class_options: [openany, a4paper]
    #+latex_header: \usepackage{amsmath,amssymb,amsthm,geometry,hyperref,paralist,svg,thmtools,tikz,tikz-cd}
    #+latex_header: \usepackage{mathtools}
@@ -61,6 +61,12 @@
 
 ** Export settings
 
+   Remove color from the bash output
+   #+NAME: strip
+   #+BEGIN_SRC elisp :var text="\e[31mHello World\e[0m"
+   (ansi-color-apply text)
+   #+END_SRC
+
    Export into the artifacts directory
    #+export_file_name: artifacts/thesis-notes
 
@@ -68,41 +74,50 @@
    #+name: export-setup
    #+begin_src emacs-lisp :results silent :var this-year="2023"
      ;; (add-to-list 'org-latex-classes
-          ;;           `("tufte-book"
-          ;;             ,(string-join
-          ;;               '("\\documentclass{tufte-book}"
-          ;;                 "\\usepackage{color}"
-          ;;                 "\\usepackage{amsmath,amssymb}")
-          ;;               "\n")
-          ;;             ("\\chapter{%s}" . "\\chapter*{%s}")
-          ;;             ("\\section{%s}" . "\\section*{%s}")
-          ;;             ("\\subsection{%s}" . "\\subsection*{%s}")
-          ;;             ("\\paragraph{%s}" . "\\paragraph*{%s}")
-          ;;             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-          (setq-local org-latex-pdf-process
-                      (let
-                          ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
-                                        " --synctex=1"
-                                        " -output-directory %o %f")))
-                        (list "cp ~/Dropbox/org/phd/research/refs.bib refs.bib"
-                              "cp refs.bib %o/"
-                              "cp *.svg figs/"
-                              "cp *.png figs/"
-                              "mv *.svg %o/figs"
-                              "mv *.png %o/figs"
-                              cmd
-                              cmd
-                              "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
-                              "cd %o; bibtex %b"
-                              cmd
-                              cmd
-                              "rm -rf %o/svg-inkscape"
-                              "mv svg-inkscape %o/"
-                              "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
-                              "cp %o/%b.tex main.tex"
-                              (concat "cp %o/%b.pdf ../docs/" this-year "/thesis-notes.pdf")))
-                      org-latex-subtitle-format "\\\\\\medskip\\noindent\\Huge %s"
-                      org-confirm-babel-evaluate nil)
+     ;;              `("tufte-book"
+     ;;                ,(string-join
+     ;;                  '("\\documentclass{tufte-book}"
+     ;;                    "\\usepackage{color}"
+     ;;                    "\\usepackage{amsmath,amssymb}")
+     ;;                  "\n")
+     ;;                ("\\chapter{%s}" . "\\chapter*{%s}")
+     ;;                ("\\section{%s}" . "\\section*{%s}")
+     ;;                ("\\subsection{%s}" . "\\subsection*{%s}")
+     ;;                ("\\paragraph{%s}" . "\\paragraph*{%s}")
+     ;;                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+     (add-to-list 'org-latex-classes
+                '("book-noparts"
+                   "\\documentclass{book}"
+                   ("\\chapter{%s}" . "\\chapter*{%s}")
+                   ("\\section{%s}" . "\\section*{%s}")
+                   ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+     (setq-local org-latex-pdf-process
+                 (let
+                     ((cmd (concat "pdflatex -shell-escape -interaction nonstopmode"
+                                   " --synctex=1"
+                                   " -output-directory %o %f")))
+                   (list "cp ~/Dropbox/org/phd/research/refs.bib refs.bib"
+                         "cp refs.bib %o/"
+                         "cp *.svg figs/"
+                         "cp *.png figs/"
+                         "mv *.svg %o/figs"
+                         "mv *.png %o/figs"
+                         cmd
+                         cmd
+                         "cd %o; if test -r %b.idx; then makeindex %b.idx; fi"
+                         "cd %o; bibtex %b"
+                         cmd
+                         cmd
+                         "rm -rf %o/svg-inkscape"
+                         "mv svg-inkscape %o/"
+                         "rm -rf *.{aux,bbl,blg,fls,out,log,toc}"
+                         "cp %o/%b.tex main.tex"
+                         (concat "cp %o/%b.pdf ../docs/" this-year "/thesis-notes.pdf")))
+                 org-latex-subtitle-format "\\\\\\medskip\\noindent\\Huge %s"
+                 org-confirm-babel-evaluate nil)
    #+end_src
 
 
@@ -1644,17 +1659,125 @@
 
 * Concurrent course (2 days)
 
-  - Introduction to concurrency in Java
-    + What is concurrency?
-    + Processes and threads
-  - Basics
-    + Defining and starting a Thread
-    + Pause execution
-    + Thread management
-  - The concurrency package (java.util.concurrency)
-    + Locks (java.util.concurrency.locks)
-    + Atomics (java.util.concurrency.atomic)
-  - Some example
+** Prerrequisites
+   - maven
+   - editor (Netbeans maybe?)
+   - jdk 17
+
+
+** Introduction to multi-threading programming in Java
+
+*** Introduction
+
+    In the early 2000s, the multicore revolution began due to was difficult make
+    processor chips smaller and faster. Derived from this situation, we had to
+    change the way in how we develop software. The multicore chips cause that
+    perform computing being more effective by exploiting
+    ``parallelism''. However, the challenge is in how to exploit that
+    parallelism. Those multicore chips or multiprocessors, usually use shared
+    memory to communicate the processors between themselves, thus, an important
+    aspect to program these multiprocessors is how to coordinate the access to
+    shared memory, i.e. how to coordinate the access to some shared data to avoid
+    problems while it is manipulated (writes and lectures). The above is
+    challenging due to the modern systems are inherently asynchronous and,
+    without synchronization mechanisms, unpredictable events can occur while the
+    shared data is manipulated.
+
+    We will focus on tools and techniques for programming multiprocessors using
+    shared memory with java. We will cover some topics related to concurrent and
+    parallel computing.
+
+*** Processes and threads
+
+    The first thing that we will talk is what is the difference between a process
+    and a thread. Both process and thread are independent sequences of
+    execution. Loosely speaking, a process is in practical terms, an executing
+    program. A thread is a lightweight process that can run in parallel and share
+    resources as memory and disc with its parent process. Usually, threads run in
+    process space context.
+
+    For example, we can run a program in java (like an IDE as Netbeans). The
+    program running is known as the main process, and all those events that
+    executes asynchronously inside of our program, like invoke to compile the
+    code, debugging or even library search for our project inside the IDE, are
+    executed by threads. That's the main difference.
+
+*** Basics
+
+    *Creating the base project*: Lets create a maven based project. In some
+    terminal, write:
+
+    #+begin_src bash :results output :post strip(*this*)
+      cd ..
+      mvn archetype:generate -DgroupId=mx.unam.concurrent \
+          -DartifactId=concurrent-example \
+          -DarchetypeArtifactId=maven-archetype-quickstart \
+          -DarchetypeVersion=1.4 -DinteractiveMode=false
+      ls | grep concurrent-example
+    #+end_src
+
+    It creates a project with a main file called =App.java=. In that file we
+    will work with the tools for write multi-threaded applications. The first
+    thing is change some parameters of our project to work with a recent
+    java version.
+
+    In the file =pom.xml=, change the target output and compiler version. Those
+    values should be changed in the properties section.
+
+    #+begin_src xml
+      <maven.compiler.source>17</maven.compiler.source>
+      <maven.compiler.target>17</maven.compiler.target>
+    #+end_src
+
+    To have a /main/ method in our application and we have a main point of
+    execution, add the next code to the pom.xml in the section of plugins.
+
+    #+begin_src xml
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>mx.unam.concurrent.App</mainClass>
+        </configuration>
+      </plugin>
+    #+end_src
+
+    Thereafter we can run our project with the following instruction:
+
+    #+begin_src bash :results output :post strip(*this*)
+      pwd
+      cd ../concurrent-example
+      mvn compile exec:java
+    #+end_src
+
+*** Defining and starting a Thread
+
+    In Java, to create threads, we can create an instance of the class Thread
+    (java.lang.Thread) or make a derived subclass. Also we can provide a
+    Runnable object. The Runnable (java.lang.Runnable) interface defines a
+    single method, run, meant to contain the code executed in the thread.
+
+    Lets create a basic application where we define an instance of Thread and
+    run it.
+
+
+
+*** Pause execution
+*** Thread management
+*** Critical Sections and Isolation
+*** The concurrency package (java.util.concurrency)
+**** Locks (java.util.concurrency.locks)
+**** Atomics (java.util.concurrency.atomic)
+**** Concurrent Data Structures
+**** Some example
 
 
 
