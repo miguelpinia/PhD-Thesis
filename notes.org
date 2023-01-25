@@ -1657,129 +1657,360 @@
    is a modular suite of Clojure.
 
 
-* Concurrent course (2 days)
+* Introduction to multi-threading programming with Java (2 days)
+  :properties:
+  :export_latex_class: article
+  :export_options: toc:nil
+  :end:
 
-** Prerrequisites
-   - maven
-   - editor (Netbeans maybe?)
-   - jdk 17
+  *Prerrequisites*:
+  - Maven
+  - An editor like emacs or vi or IDE like Netbeans
+  - JDK 17 (open-jdk)
+
+** Introduction
+
+   In the early 2000s, the multicore revolution began due to was difficult make
+   processor chips smaller and faster. Derived from this situation, we had to
+   change the way in how we develop software. The multicore chips cause that
+   perform computing being more effective by exploiting
+   ``parallelism''. However, the challenge is in how to exploit that
+   parallelism. Those multicore chips or multiprocessors, usually use shared
+   memory to communicate the processors between themselves, thus, an important
+   aspect to program these multiprocessors is how to coordinate the access to
+   shared memory, i.e. how to coordinate the access to some shared data to avoid
+   problems while it is manipulated (writes and lectures). The above is
+   challenging due to the modern systems are inherently asynchronous and,
+   without synchronization mechanisms, unpredictable events can occur while the
+   shared data is manipulated.
+
+   We will focus on tools and techniques for programming multiprocessors using
+   shared memory with java. We will cover some topics related to concurrent and
+   parallel computing.
+
+** Processes and threads
+
+   The first thing that we will talk is what is the difference between a process
+   and a thread. Both process and thread are independent sequences of
+   execution. Loosely speaking, a process is in practical terms, an executing
+   program. A thread is a lightweight process that can run in parallel and share
+   resources as memory and disc with its parent process. Usually, threads run in
+   process space context.
+
+   For example, we can run a program in java (like an IDE as Netbeans). The
+   program running is known as the main process, and all those events that
+   executes asynchronously inside of our program, like invoke to compile the
+   code, debugging or even library search for our project inside the IDE, are
+   executed by threads. That's the main difference.
+
+** Basics
+
+   *Creating the base project*: Lets create a maven based project. In some
+   terminal, write:
+
+   #+begin_src bash :results output :post strip(*this*)
+     cd ..
+     mvn archetype:generate -DgroupId=mx.unam.concurrent \
+         -DartifactId=concurrent-example \
+         -DarchetypeArtifactId=maven-archetype-quickstart \
+         -DarchetypeVersion=1.4 -DinteractiveMode=false
+     ls | grep concurrent-example
+   #+end_src
+
+   It creates a project with a main file called =App.java=. In that file we
+   will work with the tools for write multi-threaded applications. The first
+   thing is change some parameters of our project to work with a recent
+   java version.
+
+   In the file =pom.xml=, change the target output and compiler version. Those
+   values should be changed in the properties section.
+
+   #+begin_src xml
+     <maven.compiler.source>17</maven.compiler.source>
+     <maven.compiler.target>17</maven.compiler.target>
+   #+end_src
+
+   To have a /main/ method in our application and we have a main point of
+   execution, add the next code to the pom.xml in the section of plugins.
+
+   #+begin_src xml
+     <plugin>
+       <groupId>org.codehaus.mojo</groupId>
+       <artifactId>exec-maven-plugin</artifactId>
+       <version>1.2.1</version>
+       <executions>
+         <execution>
+           <goals>
+             <goal>java</goal>
+           </goals>
+         </execution>
+       </executions>
+       <configuration>
+         <mainClass>mx.unam.concurrent.App</mainClass>
+       </configuration>
+     </plugin>
+   #+end_src
+
+   Thereafter we can run our project with the following instruction:
+
+   #+begin_src bash :results output :post strip(*this*)
+     pwd
+     cd ../concurrent-example
+     mvn compile exec:java
+   #+end_src
+
+** Defining and starting a Thread
+
+   In Java, to use threads in our applications, we can create an instance of
+   the class =Thread= (~java.lang.Thread~) or make a derived subclass. Also we can
+   provide an object that implements the =Runnable= interface
+   (~java.lang.Runnable~). This interface defines a single method, =run=, meant to
+   contain the code executed in the thread. Lets create a basic application
+   where we define an instance of Thread and run it.
+
+   #+begin_src java
+     public class App {
+
+         public static void main(String[] args) {
+             MyThread1 obj1 = new MyThread1();
+             MyThread2 obj2 = new MyThread2();
+             Thread t = new Thread(new MyRunnable());
+
+             obj1.start();
+             obj2.start();
+             t.start();
+         }
+     }
+
+     class MyThread1 extends Thread {
+         @Override
+         public void run() {
+             System.out.println("Thread 1 is running");
+         }
+     }
+
+     class MyThread2 extends Thread {
+         @Override
+         public void run() {
+             System.out.println("Thread 2 is running");
+         }
+     }
+
+     class MyRunnable implements Runnable {
+         @Override
+         public void run() {
+             System.out.println("My runnable object is running");
+         }
+     }
+   #+end_src
+
+   A more interesting example could be the following:
+
+   #+begin_src java :output results
+     package mx.unam.concurrent;
+
+     public class App {
+
+         public static void main(String[] args) {
+             MyThread1 obj1 = new MyThread1();
+             MyThread2 obj2 = new MyThread2();
+             Thread t = new Thread(new MyRunnable());
+
+             obj1.start();
+             obj2.start();
+             t.start();
+         }
+     }
+
+     class MyThread1 extends Thread {
+         @Override
+         public void run() {
+             for (int i = 0; i < 10; i++) {
+                 String output = String.format("Thread 1 is running. Iter: %d", i);
+                 System.out.println(output);
+             }
+         }
+     }
+
+     class MyThread2 extends Thread {
+         @Override
+         public void run() {
+             for (int i = 0; i < 10; i++) {
+                 String output = String.format("Thread 2 is running. Iter: %d", i);
+                 System.out.println(output);
+             }
+         }
+     }
+
+     class MyRunnable implements Runnable {
+         @Override
+         public void run() {
+             for (int i = 0; i < 10; i++) {
+                 String output = String
+                     .format("My runnable object is running. Iter: %d", i);
+                 System.out.println(output);
+             }
+         }
+     }
+   #+end_src
+
+   A possible output for the previous code is the following. We can observe how
+   the calls to the ~println~ method are interspersed. In a sequential execution,
+   the output of the object =obj1= should be printed (the sequence of printlns
+   from zero to nine) followed by the output of the =obj2= (the sequence of
+   printlns from zero to nine) and similarly, in the end, the output from the
+   object =t=, but, in this, there is not a order in how the objects are
+   called.
+
+   #+RESULTS:
+   #+begin_example
+   My runnable object is running. Iter: 0
+   Thread 1 is running. Iter: 0
+   Thread 2 is running. Iter: 0
+   My runnable object is running. Iter: 1
+   Thread 2 is running. Iter: 1
+   Thread 1 is running. Iter: 1
+   My runnable object is running. Iter: 2
+   Thread 2 is running. Iter: 2
+   Thread 1 is running. Iter: 2
+   My runnable object is running. Iter: 3
+   Thread 2 is running. Iter: 3
+   Thread 1 is running. Iter: 3
+   Thread 2 is running. Iter: 4
+   My runnable object is running. Iter: 4
+   Thread 1 is running. Iter: 4
+   Thread 2 is running. Iter: 5
+   My runnable object is running. Iter: 5
+   Thread 1 is running. Iter: 5
+   Thread 2 is running. Iter: 6
+   My runnable object is running. Iter: 6
+   Thread 1 is running. Iter: 6
+   Thread 2 is running. Iter: 7
+   My runnable object is running. Iter: 7
+   Thread 1 is running. Iter: 7
+   Thread 2 is running. Iter: 8
+   My runnable object is running. Iter: 8
+   Thread 1 is running. Iter: 8
+   Thread 2 is running. Iter: 9
+   My runnable object is running. Iter: 9
+   Thread 1 is running. Iter: 9
+   #+end_example
+
+** Thread managment
+
+   After seeing how to use threads in a basic way, now let us discuss some
+   methods available to thread management. More documentation about these
+   methods is available on
+   https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html.
+   The methods that we refer are:
+
+   - start
+   - suspend
+   - stop
+   - sleep
+   - join
+
+   We will exemplify the use of the first four methods using the next program:
+
+   #+begin_src java :output results
+     public class App {
+         public static void main(String[] args) {
+             MyThread t1 = new MyThread("First Thread");
+             MyThread t2 = new MyThread("Second Thread");
+             try {
+                 Thread.sleep(500); // Sleeping for 500ms
+                 t1.stop();
+                 t2.stop();
+                 Thread.sleep(500);
+             }
+             catch (InterruptedException e) {
+                 System.out.println("Interrupted Exception:  " + e.getMessage());
+                 e.printStackTrace();
+             }
+             System.out.println("Exiting the main thread");
+         }
+     }
 
 
-** Introduction to multi-threading programming in Java
+     class MyThread implements Runnable {
+         private boolean exit;
+         private String name;
+         Thread t;
 
-*** Introduction
+         public MyThread(String threadName) {
+             name = threadName;
+             t = new Thread(this, name);
+             System.out.println(String.format("New Thread: %s", t.toString()));
+             exit = false;
+             t.start(); // Starting the thread
+         }
 
-    In the early 2000s, the multicore revolution began due to was difficult make
-    processor chips smaller and faster. Derived from this situation, we had to
-    change the way in how we develop software. The multicore chips cause that
-    perform computing being more effective by exploiting
-    ``parallelism''. However, the challenge is in how to exploit that
-    parallelism. Those multicore chips or multiprocessors, usually use shared
-    memory to communicate the processors between themselves, thus, an important
-    aspect to program these multiprocessors is how to coordinate the access to
-    shared memory, i.e. how to coordinate the access to some shared data to avoid
-    problems while it is manipulated (writes and lectures). The above is
-    challenging due to the modern systems are inherently asynchronous and,
-    without synchronization mechanisms, unpredictable events can occur while the
-    shared data is manipulated.
+         @Override
+         public void run() {
+             int i = 0;
+             while (!exit) {
+                 System.out.println(String.format("%s: %d", name, i));
+                 i++;
+                 try {
+                     Thread.sleep(100); // Sleeping for 100ms
+                 }
+                 catch (InterruptedException e) {
+                     System.out.println("Interrupted Exception: " + e.getMessage());
+                     e.printStackTrace();
+                 }
+             }
+         }
 
-    We will focus on tools and techniques for programming multiprocessors using
-    shared memory with java. We will cover some topics related to concurrent and
-    parallel computing.
+         public void stop() {
+             exit = true;
+         }
+     }
+   #+end_src
 
-*** Processes and threads
+   This program declares an inner class called ~MyThread~, which implements the
+   Runnable interface. The class constructor takes as a parameter a string,
+   which represents the name for the instance. Inside of the constructor, the
+   instance declares a thread and starts it with the method =start()=. This
+   method will invoke the method =run=. In this method, it will print the name of
+   the instance with the value of a counter. The counter will increase it every
+   100 milliseconds. The class ~MyThread~ also have a method =stop=, where we
+   indicating when the method =run= should stop.
 
-    The first thing that we will talk is what is the difference between a process
-    and a thread. Both process and thread are independent sequences of
-    execution. Loosely speaking, a process is in practical terms, an executing
-    program. A thread is a lightweight process that can run in parallel and share
-    resources as memory and disc with its parent process. Usually, threads run in
-    process space context.
+   Additionally, the ~App~ class will contain the main method. In this method, it
+   will declare two instances of class ~MyThread~ with distinct names. Then, the
+   main thread will do the following:
 
-    For example, we can run a program in java (like an IDE as Netbeans). The
-    program running is known as the main process, and all those events that
-    executes asynchronously inside of our program, like invoke to compile the
-    code, debugging or even library search for our project inside the IDE, are
-    executed by threads. That's the main difference.
+   - sleeps by 500 milliseconds
+   - calls the method =stop= of the two instances
+   - and then, it sleeps for another 500 milliseconds.
 
-*** Basics
+   A possible output for the execution of the previous code is the following:
 
-    *Creating the base project*: Lets create a maven based project. In some
-    terminal, write:
+   #+RESULTS:
+   #+begin_example
+   New Thread: Thread[First Thread,5,main]
+   New Thread: Thread[Second Thread,5,main]
+   First Thread: 0
+   Second Thread: 0
+   Second Thread: 1
+   First Thread: 1
+   Second Thread: 2
+   First Thread: 2
+   First Thread: 3
+   Second Thread: 3
+   Second Thread: 4
+   First Thread: 4
+   Exiting the main thread
+   #+end_example
 
-    #+begin_src bash :results output :post strip(*this*)
-      cd ..
-      mvn archetype:generate -DgroupId=mx.unam.concurrent \
-          -DartifactId=concurrent-example \
-          -DarchetypeArtifactId=maven-archetype-quickstart \
-          -DarchetypeVersion=1.4 -DinteractiveMode=false
-      ls | grep concurrent-example
-    #+end_src
+   The =join()= method is used mainly
 
-    It creates a project with a main file called =App.java=. In that file we
-    will work with the tools for write multi-threaded applications. The first
-    thing is change some parameters of our project to work with a recent
-    java version.
-
-    In the file =pom.xml=, change the target output and compiler version. Those
-    values should be changed in the properties section.
-
-    #+begin_src xml
-      <maven.compiler.source>17</maven.compiler.source>
-      <maven.compiler.target>17</maven.compiler.target>
-    #+end_src
-
-    To have a /main/ method in our application and we have a main point of
-    execution, add the next code to the pom.xml in the section of plugins.
-
-    #+begin_src xml
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.2.1</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>java</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <mainClass>mx.unam.concurrent.App</mainClass>
-        </configuration>
-      </plugin>
-    #+end_src
-
-    Thereafter we can run our project with the following instruction:
-
-    #+begin_src bash :results output :post strip(*this*)
-      pwd
-      cd ../concurrent-example
-      mvn compile exec:java
-    #+end_src
-
-*** Defining and starting a Thread
-
-    In Java, to create threads, we can create an instance of the class Thread
-    (java.lang.Thread) or make a derived subclass. Also we can provide a
-    Runnable object. The Runnable (java.lang.Runnable) interface defines a
-    single method, run, meant to contain the code executed in the thread.
-
-    Lets create a basic application where we define an instance of Thread and
-    run it.
-
-
-
-*** Pause execution
-*** Thread management
-*** Critical Sections and Isolation
-*** The concurrency package (java.util.concurrency)
-**** Locks (java.util.concurrency.locks)
-**** Atomics (java.util.concurrency.atomic)
-**** Concurrent Data Structures
-**** Some example
-
-
+** Critical Sections and Isolation
+** The concurrency package (java.util.concurrency)
+*** Locks (java.util.concurrency.locks)
+*** Atomics (java.util.concurrency.atomic)
+*** Concurrent Data Structures
+*** Some example
 
 * Other links
 
