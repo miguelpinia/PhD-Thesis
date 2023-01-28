@@ -1667,6 +1667,7 @@
   - Maven
   - An editor like emacs or vi or IDE like Netbeans
   - JDK 17 (open-jdk)
+  - git
 
 ** Introduction
 
@@ -1924,7 +1925,7 @@
                  Thread.sleep(500);
              }
              catch (InterruptedException e) {
-                 System.out.println("Interrupted Exception:  " + e.getMessage());
+                 System.out.format("Interrupted Exception:  %s\n", e.getMessage());
                  e.printStackTrace();
              }
              System.out.println("Exiting the main thread");
@@ -1940,7 +1941,7 @@
          public MyThread(String threadName) {
              name = threadName;
              t = new Thread(this, name);
-             System.out.println(String.format("New Thread: %s", t.toString()));
+             System.out.format("New Thread: %s\n", t.toString());
              exit = false;
              t.start(); // Starting the thread
          }
@@ -1949,13 +1950,13 @@
          public void run() {
              int i = 0;
              while (!exit) {
-                 System.out.println(String.format("%s: %d", name, i));
+                 System.out.format("%s: %d\n", name, i);
                  i++;
                  try {
                      Thread.sleep(100); // Sleeping for 100ms
                  }
                  catch (InterruptedException e) {
-                     System.out.println("Interrupted Exception: " + e.getMessage());
+                     System.out.format("Interrupted Exception:  %s\n", e.getMessage());
                      e.printStackTrace();
                  }
              }
@@ -2003,9 +2004,213 @@
    Exiting the main thread
    #+end_example
 
-   The =join()= method is used mainly
+
+   The =join()= method allows one thread to wait until another thread completes
+   its execution. From Oracle's documentation:
+
+   ``If =t= is a ~Thread~ object whose thread is currently executing, =t.join()= causes
+   the current thread pauses execution until =t='s thread terminates''
+
+   Let see a more elaborated example:
+
+
+   #+begin_src java :output results
+     public class SimpleThreads {
+
+         static void threadMessage(String message) {
+             String threadName = Thread.currentThread().getName();
+             System.out.format("%s: %s%n", threadName, message);
+         }
+
+         private static class MessageLoop
+             implements Runnable {
+             public void run() {
+                 String importantInfo[] = {
+                     "Mares eat oats",
+                     "Does eat oats",
+                     "Little lambs eat ivy",
+                     "A kid will eat ivy too"
+                 };
+                 try {
+                     for (int i = 0; i < importantInfo.length; i++) {
+                         Thread.sleep(4000);
+                         threadMessage(importantInfo[i]);
+                     }
+                 } catch (InterruptedException e) {
+                     threadMessage("I wasn't done!");
+                 }
+             }
+         }
+
+         public static void main(String args[])
+             throws InterruptedException {
+
+             long patience = 1000 * 60 * 60;
+             if (args.length > 0) {
+                 try {
+                     patience = Long.parseLong(args[0]) * 1000;
+                 } catch (NumberFormatException e) {
+                     System.err.println("Argument must be an integer.");
+                     System.exit(1);
+                 }
+             }
+
+             threadMessage("Starting MessageLoop thread");
+             long startTime = System.currentTimeMillis();
+             Thread t = new Thread(new MessageLoop());
+             t.start();
+
+             threadMessage("Waiting for MessageLoop thread to finish");
+             while (t.isAlive()) {
+                 threadMessage("Still waiting...");
+                 t.join(1000);
+                 if (((System.currentTimeMillis() - startTime) > patience)
+                     && t.isAlive()) {
+                     threadMessage("Tired of waiting!");
+                     t.interrupt();
+                     t.join();
+                 }
+             }
+             threadMessage("Finally!");
+         }
+     }
+   #+end_src
+
+** Executors
+
+   Sometimes, work directly with threads could be a bit difficult and can
+   introduce some errors or mistakes. To avoid this, the concurrent API of java
+   provides a class called =ExecutorService=
+   (=java.util.conccurent.ExecutorService=). This class is capable of execute
+   asynchronous tasks and manage a pool of threads. Thus, we don't have to
+   create threads by hand. Also, the threads in the pool can be reused
+   throughout the life-cycle of our application.
+
+   The basic way to create an instance of =ExecutorService= is through the factory
+   class =Executors= (=java.util.concurrent.Executors=). This factory class provides
+   many static methods to create different instances. Variants of the
+   instantiated class usually are parameterized according the number of threads
+   or the number of cores available. An small example is shown below:
+
+   #+begin_src java :output results
+     import java.util.concurrent.Executors;
+     import java.util.concurrent.ExecutorService;
+
+     public class App {
+
+         private static void doLongWork(String name) {
+             String message = String.format("Hello %s, how is going?", name);
+             System.out.println(message);
+             try {
+                 Thread.sleep(1001);
+             }
+             catch (InterruptedException e) {
+                 System.out.println("Error " + e.getMessage());
+                 e.printStackTrace();
+             }
+         }
+
+         public static void main(String[] args) {
+             int numProcessors = Runtime.getRuntime().availableProcessors();
+             ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+             for (int i = 0; i < numProcessors; i++) {
+                 final int name = i;
+                 executor.execute(() -> doLongWork(String.format("thread %d", name)));
+             }
+             executor.shutdown();
+         }
+     }
+   #+end_src
+
+   In the main block of the previous code, we get the number of cores (k)
+   available in our machine. Then, we declare an instance of ExecutorService
+   with a pool of k threads. Thereafter, we launch a lambda function[fn:4]
+   calling a method that it does some long work. For each core, we run the
+   lambda function. At the end of the program, we have to stop explicitly the
+   ExecutorService, if we didn't do that, the service will keep listening for
+   new tasks and never stops. Finally, we get a result like shown below:
+
+   #+RESULTS:
+   : Hello thread 0, how is going?
+   : Hello thread 1, how is going?
+   : Hello thread 7, how is going?
+   : Hello thread 6, how is going?
+   : Hello thread 2, how is going?
+   : Hello thread 4, how is going?
+   : Hello thread 5, how is going?
+   : Hello thread 3, how is going?
+
+*** Callables and Futures
+
+    Similar to Runnable, executors can work with another kind of tasks. These
+    tasks are called callables (~Callable~ interface). Such interface is similar
+    to ~Runnable~, but instead of return void in its =run= method, it returns a
+    value. The Callable objects are passed to the method =submit= of the executorService
+
+    #+begin_src java
+      import java.util.concurrent.Callable;
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.ExecutionException;
+      import java.util.concurrent.Future;
+      import java.util.concurrent.TimeUnit;
+
+      public class App {
+          public static void main(String args[]) throws ExecutionException {
+              Callable<Integer> task = () -> {
+                  try {
+                      TimeUnit.SECONDS.sleep(2);
+                      return 42;
+                  }
+                  catch (InterruptedException e) {
+                      System.out.println("Error " + e.getMessage());
+                      e.printStackTrace();
+                  }
+                  return -1;
+              };
+
+              try {
+                  ExecutorService executor = Executors.newFixedThreadPool(1);
+                  Future<Integer> future = executor.submit(task);
+                  System.out.println(String.format("Future done? %b", future.isDone()));
+                  Integer result = future.get();
+                  System.out.println(String.format("Future done? %b", future.isDone()));
+                  System.out.println(String.format("Result: %d", result));
+                  executor.shutdown();
+              }
+              catch (InterruptedException | ExecutionException e) {
+                  System.out.println("Error " + e.getMessage());
+                  e.printStackTrace();
+              }
+
+          }
+      }
+
+
+    #+end_src
+
+    #+RESULTS:
+    : Future done? false
+    : Future done? true
+    : Result: 42
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ** Critical Sections and Isolation
+
+   When we implement a more complex program
+
 ** The concurrency package (java.util.concurrency)
 *** Locks (java.util.concurrency.locks)
 *** Atomics (java.util.concurrency.atomic)
@@ -2581,6 +2786,9 @@ standard reference that can be used for comparing performance results.
 a mark made on some permanent object showing the elevation at that point. This
 mark is the used as the standard reference point in subsequent topological
 surveys.
+[fn:4] The lambda function is a =Runnable=. We can get the same result if we
+declare a class that implements the interface and instantiate it. The instance
+is passed as argument to the method =execute=.
 
 
 * Articles to begin with
