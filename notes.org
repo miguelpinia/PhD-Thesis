@@ -878,6 +878,7 @@
 
 * Work-stealing
 
+
 * Modular Basket Queues
 
 ** Measuring Performance
@@ -1661,6 +1662,7 @@
   :properties:
   :export_latex_class: article
   :export_options: toc:nil
+  :export_file_name: artifacts/multithreading
   :end:
 
   *Prerrequisites*:
@@ -1689,6 +1691,7 @@
    shared memory with java. We will cover some topics related to concurrent and
    parallel computing.
 
+
 ** Processes and threads
 
    The first thing that we will talk is what is the difference between a process
@@ -1703,6 +1706,7 @@
    executes asynchronously inside of our program, like invoke to compile the
    code, debugging or even library search for our project inside the IDE, are
    executed by threads. That's the main difference.
+
 
 ** Basics
 
@@ -1759,6 +1763,7 @@
      cd ../concurrent-example
      mvn compile exec:java
    #+end_src
+
 
 ** Defining and starting a Thread
 
@@ -1862,40 +1867,6 @@
    printlns from zero to nine) and similarly, in the end, the output from the
    object =t=, but, in this, there is not a order in how the objects are
    called.
-
-   #+RESULTS:
-   #+begin_example
-   My runnable object is running. Iter: 0
-   Thread 1 is running. Iter: 0
-   Thread 2 is running. Iter: 0
-   My runnable object is running. Iter: 1
-   Thread 2 is running. Iter: 1
-   Thread 1 is running. Iter: 1
-   My runnable object is running. Iter: 2
-   Thread 2 is running. Iter: 2
-   Thread 1 is running. Iter: 2
-   My runnable object is running. Iter: 3
-   Thread 2 is running. Iter: 3
-   Thread 1 is running. Iter: 3
-   Thread 2 is running. Iter: 4
-   My runnable object is running. Iter: 4
-   Thread 1 is running. Iter: 4
-   Thread 2 is running. Iter: 5
-   My runnable object is running. Iter: 5
-   Thread 1 is running. Iter: 5
-   Thread 2 is running. Iter: 6
-   My runnable object is running. Iter: 6
-   Thread 1 is running. Iter: 6
-   Thread 2 is running. Iter: 7
-   My runnable object is running. Iter: 7
-   Thread 1 is running. Iter: 7
-   Thread 2 is running. Iter: 8
-   My runnable object is running. Iter: 8
-   Thread 1 is running. Iter: 8
-   Thread 2 is running. Iter: 9
-   My runnable object is running. Iter: 9
-   Thread 1 is running. Iter: 9
-   #+end_example
 
 ** Thread managment
 
@@ -2008,8 +1979,8 @@
    The =join()= method allows one thread to wait until another thread completes
    its execution. From Oracle's documentation:
 
-   ``If =t= is a ~Thread~ object whose thread is currently executing, =t.join()= causes
-   the current thread pauses execution until =t='s thread terminates''
+   ``If =t= is a ~Thread~ object whose thread is currently executing, =t.join()=
+   causes the current thread pauses execution until =t='s thread terminates''
 
    Let see a more elaborated example:
 
@@ -2075,6 +2046,7 @@
          }
      }
    #+end_src
+
 
 ** Executors
 
@@ -2142,10 +2114,19 @@
 
 *** Callables and Futures
 
-    Similar to Runnable, executors can work with another kind of tasks. These
-    tasks are called callables (~Callable~ interface). Such interface is similar
-    to ~Runnable~, but instead of return void in its =run= method, it returns a
-    value. The Callable objects are passed to the method =submit= of the executorService
+    Like Runnable, executors can work with other kinds of tasks. We called these
+    tasks callables (~Callable~ interface). Such interface is similar to ~Runnable~,
+    but instead of returning void after calling its =run= method, it returns a
+    value. These objects are parameters for the method =submit= of the
+    executorService. This method does not wait until the task completes. The
+    executor service cannot return the result of the callable objecty. In that
+    case, the executor returns an object of type ~Future~. We can retrieve the
+    computation result from the ~Callable~ object using the ~Future~ objects. The
+    /futures/ have a method called =isDone()=, with this method we can check if the
+    /future/ has already finished its execution. Another method available for
+    /futures/ is =get()=. Calling this method blocks the current threads and waits
+    until the /callable/ completes its execution. An example is below:
+
 
     #+begin_src java
       import java.util.concurrent.Callable;
@@ -2169,8 +2150,8 @@
                   return -1;
               };
 
+              ExecutorService executor = Executors.newFixedThreadPool(1);
               try {
-                  ExecutorService executor = Executors.newFixedThreadPool(1);
                   Future<Integer> future = executor.submit(task);
                   System.out.println(String.format("Future done? %b", future.isDone()));
                   Integer result = future.get();
@@ -2181,12 +2162,11 @@
               catch (InterruptedException | ExecutionException e) {
                   System.out.println("Error " + e.getMessage());
                   e.printStackTrace();
+                  executor.shutdown();
               }
 
           }
       }
-
-
     #+end_src
 
     #+RESULTS:
@@ -2195,27 +2175,268 @@
     : Result: 42
 
 
+    Calls to =future.get()= will block the current thread and wait until the
+    computation finish. But, sometimes this call can runs forever and making the
+    program unresponsive. To counterattack this type of scenarios, you can add a
+    timeout to avoid endless executions. An example below:
+
+    #+begin_src java :output results
+      import java.util.concurrent.Callable;
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.ExecutionException;
+      import java.util.concurrent.Future;
+      import java.util.concurrent.TimeUnit;
+      import java.util.concurrent.TimeoutException;
 
 
+      public class App {
+          public static void main(String args[]) throws ExecutionException {
+              Callable<Integer> task = () -> {
+                  try {
+                      TimeUnit.SECONDS.sleep(4);
+                      return 42;
+                  }
+                  catch (InterruptedException e) {
+                      System.out.println("Error " + e.getMessage());
+                      e.printStackTrace();
+                  }
+                  return -1;
+              };
+
+              ExecutorService executor = Executors.newFixedThreadPool(1);
+              try {
+                  Future<Integer> future = executor.submit(task);
+                  System.out.println(String.format("Future done? %b", future.isDone()));
+                  Integer result = future.get(1, TimeUnit.SECONDS);
+                  System.out.println(String.format("Future done? %b", future.isDone()));
+                  System.out.println(String.format("Result: %d", result));
+                  executor.shutdown();
+              }
+              catch (InterruptedException | ExecutionException | TimeoutException e) {
+                  System.out.println("Error " + e.getLocalizedMessage());
+                  e.printStackTrace();
+                  executor.shutdown();
+              }
+          }
+      }
+    #+end_src
+
+    #+RESULTS:
+    : Future done? false
+    : Error null
 
 
+    The last method we will cover of ExecutorService (there are a plenty more
+    but we will not cover them) is =invokeAll=. =InvokeAll= allows batch submitting
+    of multiple /callables/. This method accepts a collection of /callables/ and
+    returns a list of /futures/.
+
+    #+begin_src java :output results
+      import java.util.concurrent.Callable;
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.ExecutionException;
+      import java.util.concurrent.Future;
+      import java.util.concurrent.TimeUnit;
+
+      public class App {
+          public static void main(String args[]) throws ExecutionException {
+              try {
+                  ExecutorService executor = Executors.newFixedThreadPool(1);
+
+                  List<Callable<String>> callables = Arrays
+                      .asList(
+                              () -> {
+                                  TimeUnit.SECONDS.sleep(2);
+                                  return "task 1";
+                              },
+                              () -> {
+                                  TimeUnit.SECONDS.sleep(2);
+                                  return "task 2";
+                              },
+                              () -> {
+                                  TimeUnit.SECONDS.sleep(2);
+                                  return "task 3";
+                              });
+
+                  executor.invokeAll(callables)
+                      .stream()
+                      .map(future -> {
+                              try {
+                                  return future.get();
+                              } catch (Exception e) {
+                                  throw new IllegalStateException(e);
+                              }
+                          })
+                      .forEach(System.out::println);
+                  executor.shutdown();
+              }
+              catch (InterruptedException e) {
+                  System.out.println("Error " + e.getMessage());
+                  e.printStackTrace();
+              }
+
+          }
+      }
+    #+end_src
+
+    #+RESULTS:
+    : task 2
+    : task 3
+    : task 1
+
+    We can get better results if we increment the number of available threads
+    for the executorService. By example, using the previous instruction and
+    setting it as the fixed value:
+
+    #+begin_src java
+      int numProcessors = Runtime.getRuntime().availableProcessors();
+      ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+    #+end_src
+
+    It is not necessary call =parallelStream= from the *Stream* API because the
+    =executorService= assign each task to an available thread in its pool. But,
+    depending on the method called (=stream= or =parallelStream=), the order of the
+    results may vary. This is due to stream (sequential) is pipelined in a
+    single thread instead of use multiple threads.
 
 
+** Synchronized and locks
 
 
+*** Synchronized
+
+    When we implement a more complex multithreaded program, there are sections
+    of code that are accessed by multiple threads. We need to pay attention when
+    accessing to shared mutable variable concurrently. By example, lets think in
+    a counter used by multiple threads concurrently. A first approach could be
+    the following:
+
+    #+begin_src java
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.Executors;
+      import java.util.stream.IntStream;
+
+      public class App {
+
+          public static void main(String[] args) {
+              Counter c = new Counter();
+              c.test();
+          }
+
+      }
+
+      class Counter {
+          int count = 0;
+
+          void increment() {
+              count = count + 1;
+          }
+
+          public void test() {
+              int numProcessors = Runtime.getRuntime().availableProcessors();
+              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+              IntStream.range(0, 10000)
+                  .forEach(i -> executor.submit(this::increment));
+
+              executor.shutdown();
+              System.out.println(count);
+          }
+      }
+    #+end_src
+
+    #+RESULTS:
+    : 3772
+
+    We can see that the value obtained is inconsistent with the value
+    expected. This happen due a race condition.  To avoid this problem, java
+    provides a simple mechanism to provide thread synchronization, this through
+    the keyword =synchronized=. Internally, Java uses a monitor lock to manage
+    synchronization. Let see an example:
+
+    #+begin_src java
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.Executors;
+      import java.util.stream.IntStream;
+
+      public class App {
+
+          public static void main(String[] args) {
+              Counter c = new Counter();
+              c.test();
+          }
+
+      }
+
+      class Counter {
+          int count = 0;
+
+          synchronized void increment() {
+              count = count + 1;
+          }
+
+          public void test() {
+              int numProcessors = Runtime.getRuntime().availableProcessors();
+              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+              IntStream.range(0, 10000)
+                  .forEach(i -> executor.submit(this::increment));
+
+              executor.shutdown();
+              System.out.println(count);
+          }
+      }
+    #+end_src
+
+    #+RESULTS:
+    : 10000
+
+    There are more uses to the keyword synchronized, but we do not discuss them
+    in this tutorial.
 
 
+*** Locks
 
+    Another tool provide by Java to manage synchronization are the looks. With
+    them, we can set lock mechanisms in an explicit way. Locks support many
+    methods for finer grained synchronization control.
 
-** Critical Sections and Isolation
-
-   When we implement a more complex program
 
 ** The concurrency package (java.util.concurrency)
 *** Locks (java.util.concurrency.locks)
 *** Atomics (java.util.concurrency.atomic)
 *** Concurrent Data Structures
 *** Some example
+
+
+* Concurrent programming in Java
+
+** 1.1 Threads
+   Each process can create and execute threads.
+   Create thread: t1 = new Thread(s1); Where s1 is a computation unit modifying x
+   = 0.
+   t2 = new Thread(s1');
+   Start execution: t1.start(); t2.start();
+   Main thread: t0, creates and starts t1. After start t1, t0 can start another
+   computation s2.
+   t1.join() / wait to complete
+   s3 // = x
+   s1: t2.join();
+   s1': t1.join();
+   t1 join to t2 and t2 join to t1;
+   A very common error is deadlock.
+
+** Structured locks
+
+   Inc(A) {
+     synchronized(A) {
+       A.count = A.count + 1;
+     }
+   }
+
+   With two threads: t0 and t1, we try increment concurrently the same object,
+   and this will give us a problem known as data race.
+
 
 * Other links
 
