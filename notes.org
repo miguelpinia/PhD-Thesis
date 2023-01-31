@@ -2276,7 +2276,6 @@
                   System.out.println("Error " + e.getMessage());
                   e.printStackTrace();
               }
-
           }
       }
     #+end_src
@@ -2397,16 +2396,208 @@
 
 *** Locks
 
+
     Another tool provide by Java to manage synchronization are the looks. With
     them, we can set lock mechanisms in an explicit way. Locks support many
-    methods for finer grained synchronization control.
+    methods for finer grained synchronization control. Java provides many types
+    of locks, by  example =ReentrantLock=, =ReentrantReadWriteLock= or
+    =StampedLock=. Locks that implement the interface
+    =java.util.concurrent.locks.Lock=, use the methods =lock()= and =unlock()= to
+    provide locking explicitly. Another important operation provided by this
+    interface is tryLock(), used to try get the lock without pausing the current
+    thread. =ReentrantLock= is a class that implements the =Lock= interface.
+
+    Let see an example:
+
+    #+begin_src java
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.TimeUnit;
+      import java.util.concurrent.locks.ReentrantLock;
+
+      public class App {
+
+          public static void main(String[] args) throws InterruptedException {
+              int numProcessors = Runtime.getRuntime().availableProcessors();
+              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+              ReentrantLock lock = new ReentrantLock();
+              executor.submit(() -> {
+                      lock.lock();
+                      try {
+                          TimeUnit.SECONDS.sleep(4);
+                          System.out.println("wake up");
+                      } catch (InterruptedException ex) {
+                          ex.printStackTrace();
+                      } finally {
+                          lock.unlock();
+                      }
+                  });
+              executor.submit(() -> {
+                      System.out.println("Locked: " + lock.isLocked());
+                      System.out.println("Held by me: " + lock.isHeldByCurrentThread());
+                      boolean locked = lock.tryLock();
+                      System.out.println("lock aquired: " + locked);
+                  });
+              executor.shutdown();
+          }
+      }
+    #+end_src
+
+    #+RESULTS:
+    : Locked: true
+    : Held by me: false
+    : lock aquired: false
+    : wake up
+
+    The class =ReentrantReadWriteLock= is another lock class that implements the
+    interface =ReadWriteLock=.  The idea behind is to have a pair of locks for
+    read-and-write access. Usually, it is safe to read mutable shared variables
+    while nobody is writing over them. Thus, the read-lock can be held by many
+    threads while no thread holds the write-lock. Using this lock, we can
+    improve performance and throughput when reads are more frequent than
+    writes. An example is below:
+
+    #+begin_src java
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.TimeUnit;
+      import java.util.concurrent.locks.ReentrantLock;
+      import java.util.concurrent.locks.ReentrantReadWriteLock;
+      import java.util.concurrent.locks.ReadWriteLock;
+      import java.util.Map;
+      import java.util.HashMap;
+
+      public class App {
+
+          public static void main(String[] args) throws InterruptedException {
+              int numProcessors = Runtime.getRuntime().availableProcessors();
+              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+              Map<String, String> map = new HashMap<>();
+
+              ReadWriteLock lock = new ReentrantReadWriteLock();
+
+              executor.submit(() -> {
+                      lock.writeLock().lock();
+                      try {
+                          System.out.println("Putting information into the map");
+                          TimeUnit.SECONDS.sleep(4);
+                          map.put("foo", "bar");
+                      } catch (InterruptedException ex) {
+                          ex.printStackTrace();
+                      } finally {
+                          lock.writeLock().unlock();
+                      }
+                  });
+
+              Runnable readTask = () -> {
+                  lock.readLock().lock();
+                  try {
+                      String threadName = Thread.currentThread().getName();
+                      String message = String.format("Name %s, value: %s", threadName, map.get("foo"));
+                      System.out.println(message);
+                      TimeUnit.SECONDS.sleep(1);
+                  } catch(InterruptedException ex) {
+                      ex.printStackTrace();
+                  } finally {
+                      lock.readLock().unlock();
+                  }
+              };
+
+              executor.submit(readTask);
+              executor.submit(readTask);
+
+              executor.shutdown();
+          }
+      }
+    #+end_src
+
+    #+RESULTS:
+    : Putting information into the map
+    : Name pool-1-thread-2, value: bar
+    : Name pool-1-thread-3, value: bar
+
+    - [ ] StampedLock
+    - [ ] Semaphores
+
+** Atomic Variables
+
+   Java provides many classes to perform atomic operations over many data
+   types. Inside of these classes, the atomic operations are handled by
+   compare-and-swap or swap (getAndSet) instructions, which are atomic
+   instructions directly supported by most modern CPUs. These classes lives in
+   the package =java.util.concurrent.atomic= and some examples are:
+
+   - AtomicInteger
+   - AtomicLong
+   - AtomicReference
+   - AtomicStampedReference
+   - AtomicIntegerArray
+
+   The specification for the atomic accesses performed by these classes is
+   described in the documentation of =java.lang.invoke.VarHandle= (for java
+   9+). Some methods that they share are:
+
+   - compareAndExchange
+   - compareAndSet
+   - getAndIncrement
+   - getAndSet
+
+   Let's see an example of how use the atomic variables:
+
+   #+begin_src java
+     import java.util.concurrent.Executors;
+     import java.util.concurrent.ExecutorService;
+     import java.util.concurrent.TimeUnit;
+     import java.util.concurrent.atomic.AtomicInteger;
+     import java.util.stream.IntStream;
+
+     public class App {
+
+         public static void stop(ExecutorService executor) {
+             try {
+                 executor.shutdown();
+                 executor.awaitTermination(60, TimeUnit.SECONDS); // give it time to finish
+             } catch (InterruptedException ex) {
+                 ex.printStackTrace();
+             } finally {
+                 if (!executor.isTerminated()) {
+                     System.out.println("Termination interrupted");
+                 }
+                 executor.shutdown();
+             }
+         }
+
+         public static void main(String[] args) throws InterruptedException {
+             int numProcessors = Runtime.getRuntime().availableProcessors();
+             ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+             AtomicInteger atomicInt = new AtomicInteger(0);
+
+             IntStream.range(0, 10000).forEach(i -> executor.submit(atomicInt::incrementAndGet));
+
+             stop(executor);
+             System.out.println("Value is: " + atomicInt.get());
+         }
+     }
+   #+end_src
+
+   #+RESULTS:
+   : Value is: 10000
 
 
-** The concurrency package (java.util.concurrency)
-*** Locks (java.util.concurrency.locks)
-*** Atomics (java.util.concurrency.atomic)
-*** Concurrent Data Structures
-*** Some example
+** Synchronizers
+
+   Five classes aid common special purpose synchronization idioms:
+
+   - Semaphore
+   - CountDownLatch
+   - CyclicBarrier
+   - Phaser
+   - Exchanger
+
+** Concurrent Collections
+
+   The Java Concurrent API provides multiple collections designed for use in
+   multithreaded contexts
 
 
 * Concurrent programming in Java

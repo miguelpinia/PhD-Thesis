@@ -1,4 +1,4 @@
-% Created 2023-01-30 lun 14:35
+% Created 2023-01-31 mar 11:22
 % Intended LaTeX compiler: pdflatex
 \documentclass[openany, a4paper]{book}
 \usepackage[utf8]{inputenc}
@@ -70,10 +70,10 @@
 
 
 \chapter{Introduction}
-\label{sec:orgc028e86}
+\label{sec:orgee04130}
 
 \section{About Concurrent Computing}
-\label{sec:orga3fcb79}
+\label{sec:orgfa72b32}
 
 What is concurrent computing? This is a good question. We should first talk
 about single-core and multi-core processors manufactured by the computer
@@ -94,7 +94,7 @@ permitting make computing more effectively using \emph{parallelism}, where the
 processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 \subsection{Classic concurrent computing}
-\label{sec:org8522a58}
+\label{sec:orgb122391}
 
 \begin{itemize}
 \item[{$\square$}] Basic Definitions
@@ -104,7 +104,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Relaxed concurrent computing}
-\label{sec:orgf751443}
+\label{sec:orga53b44c}
 
 \begin{itemize}
 \item[{$\square$}] Relaxing the problem
@@ -113,7 +113,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Work-stealing}
-\label{sec:orgc2b91c1}
+\label{sec:org0a5ea7d}
 
 \begin{itemize}
 \item[{$\square$}] How it works the work-stealing
@@ -123,7 +123,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Data-Structures}
-\label{sec:org24d5250}
+\label{sec:orga41654f}
 
 \begin{itemize}
 \item[{$\square$}] Queues with multiplicity
@@ -131,22 +131,22 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Contributions}
-\label{sec:org8f806d2}
+\label{sec:orgdf66319}
 
 \subsection{Organization}
-\label{sec:orgac63711}
+\label{sec:org24edd1a}
 
 
 \section{Preliminaries}
-\label{sec:org5aa7654}
+\label{sec:orgcd101ee}
 
 
 \subsection{Mathematical model}
-\label{sec:org7079ef2}
+\label{sec:org3e8ade1}
 
 
 \subsection{Realistic model of computation}
-\label{sec:org6fb4494}
+\label{sec:org1e59b92}
 
 We consider a standard concurrent shared memory system with \(n \ge 2\)
 \emph{asynchronous} processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
@@ -170,7 +170,7 @@ write to a single shared memory space. Usually each processor core has a
 cache to operate with data from the shared memory. Often, this data is
 transferred through a memory bus, allowing connect the processors with the
 memory. The figure \ref{fig:arch} shows a simplified view of this model. In
-the sections: \hyperref[sec:orgffc38d9]{Cache memory}, \hyperref[sec:org01f40e0]{Memory bus} and \hyperref[sec:org740f1d9]{Main memory}, we explain more in
+the sections: \hyperref[sec:org1aaba75]{Cache memory}, \hyperref[sec:org24f09a1]{Memory bus} and \hyperref[sec:orgcf26706]{Main memory}, we explain more in
 detail the meaning of each bullet of the list.
 
 \begin{figure}
@@ -183,7 +183,7 @@ detail the meaning of each bullet of the list.
 
 
 \subsection{Cache memory}
-\label{sec:orgffc38d9}
+\label{sec:org1aaba75}
 
 The cache memory is a special very high-speed memory that is very close to
 the processor and the processes can access it very fast. The caches are used
@@ -202,7 +202,7 @@ are close to be executed. In the third level, this cache is shared by many
 processors and is used as feeder for the L2 cache.
 
 \subsection{Memory bus}
-\label{sec:org01f40e0}
+\label{sec:org24f09a1}
 
 Is a computer bus that allows transfer data from the primary memory to the
 CPU and the cache memory. It is made up of two parts: the data bus and the
@@ -213,18 +213,18 @@ information.
 
 
 \subsection{Main memory}
-\label{sec:org740f1d9}
+\label{sec:orgcf26706}
 
 Is the responsible of hold the data that CPU need to access frequently, such
 as instructions or data currently being processed. The CPU can access to
 this information faster than the access to secondary memory.
 
 \subsection{Consistency Memory Model and Cache Coherence}
-\label{sec:org4c45d72}
+\label{sec:orgecc6c00}
 
 \begin{enumerate}
 \item Consistency memory model
-\label{sec:org6756469}
+\label{sec:org4d2d013}
 
 Following the simplified view of the cache architecture, we want to have a
 correct shared memory. And what this means? The correctness of the shared
@@ -249,7 +249,7 @@ considered, because these models shows that most memory orderings in strong
 models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \item Cache coherence
-\label{sec:org7d8c51f}
+\label{sec:org91d12f6}
 
 Cache coherence protocols are used in response to solve a coherence problem
 in cache. For example, a coherence problem can arise if multiple cores have
@@ -266,7 +266,7 @@ data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 
 \subsection{Memory fences}
-\label{sec:org76782bc}
+\label{sec:org2af0eae}
 
 A memory fence is a barrier instruction that causes a CPU or compiler to
 enforce a an ordering constraint on memory operations (loads and stores)
@@ -377,7 +377,7 @@ full memory fence instruction \texttt{MFENCE}. For other archict
 
 
 \section{Work-Stealing}
-\label{sec:org05e3761}
+\label{sec:org9c1e660}
 
 We analyze the algorithms for work-stealing described in the article Fully
 Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
@@ -394,83 +394,83 @@ similar semantic than the prior algorithms.
 
 
 \subsection{Model}
-\label{sec:org98cf114}
+\label{sec:orgcb7e349}
 
 \subsection{Known algorithms}
-\label{sec:org7f7ca03}
+\label{sec:orge7937b7}
 
 \subsection{Pseudocode for Work-Stealing with Weak Multiplicity}
-\label{sec:org805f12a}
+\label{sec:org8acaa54}
 
 
 
 \section{Data-Structures}
-\label{sec:org772c269}
+\label{sec:org5eebf92}
 
 \subsection{Queues}
-\label{sec:orgd7f54ef}
+\label{sec:org578e966}
 
 \subsection{Stacks}
-\label{sec:org78ed28c}
+\label{sec:org107f383}
 
 
 \section{Some Hardware Foundations}
-\label{sec:org2ebf004}
+\label{sec:orgd482bed}
 
 \subsection{Cache memory}
-\label{sec:orgb86d5a2}
+\label{sec:orgdbd2b80}
 
 The cache memory
 
 \begin{enumerate}
 \item Multiple caches
-\label{sec:orgf9fa5aa}
+\label{sec:org99a8170}
 
 
 \item Cache coherence protocols
-\label{sec:org6ea87d1}
+\label{sec:org6ac8eb7}
 
 
 
 \begin{enumerate}
 \item MESI
-\label{sec:orgda5713f}
+\label{sec:org460abfc}
 
 
 \item MOESI
-\label{sec:orgc59ea28}
+\label{sec:org4d61f6f}
 \end{enumerate}
 
 
 \item Store Buffers
-\label{sec:orgcc878dd}
+\label{sec:org2f4b7ef}
 \end{enumerate}
 
 
 \subsection{Reordering (CPU or Compiler)}
-\label{sec:org78df52e}
+\label{sec:org2ff33bf}
 
 
 \subsection{Memory Barriers}
-\label{sec:org4f6cbbd}
+\label{sec:org6a20a9c}
 
 
 \begin{enumerate}
 \item X86 and TSO architectures
-\label{sec:org51e1fb1}
+\label{sec:orgb11e3ab}
 
 
 \item Memory Fences
-\label{sec:orgbd3dc5e}
+\label{sec:orgcbf8511}
 \end{enumerate}
 
 
 \subsection{Read-Modify-Write Operations}
-\label{sec:org3ee454b}
+\label{sec:org83718d6}
 
 
 \subsection{Bibliography}
-\label{sec:org0c15272}
+\label{sec:orgdb90f0f}
 
 \begin{itemize}
 \item \url{https://blog.the-pans.com/std-atomic-from-bottom-up/}
@@ -478,7 +478,7 @@ The cache memory
 
 
 \subsection{Memory management}
-\label{sec:org9b8c916}
+\label{sec:orgb47f6f5}
 
 To implement efficiently the idempotent algorithms in an enviroment without
 garbage collection, it's necessary use some technique or metodology to
@@ -487,7 +487,7 @@ threads want to reclaim the memory of the object associated to the pointer.
 
 \begin{enumerate}
 \item Strategies to delete shared pointers
-\label{sec:orgd215657}
+\label{sec:orgd682619}
 
 \begin{itemize}
 \item Add pointers to list to safety delete.
@@ -501,7 +501,7 @@ it exits.
 
 
 \item Hazard pointers
-\label{sec:orgc0db5d7}
+\label{sec:org2c45da8}
 
 The \emph{Hazard Pointers} is a technique to manage memory in languages where there
 are not a garbage collector. This technique was proposed by Maged
@@ -558,7 +558,7 @@ void func() {
 
 
 \item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
-\label{sec:org23fd36b}
+\label{sec:orge833073}
 
 
 When a memory region is reclaimed, the programmer cannot know how that
@@ -578,7 +578,7 @@ created
 
 
 \section{Memory management for work-stealing algorithms}
-\label{sec:org8935ca7}
+\label{sec:orgd2a3159}
 
 It is well known that C++ does not have a garbage collector like Java. Since
 the publish of the \href{https://en.cppreference.com/w/cpp/11}{Standard C++11}, new features for memory management were
@@ -596,81 +596,81 @@ avoid problems like the \href{https://www.stroustrup.com/isorc2010.pdf}{ABA prob
 
 
 \section{C++ Memory model}
-\label{sec:orgab6147e}
+\label{sec:orgff0d3f2}
 
 \subsection{Memory model basics}
-\label{sec:org570c1b0}
+\label{sec:org6ca4462}
 
 \begin{enumerate}
 \item Objects and memory locations
-\label{sec:org00c767d}
+\label{sec:org3ef4294}
 
 
 \item Objects, memory locations, and concurrency
-\label{sec:orgb3aa006}
+\label{sec:orgb2ebc90}
 
 
 \item Modification orders
-\label{sec:org298b811}
+\label{sec:orgb3403c7}
 \end{enumerate}
 
 
 \subsection{Atomic operations and types in C++}
-\label{sec:org19428ff}
+\label{sec:orge274ba0}
 
 
 \begin{enumerate}
 \item The standard atomic types
-\label{sec:orgcdec5cd}
+\label{sec:org09aab32}
 
 \item Operations on std::atomic\textsubscript{flag}
-\label{sec:org80d002f}
+\label{sec:org81bb9c4}
 
 \item Operations on std::atomic<boolean>
-\label{sec:org003b767}
+\label{sec:org95fdbcb}
 
 \item Operations on std::atomic<T*>: pointer arithmetic
-\label{sec:org8de1740}
+\label{sec:orge4c7e61}
 
 \item Operations on standard atomic integral types
-\label{sec:org9d51e7e}
+\label{sec:org49903d0}
 
 \item The std::atomic<> primary class template
-\label{sec:org7950a96}
+\label{sec:org16d2087}
 
 \item Free functions for atomic operations
-\label{sec:org42d6a0b}
+\label{sec:org0462316}
 \end{enumerate}
 
 \subsection{Synchronizing operations and enforcing ordering}
-\label{sec:org02e47eb}
+\label{sec:org0751a25}
 
 \begin{enumerate}
 \item The synchronization relationship
-\label{sec:org6ca9dde}
+\label{sec:orga404f29}
 
 \item The happens-before relationship
-\label{sec:orgd4d6bce}
+\label{sec:org4f2c2ec}
 
 \item Memory ordering for atomic operations
-\label{sec:org43b98ef}
+\label{sec:orgc068d1e}
 
 \item Release sequences and synchronizes-with
-\label{sec:org17a26a2}
+\label{sec:orgae6142b}
 
 \item Fences
-\label{sec:org7c3e2ac}
+\label{sec:org5f22115}
 
 \item Ordering non-atomic operations with atomics
-\label{sec:org0199e24}
+\label{sec:org17ca545}
 
 \item Ordering non-atomic operations
-\label{sec:org26ebf16}
+\label{sec:org046469f}
 \end{enumerate}
 
 
 \section{Guidelines for designing data-structures for concurrency}
-\label{sec:org289305e}
+\label{sec:org462865c}
 
 \begin{itemize}
 \item Ensure that no thread can see a state where the invariants of the
@@ -691,10 +691,10 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \chapter{Advanced topics in Multi-Core Architecture and Software Systems}
-\label{sec:org94bfe11}
+\label{sec:orgd9cb80f}
 
 \section{Introduction}
-\label{sec:org41f9e47}
+\label{sec:org98bb6af}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.cs.tau.ac.il/\~mad/publications/atc2018-bst.pdf}{Getting to the root of concurrent binary search tree performance}
@@ -707,7 +707,7 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \section{Out-of-order execution and memory-level parallelism}
-\label{sec:org0c4354e}
+\label{sec:orgc422a75}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.cs.tau.ac.il/\~mad/publications/sosp2021-CT.pdf}{Cuckoo trie: Exploiting Memory-Level Parallelism for Efficient DRAM Indexing}
@@ -715,7 +715,7 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \section{Speculative execution attacks and defenses}
-\label{sec:org18cd598}
+\label{sec:org2d666d8}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://eprint.iacr.org/2013/448.pdf}{FLUSH + RELOAD: A High Resolution, Low Noise L3 Cache Side-Channel Attack}
@@ -727,7 +727,7 @@ Speculatively Accesed Data}
 
 
 \section{Reasoning about concurrency (linearizability)}
-\label{sec:org3763ebd}
+\label{sec:org981be39}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://cs.brown.edu/\~mph/HerlihyW90/p463-herlihy.pdf}{Linearizability: A Correctness Condition for Concurrent Objects}
@@ -736,7 +736,7 @@ Speculatively Accesed Data}
 
 
 \section{Cache Coherence}
-\label{sec:org9d9ba09}
+\label{sec:org1d19812}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph\_tau01003094500\&context=L\&vid=TAU2\&search\_scope=Blended\&tab=default\_tab\&lang=iw\_IL}{A Primer on Memory Consistency and Cache Coherence (Chap 2, 6-8)}
@@ -744,7 +744,7 @@ Speculatively Accesed Data}
 
 
 \section{Serializing Efficiently}
-\label{sec:orge17ab03}
+\label{sec:org3428736}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://www.cs.rochester.edu/\~scott/papers/1991\_TOCS\_synch.pdf}{Algorithms for scalable synchronization on shared-memory multiprocessors}
@@ -756,7 +756,7 @@ Speculatively Accesed Data}
 
 
 \section{Memory Consistency Models (Hardware)}
-\label{sec:orgd78424b}
+\label{sec:org1fab105}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph\_tau01003094500\&context=L\&vid=TAU2\&search\_scope=Blended\&tab=default\_tab\&lang=iw\_IL}{A Primer on Memory Consistency and Cache Coherence (Chapters 3-5)}
@@ -765,7 +765,7 @@ Speculatively Accesed Data}
 
 
 \section{Memory Consistency Models (programming language)}
-\label{sec:org96c3100}
+\label{sec:org2fbf462}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://www.hpl.hp.com/techreports/2004/HPL-2004-209.pdf}{Threads Cannot be Implemented as a Library}
@@ -777,7 +777,7 @@ Speculatively Accesed Data}
 
 
 \section{Safe Memory Reclamation}
-\label{sec:org3ce639f}
+\label{sec:org8aaf4db}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://www.research.ibm.com/people/m/michael/spaa-2002.pdf}{High Performance Dynamic Lock-Free Hash Tables and List-Based Sets}
@@ -794,7 +794,7 @@ compares to Hazard Pointers).
 
 
 \section{Ordered Parallelism and Relaxed Data Structures}
-\label{sec:org30bdf32}
+\label{sec:orgf279da2}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-579.pdf}{Skip Lists (Section 4.3.3 of the thesis)}
@@ -805,7 +805,7 @@ compares to Hazard Pointers).
 
 
 \section{Ordered Parallelism and Relaxed Data Structures}
-\label{sec:org3322448}
+\label{sec:org5512c00}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://people.csail.mit.edu/sanchez/papers/2015.swarm.micro.pdf}{A Scalable Architecture for Ordered Parallelism}
@@ -813,7 +813,7 @@ compares to Hazard Pointers).
 
 
 \section{Transactional Memory}
-\label{sec:orge8d9f2d}
+\label{sec:org8b54902}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://people.cs.umass.edu/\~moss/papers/isca-1993-trans-mem.pdf}{Transactional Memory: Architectural Support For Lock-Free Data Structures}
@@ -826,7 +826,7 @@ compares to Hazard Pointers).
 
 
 \section{Concurrent Search Trees}
-\label{sec:org1aed138}
+\label{sec:org532deae}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://ppl.stanford.edu/papers/ppopp207-bronson.pdf}{A Practical Concurrent Binary Tree Search}
@@ -837,17 +837,17 @@ compares to Hazard Pointers).
 
 
 \chapter{Work-stealing}
-\label{sec:org9620150}
+\label{sec:org75e84ac}
 
 
 \chapter{Modular Basket Queues}
-\label{sec:orgdfa9282}
+\label{sec:org0c559da}
 
 \section{Measuring Performance}
-\label{sec:orgc93d367}
+\label{sec:orga6bcc8b}
 
 \subsection{Introduction}
-\label{sec:org432dfbb}
+\label{sec:org120af29}
 
 When we perform experiments derived from our theoretical study, is necessary
 the use of rigorous statistical methods and techniques to evaluate, analyze
@@ -892,7 +892,7 @@ Accuracy & Low & Medium & High\\
 
 
 \subsection{Metrics of performance}
-\label{sec:orgb16bd1a}
+\label{sec:org543391f}
 
 It is important determine the basic characteristics that we need to measure
 from a computer system. Tipically we want measure:
@@ -972,7 +972,7 @@ performance of another system.
 
 
 \subsection{Average performance and variability}
-\label{sec:orgbb80755}
+\label{sec:orgbc47248}
 
 In multiple occasions, mean values can be useful for performing coarse
 comparisons. Sometimes we wish to summarize the performance of a system using
@@ -1054,7 +1054,7 @@ variation in the measurements with the mean value of those measurements.
 
 
 \subsection{Errors in experimental measurements}
-\label{sec:orgff1de6f}
+\label{sec:org9361a04}
 
 In trying to measure and understand the performance of computer systems, we
 are constantly confronted by the nitty-gritty details of the real
@@ -1133,7 +1133,7 @@ width.
 
 
 \subsection{Comparing alternatives}
-\label{sec:org9913beb}
+\label{sec:orga1fa45c}
 
 While these confidence interval tell us something about how much noise there
 is in our measurements, we ultimately want to use these measurements to make
@@ -1228,7 +1228,7 @@ total measurements.
 
 
 \subsection{Measurement tools and techniques.}
-\label{sec:orgbae27f3}
+\label{sec:org3814ac2}
 
 \begin{itemize}
 \item Events and measurements strategies
@@ -1311,7 +1311,7 @@ experiments.
 
 
 \subsection{Benchmark programs}
-\label{sec:org7dc9c4d}
+\label{sec:org473a550}
 
 To measure the maximum speed of an automobile, it must be in
 motion. Similarly, a computer must be executing some sort of program when
@@ -1421,7 +1421,7 @@ Another type of benchmarks are:
 \end{itemize}
 
 \begin{table}[h]
-\label{tab:org4fe804d}
+\label{tab:org2198875}
 \centering
 \begin{tabularx}{\linewidth}{|l|l|X|}
 \hline
@@ -1438,7 +1438,7 @@ Variable & Variable & Third dimension derived from the statement of the problem,
 
 
 \begin{table}[h]
-\label{tab:orgb8338d5}
+\label{tab:org09f5c8e}
 \centering
 \begin{tabularx}{\linewidth}{|l|X|}
 \hline
@@ -1458,7 +1458,7 @@ Your app program & The best benchmark program\\
 
 
 \subsection{Linear Regression Models}
-\label{sec:orgbcd44ff}
+\label{sec:org74941bc}
 
 Linear regression uses the least-squares-minimization technique to develop a
 mathematical model of a system from a set of measured data values. This
@@ -1477,7 +1477,7 @@ models then can be applied to the linearized data.
 
 
 \subsection{The design of experiments}
-\label{sec:org533316e}
+\label{sec:org135f07c}
 
 The primary goal of the design of experiments is to determine the maximum
 amount of information about a system with the minimum amount of effort. A
@@ -1545,7 +1545,7 @@ on these factors alone can then be performed.
 
 
 \section{Modular Basket Queues}
-\label{sec:org20c66d8}
+\label{sec:org3e20fac}
 
 A modular version of the basket queues of Hoffman, Shalev and Shavit is
 presented. It manipulates the head and tail using a novel object called
@@ -1557,7 +1557,7 @@ head and the tail using \emph{read-modify-write} instructions over a single shar
 register.
 
 \subsection{{\bfseries\sffamily TODO} Review LL/IC implementations}
-\label{sec:orgd9e43fe}
+\label{sec:org96feff8}
 
 The specification of \texttt{LL/IC} satisfies the next properties, where the state of
 the object is an integer R, initialized to zero, and assuming that any
@@ -1570,7 +1570,7 @@ invoking process, then do \(R = R + 1\); in any case return \texttt{OK}.
 \end{description}
 
 \subsection{LL/IC Implementations}
-\label{sec:org252c56f}
+\label{sec:orgf9a8c70}
 
 \begin{description}
 \item[{CAS based implementation}] It uses a shared register \(R\) initialized to
@@ -1597,7 +1597,7 @@ performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
 \end{description}
 
 \subsection{{\bfseries\sffamily TODO} Basket implementations}
-\label{sec:orgbe4214e}
+\label{sec:orgca1428d}
 
 \begin{description}
 \item[{K-Basket from FAI and SWAP}] In this first implementation, the processes
@@ -1617,7 +1617,7 @@ to \emph{locally linearizable} generic data structure implementations of
 \end{description}
 
 \subsection{{\bfseries\sffamily TODO} Update experiments}
-\label{sec:org038fbab}
+\label{sec:org9ae1c06}
 
 To update the experiments is necessary understand what are metrics that
 allows us compare the algorithms designed for LL/IC objects and Baskets. A
@@ -1692,18 +1692,18 @@ an overly-optimistic performance due to the lower cache miss rate.
 
 
 \subsection{{\bfseries\sffamily TODO} Add rigorous statistics evaluations}
-\label{sec:org1f0c18f}
+\label{sec:orgbcf5370}
 
 
 \section{Clojure for data-science}
-\label{sec:org2aa53d0}
+\label{sec:org7aef7ff}
 
 To load, manipulate and display data, we use the \emph{Incanter} library. Incanter
 is a modular suite of Clojure.
 
 
 \chapter{Introduction to multi-threading programming with Java (2 days)}
-\label{sec:org0810115}
+\label{sec:org986155c}
 \textbf{Prerrequisites}:
 \begin{itemize}
 \item Maven
@@ -1713,7 +1713,7 @@ is a modular suite of Clojure.
 \end{itemize}
 
 \section{Introduction}
-\label{sec:orgc509179}
+\label{sec:orgec7de87}
 
 In the early 2000s, the multicore revolution began due to was difficult make
 processor chips smaller and faster. Derived from this situation, we had to
@@ -1735,7 +1735,7 @@ parallel computing.
 
 
 \section{Processes and threads}
-\label{sec:orgf45660c}
+\label{sec:orgc8367ec}
 
 The first thing that we will talk is what is the difference between a process
 and a thread. Both process and thread are independent sequences of
@@ -1752,7 +1752,7 @@ executed by threads. That's the main difference.
 
 
 \section{Basics}
-\label{sec:org2d50afd}
+\label{sec:org78d19f2}
 
 \textbf{Creating the base project}: Lets create a maven based project. In some
 terminal, write:
@@ -1810,7 +1810,7 @@ mvn compile exec:java
 
 
 \section{Defining and starting a Thread}
-\label{sec:orgcdf8284}
+\label{sec:org8ff3afe}
 
 In Java, to use threads in our applications, we can create an instance of
 the class \texttt{Thread} (\texttt{java.lang.Thread}) or make a derived subclass. Also we can
@@ -1914,7 +1914,7 @@ object \texttt{t}, but, in this, there is not a order in how the objects are
 called.
 
 \section{Thread managment}
-\label{sec:org5bc9139}
+\label{sec:orgd1799b5}
 
 After seeing how to use threads in a basic way, now let us discuss some
 methods available to thread management. More documentation about these
@@ -2098,7 +2098,7 @@ public class SimpleThreads {
 
 
 \section{Executors}
-\label{sec:org3422790}
+\label{sec:org63efd7b}
 
 Sometimes, work directly with threads could be a bit difficult and can
 introduce some errors or mistakes. To avoid this, the concurrent API of java
@@ -2166,7 +2166,7 @@ Hello thread 3, how is going?
 \end{verbatim}
 
 \subsection{Callables and Futures}
-\label{sec:org8c2c419}
+\label{sec:orgf02ab0c}
 
 Like Runnable, executors can work with other kinds of tasks. We called these
 tasks callables (\texttt{Callable} interface). Such interface is similar to \texttt{Runnable},
@@ -2321,7 +2321,6 @@ public class App {
             System.out.println("Error " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 }
 \end{verbatim}
@@ -2343,11 +2342,11 @@ single thread instead of use multiple threads.
 
 
 \section{Synchronized and locks}
-\label{sec:org4e3fcca}
+\label{sec:orgbff04db}
 
 
 \subsection{Synchronized}
-\label{sec:org4576b4e}
+\label{sec:org7c8d04d}
 
 When we implement a more complex multithreaded program, there are sections
 of code that are accessed by multiple threads. We need to pay attention when
@@ -2432,30 +2431,246 @@ in this tutorial.
 
 
 \subsection{Locks}
-\label{sec:org5447585}
+\label{sec:org087dab8}
+
 
 Another tool provide by Java to manage synchronization are the looks. With
 them, we can set lock mechanisms in an explicit way. Locks support many
-methods for finer grained synchronization control.
+methods for finer grained synchronization control. Java provides many types
+of locks, by  example \texttt{ReentrantLock}, \texttt{ReentrantReadWriteLock} or
+\texttt{StampedLock}. Locks that implement the interface
+\texttt{java.util.concurrent.locks.Lock}, use the methods \texttt{lock()} and \texttt{unlock()} to
+provide locking explicitly. Another important operation provided by this
+interface is tryLock(), used to try get the lock without pausing the current
+thread. \texttt{ReentrantLock} is a class that implements the \texttt{Lock} interface.
+
+Let see an example:
+
+\begin{verbatim}
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class App {
+
+    public static void main(String[] args) throws InterruptedException {
+        int numProcessors = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+        ReentrantLock lock = new ReentrantLock();
+        executor.submit(() -> {
+                lock.lock();
+                try {
+                    TimeUnit.SECONDS.sleep(4);
+                    System.out.println("wake up");
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                } finally {
+                    lock.unlock();
+                }
+            });
+        executor.submit(() -> {
+                System.out.println("Locked: " + lock.isLocked());
+                System.out.println("Held by me: " + lock.isHeldByCurrentThread());
+                boolean locked = lock.tryLock();
+                System.out.println("lock aquired: " + locked);
+            });
+        executor.shutdown();
+    }
+}
+\end{verbatim}
+
+The class \texttt{ReentrantReadWriteLock} is another lock class that implements the
+interface \texttt{ReadWriteLock}.  The idea behind is to have a pair of locks for
+read-and-write access. Usually, it is safe to read mutable shared variables
+while nobody is writing over them. Thus, the read-lock can be held by many
+threads while no thread holds the write-lock. Using this lock, we can
+improve performance and throughput when reads are more frequent than
+writes. An example is below:
+
+\begin{verbatim}
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.Map;
+import java.util.HashMap;
+
+public class App {
+
+    public static void main(String[] args) throws InterruptedException {
+        int numProcessors = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+        Map<String, String> map = new HashMap<>();
+
+        ReadWriteLock lock = new ReentrantReadWriteLock();
+
+        executor.submit(() -> {
+                lock.writeLock().lock();
+                try {
+                    System.out.println("Putting information into the map");
+                    TimeUnit.SECONDS.sleep(4);
+                    map.put("foo", "bar");
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                } finally {
+                    lock.writeLock().unlock();
+                }
+            });
+
+        Runnable readTask = () -> {
+            lock.readLock().lock();
+            try {
+                String threadName = Thread.currentThread().getName();
+                String message = String.format("Name %s, value: %s", threadName, map.get("foo"));
+                System.out.println(message);
+                TimeUnit.SECONDS.sleep(1);
+            } catch(InterruptedException ex) {
+                ex.printStackTrace();
+            } finally {
+                lock.readLock().unlock();
+            }
+        };
+
+        executor.submit(readTask);
+        executor.submit(readTask);
+
+        executor.shutdown();
+    }
+}
+\end{verbatim}
+
+\begin{itemize}
+\item[{$\square$}] StampedLock
+\item[{$\square$}] Semaphores
+\end{itemize}
+
+\section{Atomic Variables}
+\label{sec:org14825f6}
+
+Java provides many classes to perform atomic operations over many data
+types. Inside of these classes, the atomic operations are handled by
+compare-and-swap or swap (getAndSet) instructions, which are atomic
+instructions directly supported by most modern CPUs. These classes lives in
+the package \texttt{java.util.concurrent.atomic} and some examples are:
+
+\begin{itemize}
+\item AtomicInteger
+\item AtomicLong
+\item AtomicReference
+\item AtomicStampedReference
+\item AtomicIntegerArray
+\end{itemize}
+
+The specification for the atomic accesses performed by these classes is
+described in the documentation of \texttt{java.lang.invoke.VarHandle} (for java
+9+). Some methods that they share are:
+
+\begin{itemize}
+\item compareAndExchange
+\item compareAndSet
+\item getAndIncrement
+\item getAndSet
+\end{itemize}
+
+Let's see an example of how use the atomic variables:
+
+\begin{verbatim}
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
+
+public class App {
+
+    public static void stop(ExecutorService executor) {
+        try {
+            executor.shutdown();
+            executor.awaitTermination(60, TimeUnit.SECONDS); // give it time to finish
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (!executor.isTerminated()) {
+                System.out.println("Termination interrupted");
+            }
+            executor.shutdown();
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        int numProcessors = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+        AtomicInteger atomicInt = new AtomicInteger(0);
+
+        IntStream.range(0, 10000).forEach(i -> executor.submit(atomicInt::incrementAndGet));
+
+        stop(executor);
+        System.out.println("Value is: " + atomicInt.get());
+    }
+}
+\end{verbatim}
 
 
-\section{The concurrency package (java.util.concurrency)}
-\label{sec:org1acba1b}
-\subsection{Locks (java.util.concurrency.locks)}
-\label{sec:org8d0b5e9}
-\subsection{Atomics (java.util.concurrency.atomic)}
-\label{sec:org1e3eb62}
-\subsection{Concurrent Data Structures}
-\label{sec:orgec4b072}
-\subsection{Some example}
-\label{sec:orgecf3c59}
+\section{Synchronizers}
+\label{sec:org665e48d}
+
+Five classes aid common special purpose synchronization idioms:
+
+\begin{itemize}
+\item Semaphore
+\item CountDownLatch
+\item CyclicBarrier
+\item Phaser
+\item Exchanger
+\end{itemize}
+
+\section{Concurrent Collections}
+\label{sec:org9dc1c4b}
+
+The Java Concurrent API provides multiple collections designed for use in
+multithreaded contexts
+
+
+\chapter{Concurrent programming in Java}
+\label{sec:orge95ed9b}
+
+\section{1.1 Threads}
+\label{sec:org837e1e1}
+Each process can create and execute threads.
+Create thread: t1 = new Thread(s1); Where s1 is a computation unit modifying x
+= 0.
+t2 = new Thread(s1');
+Start execution: t1.start(); t2.start();
+Main thread: t0, creates and starts t1. After start t1, t0 can start another
+computation s2.
+t1.join() / wait to complete
+s3 // = x
+s1: t2.join();
+s1': t1.join();
+t1 join to t2 and t2 join to t1;
+A very common error is deadlock.
+
+\section{Structured locks}
+\label{sec:org8624f28}
+
+Inc(A) \{
+  synchronized(A) \{
+    A.count = A.count + 1;
+  \}
+\}
+
+With two threads: t0 and t1, we try increment concurrently the same object,
+and this will give us a problem known as data race.
 
 
 \chapter{Other links}
-\label{sec:orge817953}
+\label{sec:orgc6ddb3b}
 
 \section{Youtube videos}
-\label{sec:orge61eca9}
+\label{sec:org0f5e442}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.youtube.com/watch?v=drXrIVfBKaQ}{Safe Memory Reclamation (Hazard Pointers)}
@@ -2469,7 +2684,7 @@ Safe and Efficient Teardown"}
 
 
 \section{Tools}
-\label{sec:orge097876}
+\label{sec:org2cbdc7e}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://valgrind.org/docs/manual/cg-manual.html}{Cachegrind}
@@ -2479,7 +2694,7 @@ Safe and Efficient Teardown"}
 
 
 \section{Readings}
-\label{sec:org68ea749}
+\label{sec:orgd337b01}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://frankdenneman.nl/2016/07/07/numa-deep-dive-part-1-uma-numa/}{Numa Deep Dive Part 1: From UMA To NUMA}
@@ -2506,7 +2721,7 @@ Safe and Efficient Teardown"}
 
 
 \section{Clojure things}
-\label{sec:org9bb1e2e}
+\label{sec:org37fce02}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://github.com/jepsen-io/jepsen}{Jepsen: Clojure library to set up a distributed system and verify if an
@@ -2519,7 +2734,7 @@ execution is linearizable}
 
 
 \section{Python things}
-\label{sec:orgfbe823f}
+\label{sec:org6f61b66}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://bytes.yingw787.com/posts/2019/01/11/concurrency\_with\_python\_why/}{Concurrency with python series}
@@ -2527,7 +2742,7 @@ execution is linearizable}
 
 
 \section{CPP Things}
-\label{sec:org0eb933c}
+\label{sec:org8dafba3}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.mygreatlearning.com/blog/cpp-interview-questions/?gl\_blog\_id=25150}{CPP interview}
@@ -2536,28 +2751,28 @@ execution is linearizable}
 
 
 \chapter{Notes}
-\label{sec:orgae10770}
+\label{sec:org2160380}
 
 \section{Concurrent computing}
-\label{sec:orge19b31a}
+\label{sec:org873a652}
 
 \subsection{Work-Stealing}
-\label{sec:org7918806}
+\label{sec:org6ae43a3}
 
 \subsection{Article}
-\label{sec:orgbf51c8d}
+\label{sec:orge4f9925}
 
 \begin{enumerate}
 \item Work-stealing with multiplicity
-\label{sec:org8f749e7}
+\label{sec:org598521e}
 
 \begin{enumerate}
 \item Experiments C++
-\label{sec:orgf918740}
+\label{sec:org4344762}
 
 \begin{enumerate}
 \item What to use?
-\label{sec:org7622b54}
+\label{sec:org5768e07}
 
 \begin{itemize}
 \item std::thread
@@ -2589,13 +2804,13 @@ pthreads directly.
 
 
 \item Why are important tests in concurrent code
-\label{sec:orge2d1ca3}
+\label{sec:org77fb87b}
 
 \href{https://www.youtube.com/watch?v=tRe3ddG8O1Y}{Unit testing patterns for concurrent code}
 
 \begin{enumerate}
 \item The dark art of concurrent code
-\label{sec:orgff451a1}
+\label{sec:org9bf32da}
 
 \begin{itemize}
 \item Several actions at the same time
@@ -2604,7 +2819,7 @@ pthreads directly.
 \end{itemize}
 
 \item A good unit test must be:
-\label{sec:orgcc6c85f}
+\label{sec:org7f15acb}
 
 \begin{itemize}
 \item Trustworthy
@@ -2613,7 +2828,7 @@ pthreads directly.
 \end{itemize}
 
 \item Concurrency test "smells"
-\label{sec:orgc52fe08}
+\label{sec:org45c66bd}
 
 \begin{itemize}
 \item Inconsistent results
@@ -2623,7 +2838,7 @@ pthreads directly.
 \end{itemize}
 
 \item Test smell - using "sleep" in test
-\label{sec:org13fe194}
+\label{sec:org4344bbd}
 
 \begin{itemize}
 \item Time based - fail/pass inconsistently
@@ -2641,10 +2856,10 @@ component into a component that is testeable via synchronous tests.
 \end{description}
 
 \item Model
-\label{sec:org655ab62}
+\label{sec:org9826daa}
 
 \item Technology to use
-\label{sec:org2391b08}
+\label{sec:orgaa4a0c7}
 
 \begin{itemize}
 \item Google Test
@@ -2658,7 +2873,7 @@ component into a component that is testeable via synchronous tests.
 
 
 \subsection{Related topics}
-\label{sec:org80b635d}
+\label{sec:orgcc9f0ad}
 \begin{itemize}
 \item \href{https://epub.jku.at/obvulihs/download/pdf/6196854?originalFilename=true}{Thesis} on the use of work-stealing applied to garbage collection. In this
 thesis they mention how to implement Garbage Collector Garbage First (G1)
@@ -2666,10 +2881,10 @@ in the HotSpot virtual machine of the Open JDK.
 \end{itemize}
 
 \subsection{Links}
-\label{sec:org9574d33}
+\label{sec:org3e773b0}
 \begin{enumerate}
 \item Philosophy
-\label{sec:org043e043}
+\label{sec:org6964b7e}
 
 \begin{itemize}
 \item \href{https://assets.bitbashing.io/papers/concurrency-primer.pdf}{What every systems programmer should know about concurrency}
@@ -2677,17 +2892,17 @@ in the HotSpot virtual machine of the Open JDK.
 \end{itemize}
 
 \item Courses
-\label{sec:org02cff61}
+\label{sec:org6323fbc}
 \begin{itemize}
 \item \href{https://ocw.mit.edu/courses/find-by-topic/\#cat=engineering\&subcat=computerscience\&spec=algorithmsanddatastructures}{Cursos MIT CS}
 \item
 \end{itemize}
 
 \item Programming Languages\hfill{}\textsc{cpp:java:rust}
-\label{sec:org47dc5b8}
+\label{sec:org668a7ab}
 \begin{enumerate}
 \item C/C++/Java
-\label{sec:org28b847f}
+\label{sec:org3ac59d0}
 \begin{itemize}
 \item \href{https://www.linuxjournal.com/article/6700}{Cross-Platform Software Development Using CMake}
 \item \href{https://atomheartother.github.io/c++/2018/07/12/CPPDynLib.html}{Writing a cross platform dynamic library}
@@ -2708,7 +2923,7 @@ in the HotSpot virtual machine of the Open JDK.
 
 \begin{enumerate}
 \item STL C++
-\label{sec:orgd8ae17a}
+\label{sec:orgb90242f}
 \begin{itemize}
 \item \href{https://www.geeksforgeeks.org/vector-in-cpp-stl/}{vector}
 \item \href{https://www.geeksforgeeks.org/list-cpp-stl/?ref=lbp}{List}
@@ -2724,7 +2939,7 @@ in the HotSpot virtual machine of the Open JDK.
 \end{enumerate}
 
 \item Techniques
-\label{sec:org5a66f7e}
+\label{sec:orgd62b852}
 \begin{itemize}
 \item \href{https://mziccard.me/2015/05/08/modulo-and-division-vs-bitwise-operations/}{Modulo and Division vs Bitwise Operations}
 \item \url{https://en.wikipedia.org/wiki/Locality\_of\_reference}
@@ -2736,13 +2951,13 @@ in the HotSpot virtual machine of the Open JDK.
 \end{enumerate}
 
 \item Others
-\label{sec:orgf4e8c4f}
+\label{sec:org84e2002}
 \begin{itemize}
 \item \href{https://ariannadanielle.com/why-you-need-a-website-how-to-create-your-own-website-in-a-day-for-free/}{Why you need a website as phd}
 \end{itemize}
 
 \item Techniques\hfill{}\textsc{cpp}
-\label{sec:orgef88923}
+\label{sec:org8c5d957}
 \begin{itemize}
 \item \href{https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.395.378\&rep=rep1\&type=pdf}{Hazard pointers: Safe memory reclamation for lock-free objects}
 \item \href{https://comp.lang.cpp.moderated.narkive.com/vAi9h9q9/lock-free-programming-with-boost-shared-ptr-instead-of-hazard-pointers}{Shared pointers vs hazard pointers}
@@ -2757,13 +2972,13 @@ reclamation}
 
 
 \section{Notes}
-\label{sec:org037ce27}
+\label{sec:org577ea2a}
 
 \subsection{Git}
-\label{sec:org9a9c9d8}
+\label{sec:orga44362c}
 \begin{enumerate}
 \item Write git messages that your colleagues will love
-\label{sec:orgad76c90}
+\label{sec:org55492ec}
 \begin{itemize}
 \item Why git commit messages are important
 \item Reading vs writing code
@@ -2776,10 +2991,10 @@ reclamation}
 
 
 \section{Statistics}
-\label{sec:org33e8b9c}
+\label{sec:org8d7b29c}
 
 \subsection{Temario tentativo}
-\label{sec:org3b144dd}
+\label{sec:orga5f5e28}
 
 
 \begin{itemize}
@@ -2797,11 +3012,11 @@ reclamation}
 \end{itemize}
 
 \subsection{\href{https://www.youtube.com/watch?v=kS7nIEzyAcU}{Estadística para diseños experimentales}}
-\label{sec:org12e478d}
+\label{sec:orgd26c4a9}
 
 \begin{enumerate}
 \item Diseño experimental
-\label{sec:orge0a781e}
+\label{sec:orgeb27012}
 \begin{itemize}
 \item Población objetivo
 \begin{itemize}
@@ -2817,7 +3032,7 @@ reclamation}
 \end{itemize}
 
 \item Distribución de frecuencias
-\label{sec:org860ad5b}
+\label{sec:orgde975f6}
 
 \begin{itemize}
 \item Distribución normal
@@ -2850,7 +3065,7 @@ reclamation}
 \end{itemize}
 
 \item Pruebas de hipótesis
-\label{sec:org2cb3d5a}
+\label{sec:org4e072eb}
 
 2 Hipótesis
 \begin{itemize}
@@ -2870,11 +3085,11 @@ Valor de probabilidad (p)
 \end{itemize}
 
 \item Pruebas estadísticas
-\label{sec:orga5ebf3a}
+\label{sec:org9b0a945}
 
 \begin{enumerate}
 \item Pruebas para dos grupos (muestras)
-\label{sec:org003f1f8}
+\label{sec:org761dd29}
 
 \begin{itemize}
 \item T de student (versión paramétrica)
@@ -2894,22 +3109,22 @@ Valor de probabilidad (p)
 \end{itemize}
 
 \item Pruebas para más de dos grupos
-\label{sec:orgc987912}
+\label{sec:org5535d8c}
 
 \item Pruebas para variables continuas y categóricas
-\label{sec:org91828f0}
+\label{sec:org676609b}
 \end{enumerate}
 \end{enumerate}
 
 
 
 \subsection{Estadística para ciencia de datos}
-\label{sec:org53dab18}
+\label{sec:org74ce1ce}
 
 
 \begin{enumerate}
 \item Data Science
-\label{sec:org5bb850d}
+\label{sec:org519e4cd}
 
 \begin{itemize}
 \item ¿Qué es ciencia de datos?
@@ -2919,7 +3134,7 @@ como se comporta nuestra materia prima.
 
 \begin{enumerate}
 \item Estadística básica
-\label{sec:orgdd0e759}
+\label{sec:orga42d2b7}
 
 \begin{description}
 \item[{Variable}] Características de un objeto o individuo que pueden medirse y
@@ -2935,13 +3150,13 @@ aquellos valores que estén por debajo.
 
 
 \item Data Science Steps
-\label{sec:orge7ec8fe}
+\label{sec:org52183ad}
 
 \item Main Concepts
-\label{sec:org245ce62}
+\label{sec:org967945d}
 
 \item Match Between Statistic and Data Science
-\label{sec:org7a69a81}
+\label{sec:org1244893}
 \end{enumerate}
 
 
@@ -2951,7 +3166,7 @@ aquellos valores que estén por debajo.
 
 
 \chapter{Plan last 2 semesters}
-\label{sec:orge347949}
+\label{sec:org3d585f6}
 
 \begin{itemize}
 \item[{$\square$}] Plan de experimentos para colas concurrentes
@@ -3015,13 +3230,13 @@ aquellos valores que estén por debajo.
 \end{itemize}
 
 \section{Memory management}
-\label{sec:org5786681}
+\label{sec:org4cc9e13}
 
 \subsection{A study of dynamic memory management in C++ programs (2002)}
-\label{sec:org9cc3b8a}
+\label{sec:org229d7f9}
 \begin{enumerate}
 \item Main ideas
-\label{sec:org5d452ba}
+\label{sec:orgf31849d}
 
 \begin{itemize}
 \item Dynamic memory management has been a high cost component in many software
@@ -3057,7 +3272,7 @@ to a free-list which is maintained by the \textbf{overloaded new operator}.
 \end{itemize}
 
 \item Garbage Collector Design
-\label{sec:org2f078df}
+\label{sec:org756f694}
 
 \begin{itemize}
 \item The garbage collector maintains objects with segregated memory blocks. In
@@ -3078,10 +3293,10 @@ objects are re-inserted in the list.
 
 
 \subsection{Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects}
-\label{sec:orgaa94bdd}
+\label{sec:orgb6c6327}
 \begin{enumerate}
 \item Main ideas
-\label{sec:orgddcbbff}
+\label{sec:org1e0dcd9}
 
 \begin{itemize}
 \item In languages without automatic memory reclamation or support for
@@ -3113,7 +3328,7 @@ Without special scheduler support, these methods are blocking.
 \end{itemize}
 
 \item Model
-\label{sec:org01ae416}
+\label{sec:orgb209892}
 
 \begin{itemize}
 \item The model
@@ -3126,7 +3341,7 @@ Without special scheduler support, these methods are blocking.
 \end{itemize}
 
 \item The Methodology
-\label{sec:org2e93f23}
+\label{sec:org0edd5f3}
 \begin{itemize}
 \item Associate hazard pointers with threads. A hazard pointer is a single
 write multireader pointer. The number of hazard pointers per thread
@@ -3201,7 +3416,7 @@ void scaScan(HPRecType* head) {
 
 
 \chapter{Articles to begin with}
-\label{sec:orgcf7cf5d}
+\label{sec:org6de4d77}
 
   Seed Papers
 TITLE	FIRST AUTHOR	YEAR	CITED BY
@@ -3242,7 +3457,7 @@ Fully Read/Write Fence-Free Work-Stealing with Multiplicity	Armando Castaneda	20
 
 
 \chapter{Bibliography}
-\label{sec:org7615260}
+\label{sec:orge8ca1d8}
 \bibliographystyle{plainurl}
 \bibliography{refs}
 \end{document}
