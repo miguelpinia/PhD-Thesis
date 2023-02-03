@@ -535,8 +535,8 @@
    \begin{minipage}{\linewidth}
      \includegraphics[width=\linewidth]{figs/objects.png}
    \end{minipage}
-   \caption{Simplified view of a modern computer system cache architecture}
-   \label{fig:arch}
+   \caption{Class Diagrama}
+   \label{fig:class_diagram}
   #+end_figure
 
 
