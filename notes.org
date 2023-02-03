@@ -35,22 +35,20 @@
    #+latex_header: \renewcommand{\lstlistingname}{Code}
    #+latex_header: \setcounter{tocdepth}{1}
    #+latex_header: \newtheoremstyle{break}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{\newline}{}
-   #+latex_header: \theoremstyle{break}
+   #+latex_header: \theoremstyle{plain}
    #+latex_header: \newtheorem{theorem}{Theorem}
    #+latex_header: \newtheorem{corollary}[theorem]{Corollary}
    #+latex_header: \newtheorem{proposition}[theorem]{Proposition}
    #+latex_header: \newtheorem{definition}[theorem]{Definition}
    #+latex_header: \newtheorem{lemma}[theorem]{Lemma}
    #+latex_header: \newtheorem{affirmation}[theorem]{Affirmation}
-   #+latex_header: \theoremstyle{example}
+   #+latex_header: \theoremstyle{definition}
    #+latex_header: \newtheorem{example}{Example}
    #+latex_header: \newtheorem{exmpl}{Example}
-   #+latex_header: \theoremstyle{note}
-   #+latex_header: \newtheorem{note}{Note}
-   #+latex_header: \theoremstyle{break}
-   #+latex_header: \newtheorem{remark}{Remark}
-   #+latex_header: \theoremstyle{exercise}
    #+latex_header: \newtheorem{exercise}{Exercise}
+   #+latex_header: \theoremstyle{remark}
+   #+latex_header: \newtheorem{note}{Note}
+   #+latex_header: \newtheorem{remark}{Remark}
    #+latex_header: \usetikzlibrary{arrows,automata,positioning}
    #+latex_header: \NewEnviron{obs}{\begin{mdframed}\begin{remark} \BODY \end{remark}\end{mdframed}}
    #+latex_header: \NewEnviron{nota}{\begin{mdframed}\begin{note} \BODY \end{note}\end{mdframed}}
