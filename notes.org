@@ -28,8 +28,11 @@
    #+latex_header: \usepackage{url}
    #+latex_header: \usepackage{tabularx}
    #+latex_header: \usepackage{xspace}
-   #+latex_header: \lstset{ basicstyle=\ttfamily, mathescape=true, frame=Trbl, numbers=left}
-   #+latex_header: \renewcommand{\lstlistingname}{Pseudocódigo}
+   #+latex_header: \usepackage{courier}
+   #+latex_header: \definecolor{amber}{rgb}{1.0, 0.49, 0.0}
+   #+latex_header: \definecolor{x11gray}{rgb}{0.75, 0.75, 0.75}
+   #+latex_header: \lstset{ basicstyle=\footnotesize\mdseries\ttfamily, mathescape=true, frame=Trbl, numbers=left, keywordstyle=\color{blue}, showstringspaces=false, commentstyle=\color{x11gray}, stringstyle=\color{amber}, breakline=true}
+   #+latex_header: \renewcommand{\lstlistingname}{Code}
    #+latex_header: \setcounter{tocdepth}{1}
    #+latex_header: \newtheoremstyle{break}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{\newline}{}
    #+latex_header: \theoremstyle{break}
@@ -58,6 +61,7 @@
    #+latex_header: \AtBeginDocument{\counterwithin{lstlisting}{section}}
    #+latex_header: \newcommand{\R}{{\sf \small Read}\xspace}
    #+latex_header: \newcommand{\W}{{\sf \small Write}\xspace}
+   #+latex_header: \hyphenation{Reentrant-Read-Write-Lock Stamped-Lock}
 
 
 ** Export settings
@@ -1659,946 +1663,1507 @@
    is a modular suite of Clojure.
 
 
-* Introduction to multi-threading programming with Java (2 days)
-  :properties:
-  :export_latex_class: article
-  :export_options: toc:nil
-  :export_file_name: artifacts/multithreading
-  :end:
-
-  *Prerrequisites*:
-  - Maven
-  - An editor like emacs or vi or IDE like Netbeans
-  - JDK 17 (open-jdk)
-  - git
-
-** Introduction
-
-   In the early 2000s, the multicore revolution began due to was difficult make
-   processor chips smaller and faster. Derived from this situation, we had to
-   change the way in how we develop software. The multicore chips cause that
-   perform computing being more effective by exploiting
-   ``parallelism''. However, the challenge is in how to exploit that
-   parallelism. Those multicore chips or multiprocessors, usually use shared
-   memory to communicate the processors between themselves, thus, an important
-   aspect to program these multiprocessors is how to coordinate the access to
-   shared memory, i.e. how to coordinate the access to some shared data to avoid
-   problems while it is manipulated (writes and lectures). The above is
-   challenging due to the modern systems are inherently asynchronous and,
-   without synchronization mechanisms, unpredictable events can occur while the
-   shared data is manipulated.
-
-   We will focus on tools and techniques for programming multiprocessors using
-   shared memory with java. We will cover some topics related to concurrent and
-   parallel computing.
-
-
-** Processes and threads
-
-   The first thing that we will talk is what is the difference between a process
-   and a thread. Both process and thread are independent sequences of
-   execution. Loosely speaking, a process is in practical terms, an executing
-   program. A thread is a lightweight process that can run in parallel and share
-   resources as memory and disc with its parent process. Usually, threads run in
-   process space context.
-
-   For example, we can run a program in java (like an IDE as Netbeans). The
-   program running is known as the main process, and all those events that
-   executes asynchronously inside of our program, like invoke to compile the
-   code, debugging or even library search for our project inside the IDE, are
-   executed by threads. That's the main difference.
-
-
-** Basics
-
-   *Creating the base project*: Lets create a maven based project. In some
-   terminal, write:
-
-   #+begin_src bash :results output :post strip(*this*)
-     cd ..
-     mvn archetype:generate -DgroupId=mx.unam.concurrent \
-         -DartifactId=concurrent-example \
-         -DarchetypeArtifactId=maven-archetype-quickstart \
-         -DarchetypeVersion=1.4 -DinteractiveMode=false
-     ls | grep concurrent-example
-   #+end_src
-
-   It creates a project with a main file called =App.java=. In that file we
-   will work with the tools for write multi-threaded applications. The first
-   thing is change some parameters of our project to work with a recent
-   java version.
-
-   In the file =pom.xml=, change the target output and compiler version. Those
-   values should be changed in the properties section.
-
-   #+begin_src xml
-     <maven.compiler.source>17</maven.compiler.source>
-     <maven.compiler.target>17</maven.compiler.target>
-   #+end_src
-
-   To have a /main/ method in our application and we have a main point of
-   execution, add the next code to the pom.xml in the section of plugins.
-
-   #+begin_src xml
-     <plugin>
-       <groupId>org.codehaus.mojo</groupId>
-       <artifactId>exec-maven-plugin</artifactId>
-       <version>1.2.1</version>
-       <executions>
-         <execution>
-           <goals>
-             <goal>java</goal>
-           </goals>
-         </execution>
-       </executions>
-       <configuration>
-         <mainClass>mx.unam.concurrent.App</mainClass>
-       </configuration>
-     </plugin>
-   #+end_src
-
-   Thereafter we can run our project with the following instruction:
-
-   #+begin_src bash :results output :post strip(*this*)
-     pwd
-     cd ../concurrent-example
-     mvn compile exec:java
-   #+end_src
-
-
-** Defining and starting a Thread
-
-   In Java, to use threads in our applications, we can create an instance of
-   the class =Thread= (~java.lang.Thread~) or make a derived subclass. Also we can
-   provide an object that implements the =Runnable= interface
-   (~java.lang.Runnable~). This interface defines a single method, =run=, meant to
-   contain the code executed in the thread. Lets create a basic application
-   where we define an instance of Thread and run it.
-
-   #+begin_src java
-     public class App {
-
-         public static void main(String[] args) {
-             MyThread1 obj1 = new MyThread1();
-             MyThread2 obj2 = new MyThread2();
-             Thread t = new Thread(new MyRunnable());
-
-             obj1.start();
-             obj2.start();
-             t.start();
-         }
-     }
-
-     class MyThread1 extends Thread {
-         @Override
-         public void run() {
-             System.out.println("Thread 1 is running");
-         }
-     }
-
-     class MyThread2 extends Thread {
-         @Override
-         public void run() {
-             System.out.println("Thread 2 is running");
-         }
-     }
-
-     class MyRunnable implements Runnable {
-         @Override
-         public void run() {
-             System.out.println("My runnable object is running");
-         }
-     }
-   #+end_src
-
-   A more interesting example could be the following:
-
-   #+begin_src java :output results
-     package mx.unam.concurrent;
-
-     public class App {
-
-         public static void main(String[] args) {
-             MyThread1 obj1 = new MyThread1();
-             MyThread2 obj2 = new MyThread2();
-             Thread t = new Thread(new MyRunnable());
-
-             obj1.start();
-             obj2.start();
-             t.start();
-         }
-     }
-
-     class MyThread1 extends Thread {
-         @Override
-         public void run() {
-             for (int i = 0; i < 10; i++) {
-                 String output = String.format("Thread 1 is running. Iter: %d", i);
-                 System.out.println(output);
-             }
-         }
-     }
-
-     class MyThread2 extends Thread {
-         @Override
-         public void run() {
-             for (int i = 0; i < 10; i++) {
-                 String output = String.format("Thread 2 is running. Iter: %d", i);
-                 System.out.println(output);
-             }
-         }
-     }
-
-     class MyRunnable implements Runnable {
-         @Override
-         public void run() {
-             for (int i = 0; i < 10; i++) {
-                 String output = String
-                     .format("My runnable object is running. Iter: %d", i);
-                 System.out.println(output);
-             }
-         }
-     }
-   #+end_src
-
-   A possible output for the previous code is the following. We can observe how
-   the calls to the ~println~ method are interspersed. In a sequential execution,
-   the output of the object =obj1= should be printed (the sequence of printlns
-   from zero to nine) followed by the output of the =obj2= (the sequence of
-   printlns from zero to nine) and similarly, in the end, the output from the
-   object =t=, but, in this, there is not a order in how the objects are
-   called.
-
-** Thread managment
-
-   After seeing how to use threads in a basic way, now let us discuss some
-   methods available to thread management. More documentation about these
-   methods is available on
-   https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html.
-   The methods that we refer are:
-
-   - start
-   - suspend
-   - stop
-   - sleep
-   - join
-
-   We will exemplify the use of the first four methods using the next program:
-
-   #+begin_src java :output results
-     public class App {
-         public static void main(String[] args) {
-             MyThread t1 = new MyThread("First Thread");
-             MyThread t2 = new MyThread("Second Thread");
-             try {
-                 Thread.sleep(500); // Sleeping for 500ms
-                 t1.stop();
-                 t2.stop();
-                 Thread.sleep(500);
-             }
-             catch (InterruptedException e) {
-                 System.out.format("Interrupted Exception:  %s\n", e.getMessage());
-                 e.printStackTrace();
-             }
-             System.out.println("Exiting the main thread");
-         }
-     }
-
-
-     class MyThread implements Runnable {
-         private boolean exit;
-         private String name;
-         Thread t;
-
-         public MyThread(String threadName) {
-             name = threadName;
-             t = new Thread(this, name);
-             System.out.format("New Thread: %s\n", t.toString());
-             exit = false;
-             t.start(); // Starting the thread
-         }
-
-         @Override
-         public void run() {
-             int i = 0;
-             while (!exit) {
-                 System.out.format("%s: %d\n", name, i);
-                 i++;
-                 try {
-                     Thread.sleep(100); // Sleeping for 100ms
-                 }
-                 catch (InterruptedException e) {
-                     System.out.format("Interrupted Exception:  %s\n", e.getMessage());
-                     e.printStackTrace();
-                 }
-             }
-         }
-
-         public void stop() {
-             exit = true;
-         }
-     }
-   #+end_src
-
-   This program declares an inner class called ~MyThread~, which implements the
-   Runnable interface. The class constructor takes as a parameter a string,
-   which represents the name for the instance. Inside of the constructor, the
-   instance declares a thread and starts it with the method =start()=. This
-   method will invoke the method =run=. In this method, it will print the name of
-   the instance with the value of a counter. The counter will increase it every
-   100 milliseconds. The class ~MyThread~ also have a method =stop=, where we
-   indicating when the method =run= should stop.
-
-   Additionally, the ~App~ class will contain the main method. In this method, it
-   will declare two instances of class ~MyThread~ with distinct names. Then, the
-   main thread will do the following:
-
-   - sleeps by 500 milliseconds
-   - calls the method =stop= of the two instances
-   - and then, it sleeps for another 500 milliseconds.
-
-   A possible output for the execution of the previous code is the following:
-
-   #+RESULTS:
-   #+begin_example
-   New Thread: Thread[First Thread,5,main]
-   New Thread: Thread[Second Thread,5,main]
-   First Thread: 0
-   Second Thread: 0
-   Second Thread: 1
-   First Thread: 1
-   Second Thread: 2
-   First Thread: 2
-   First Thread: 3
-   Second Thread: 3
-   Second Thread: 4
-   First Thread: 4
-   Exiting the main thread
-   #+end_example
-
-
-   The =join()= method allows one thread to wait until another thread completes
-   its execution. From Oracle's documentation:
-
-   ``If =t= is a ~Thread~ object whose thread is currently executing, =t.join()=
-   causes the current thread pauses execution until =t='s thread terminates''
-
-   Let see a more elaborated example:
-
-
-   #+begin_src java :output results
-     public class SimpleThreads {
-
-         static void threadMessage(String message) {
-             String threadName = Thread.currentThread().getName();
-             System.out.format("%s: %s%n", threadName, message);
-         }
-
-         private static class MessageLoop
-             implements Runnable {
-             public void run() {
-                 String importantInfo[] = {
-                     "Mares eat oats",
-                     "Does eat oats",
-                     "Little lambs eat ivy",
-                     "A kid will eat ivy too"
-                 };
-                 try {
-                     for (int i = 0; i < importantInfo.length; i++) {
-                         Thread.sleep(4000);
-                         threadMessage(importantInfo[i]);
-                     }
-                 } catch (InterruptedException e) {
-                     threadMessage("I wasn't done!");
-                 }
-             }
-         }
-
-         public static void main(String args[])
-             throws InterruptedException {
-
-             long patience = 1000 * 60 * 60;
-             if (args.length > 0) {
-                 try {
-                     patience = Long.parseLong(args[0]) * 1000;
-                 } catch (NumberFormatException e) {
-                     System.err.println("Argument must be an integer.");
-                     System.exit(1);
-                 }
-             }
-
-             threadMessage("Starting MessageLoop thread");
-             long startTime = System.currentTimeMillis();
-             Thread t = new Thread(new MessageLoop());
-             t.start();
-
-             threadMessage("Waiting for MessageLoop thread to finish");
-             while (t.isAlive()) {
-                 threadMessage("Still waiting...");
-                 t.join(1000);
-                 if (((System.currentTimeMillis() - startTime) > patience)
-                     && t.isAlive()) {
-                     threadMessage("Tired of waiting!");
-                     t.interrupt();
-                     t.join();
-                 }
-             }
-             threadMessage("Finally!");
-         }
-     }
-   #+end_src
-
-
-** Executors
-
-   Sometimes, work directly with threads could be a bit difficult and can
-   introduce some errors or mistakes. To avoid this, the concurrent API of java
-   provides a class called =ExecutorService=
-   (=java.util.conccurent.ExecutorService=). This class is capable of execute
-   asynchronous tasks and manage a pool of threads. Thus, we don't have to
-   create threads by hand. Also, the threads in the pool can be reused
-   throughout the life-cycle of our application.
-
-   The basic way to create an instance of =ExecutorService= is through the factory
-   class =Executors= (=java.util.concurrent.Executors=). This factory class provides
-   many static methods to create different instances. Variants of the
-   instantiated class usually are parameterized according the number of threads
-   or the number of cores available. An small example is shown below:
-
-   #+begin_src java :output results
-     import java.util.concurrent.Executors;
-     import java.util.concurrent.ExecutorService;
-
-     public class App {
-
-         private static void doLongWork(String name) {
-             String message = String.format("Hello %s, how is going?", name);
-             System.out.println(message);
-             try {
-                 Thread.sleep(1001);
-             }
-             catch (InterruptedException e) {
-                 System.out.println("Error " + e.getMessage());
-                 e.printStackTrace();
-             }
-         }
-
-         public static void main(String[] args) {
-             int numProcessors = Runtime.getRuntime().availableProcessors();
-             ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-             for (int i = 0; i < numProcessors; i++) {
-                 final int name = i;
-                 executor.execute(() -> doLongWork(String.format("thread %d", name)));
-             }
-             executor.shutdown();
-         }
-     }
-   #+end_src
-
-   In the main block of the previous code, we get the number of cores (k)
-   available in our machine. Then, we declare an instance of ExecutorService
-   with a pool of k threads. Thereafter, we launch a lambda function[fn:4]
-   calling a method that it does some long work. For each core, we run the
-   lambda function. At the end of the program, we have to stop explicitly the
-   ExecutorService, if we didn't do that, the service will keep listening for
-   new tasks and never stops. Finally, we get a result like shown below:
-
-   #+RESULTS:
-   : Hello thread 0, how is going?
-   : Hello thread 1, how is going?
-   : Hello thread 7, how is going?
-   : Hello thread 6, how is going?
-   : Hello thread 2, how is going?
-   : Hello thread 4, how is going?
-   : Hello thread 5, how is going?
-   : Hello thread 3, how is going?
-
-*** Callables and Futures
-
-    Like Runnable, executors can work with other kinds of tasks. We called these
-    tasks callables (~Callable~ interface). Such interface is similar to ~Runnable~,
-    but instead of returning void after calling its =run= method, it returns a
-    value. These objects are parameters for the method =submit= of the
-    executorService. This method does not wait until the task completes. The
-    executor service cannot return the result of the callable objecty. In that
-    case, the executor returns an object of type ~Future~. We can retrieve the
-    computation result from the ~Callable~ object using the ~Future~ objects. The
-    /futures/ have a method called =isDone()=, with this method we can check if the
-    /future/ has already finished its execution. Another method available for
-    /futures/ is =get()=. Calling this method blocks the current threads and waits
-    until the /callable/ completes its execution. An example is below:
-
-
-    #+begin_src java
-      import java.util.concurrent.Callable;
-      import java.util.concurrent.Executors;
-      import java.util.concurrent.ExecutorService;
-      import java.util.concurrent.ExecutionException;
-      import java.util.concurrent.Future;
-      import java.util.concurrent.TimeUnit;
-
+* Material for courses :noexport:
+
+** Introduction to multi-threading programming with Java (notes)
+   :properties:
+   :export_latex_class: article
+   :export_options: toc:nil
+   :export_file_name: artifacts/multithreading
+   :end:
+
+   *Prerequisites to take the course*:
+   - Basic knowledge about Maven
+   - An editor like emacs or vi or use an IDE like Netbeans
+   - JDK 17 (open-jdk)
+   - git
+
+*** Introduction
+
+    In the early 2000s, the multicore revolution began due to was difficulty
+    built processor chips smaller and faster. Derived from this situation, we had
+    to change the form we developing software. The multicore chips cause that
+    performs computing to be more effective by exploiting
+    ``parallelism''. However, the challenge is in how to exploit that
+    parallelism. Those multicore chips (multiprocessors) usually use shared
+    memory to communicate the processors between themselves. An important aspect
+    when programming these multiprocessors is establishing coordination
+    mechanisms to access shared memory, for example, how to synchronize the
+    access to shared data to avoid problems while it is manipulated (writes and
+    lectures). The above is challenging because modern systems are inherently
+    asynchronous, and without synchronization mechanisms, unpredictable events
+    can occur while shared data is modified concurrently.
+
+    In this tutorial, we will focus on tools and techniques for programming
+    multiprocessors using shared memory with =Java=. We will cover some topics
+    related to concurrent and parallel computing.
+
+
+*** Processes and threads
+
+    What is the difference between a process and a thread? Both process and
+    thread are independent sequences of execution. Loosely speaking, in practical
+    terms, a process is an executing program. A thread is a lightweight process
+    that can run over parallel with other threads and share resources as memory
+    and disc with its parent process. Usually, threads run in the process space
+    context.
+
+    For example, we can run a program in java (like Netbeans), and the
+    program in is known as the main process. During execution of program, it
+    can perform multiple events like calls to internet services or call to other
+    programs. Commonly, these events are performed in threads to avoid freeze the
+    main thread and are called asynchronously.
+
+*** Basics
+
+
+    *Creating the base project*: Let's create a maven based project. In a terminal,
+    write:
+
+    #+caption: Generating project with maven
+    #+begin_src bash -n :results output :post strip(*this*)
+      cd ..
+      mvn archetype:generate -DgroupId=mx.unam.concurrent \
+          -DartifactId=concurrent-example \
+          -DarchetypeArtifactId=maven-archetype-quickstart \
+          -DarchetypeVersion=1.4 -DinteractiveMode=false
+      ls | grep concurrent-example
+    #+end_src
+
+    It creates a project with a main file called =App.java=. We will use that file
+    to write all our code for multi-threaded applications. The first thing to do
+    is change some parameters of our project to work with a recent java version.
+
+    In the file =pom.xml=, change the target output and compiler version. Those
+    values should be changed in the properties section as shown in code
+    [[pom]].
+
+    #+caption: Changing content of file pom.xml
+    #+name: pom
+    #+begin_src xml -n
+      <maven.compiler.source>17</maven.compiler.source>
+      <maven.compiler.target>17</maven.compiler.target>
+    #+end_src
+
+    However, our application still not have defined a main class used to execute
+    the program. To allow this, add the code shown in code [[exec]] to the =pom.xml=,
+    in the plugins section.
+
+    #+caption: Adding a plugin to execute directly from maven
+    #+name: exec
+    #+begin_src xml -n
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>mx.unam.concurrent.App</mainClass>
+        </configuration>
+      </plugin>
+    #+end_src
+
+    We can run our project with the following instruction:
+
+    #+caption: Example of how to execute the project
+    #+begin_src bash -n :results output :post strip(*this*)
+      pwd
+      cd ../concurrent-example
+      mvn compile exec:java
+    #+end_src
+
+
+*** Creating and starting a Thread
+
+    In Java, to use threads in our applications, we can create an instance of the
+    class =Thread= (~java.lang.Thread~) or make a derived subclass. Also we can
+    provide an object that implements the =Runnable= interface
+    (~java.lang.Runnable~). This interface defines a single method, =run=, meant to
+    contain the code executed in the thread. Lets create a basic application
+    where we define an instance of Thread and run it.
+
+    #+caption:Basic example of how to create threads
+    #+begin_src java -n
       public class App {
-          public static void main(String args[]) throws ExecutionException {
-              Callable<Integer> task = () -> {
-                  try {
-                      TimeUnit.SECONDS.sleep(2);
-                      return 42;
-                  }
-                  catch (InterruptedException e) {
-                      System.out.println("Error " + e.getMessage());
-                      e.printStackTrace();
-                  }
-                  return -1;
-              };
 
-              ExecutorService executor = Executors.newFixedThreadPool(1);
-              try {
-                  Future<Integer> future = executor.submit(task);
-                  System.out.println(String.format("Future done? %b", future.isDone()));
-                  Integer result = future.get();
-                  System.out.println(String.format("Future done? %b", future.isDone()));
-                  System.out.println(String.format("Result: %d", result));
-                  executor.shutdown();
-              }
-              catch (InterruptedException | ExecutionException e) {
-                  System.out.println("Error " + e.getMessage());
-                  e.printStackTrace();
-                  executor.shutdown();
-              }
+          public static void main(String[] args) {
+              MyThread1 obj1 = new MyThread1();
+              MyThread2 obj2 = new MyThread2();
+              Thread t = new Thread(new MyRunnable());
 
+              obj1.start();
+              obj2.start();
+              t.start();
+          }
+      }
+
+      class MyThread1 extends Thread {
+          @Override
+          public void run() {
+              System.out.println("Thread 1 is running");
+          }
+      }
+
+      class MyThread2 extends Thread {
+          @Override
+          public void run() {
+              System.out.println("Thread 2 is running");
+          }
+      }
+
+      class MyRunnable implements Runnable {
+          @Override
+          public void run() {
+              System.out.println("My runnable object is running");
           }
       }
     #+end_src
 
-    #+RESULTS:
-    : Future done? false
-    : Future done? true
-    : Result: 42
+    A more interesting example could be the following:
 
-
-    Calls to =future.get()= will block the current thread and wait until the
-    computation finish. But, sometimes this call can runs forever and making the
-    program unresponsive. To counterattack this type of scenarios, you can add a
-    timeout to avoid endless executions. An example below:
-
-    #+begin_src java :output results
-      import java.util.concurrent.Callable;
-      import java.util.concurrent.Executors;
-      import java.util.concurrent.ExecutorService;
-      import java.util.concurrent.ExecutionException;
-      import java.util.concurrent.Future;
-      import java.util.concurrent.TimeUnit;
-      import java.util.concurrent.TimeoutException;
-
+    #+caption: Second example of how to create threads
+    #+begin_src java -n :output results
+      package mx.unam.concurrent;
 
       public class App {
-          public static void main(String args[]) throws ExecutionException {
-              Callable<Integer> task = () -> {
-                  try {
-                      TimeUnit.SECONDS.sleep(4);
-                      return 42;
-                  }
-                  catch (InterruptedException e) {
-                      System.out.println("Error " + e.getMessage());
-                      e.printStackTrace();
-                  }
-                  return -1;
-              };
 
-              ExecutorService executor = Executors.newFixedThreadPool(1);
-              try {
-                  Future<Integer> future = executor.submit(task);
-                  System.out.println(String.format("Future done? %b", future.isDone()));
-                  Integer result = future.get(1, TimeUnit.SECONDS);
-                  System.out.println(String.format("Future done? %b", future.isDone()));
-                  System.out.println(String.format("Result: %d", result));
-                  executor.shutdown();
+          public static void main(String[] args) {
+              MyThread1 obj1 = new MyThread1();
+              MyThread2 obj2 = new MyThread2();
+              Thread t = new Thread(new MyRunnable());
+              obj1.start();
+              obj2.start();
+              t.start();
+          }
+      }
+
+      class MyThread1 extends Thread {
+          @Override
+          public void run() {
+              for (int i = 0; i < 10; i++) {
+                  String output = String.format("Thread 1 is running. Iter: %d", i);
+                  System.out.println(output);
               }
-              catch (InterruptedException | ExecutionException | TimeoutException e) {
-                  System.out.println("Error " + e.getLocalizedMessage());
-                  e.printStackTrace();
-                  executor.shutdown();
+          }
+      }
+
+      class MyThread2 extends Thread {
+          @Override
+          public void run() {
+              for (int i = 0; i < 10; i++) {
+                  String output = String.format("Thread 2 is running. Iter: %d", i);
+                  System.out.println(output);
+              }
+          }
+      }
+
+      class MyRunnable implements Runnable {
+          @Override
+          public void run() {
+              for (int i = 0; i < 10; i++) {
+                  String output = String
+                      .format("My runnable object is running. Iter: %d", i);
+                  System.out.println(output);
               }
           }
       }
     #+end_src
 
+    A possible output for the previous code is the following. We can observe how
+    the calls to the =println= method are interspersed. In a sequential execution,
+    the output of the object =obj1= should be printed (the sequence of =printlns=
+    from zero to nine) followed by the output of the =obj2= (the sequence of
+    printlns from zero to nine) and similarly, in the end, the output from the
+    object =t=, but, in this, there is not a order in how the objects are
+    called.
+
+*** Thread managment
+
+    After seeing how to use threads in a basic way, now let us discuss some
+    methods available to thread management. More documentation about these
+    methods is available on
+    https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Thread.html.
+    The methods that we refer are:
+
+    - start
+    - suspend
+    - stop
+    - sleep
+    - join
+
+    We will exemplify the use of the first four methods using the program shown
+    in the code [[Threads]].
+
+    #+caption: Code example using methods for control threads.
+    #+name: Threads
+    #+begin_src java -n :output results
+      public class App {
+          public static void main(String[] args) {
+              MyThread t1 = new MyThread("First Thread");
+              MyThread t2 = new MyThread("Second Thread");
+              try {
+                  Thread.sleep(500); // Sleeping for 500ms
+                  t1.stop();
+                  t2.stop();
+                  Thread.sleep(500);
+              }
+              catch (InterruptedException e) {
+                  System.out.format("Interrupted Exception: %s\n",
+                                    e.getMessage());
+                  e.printStackTrace();
+              }
+              System.out.println("Exiting the main thread");
+          }
+      }
+      class MyThread implements Runnable {
+          private boolean exit;
+          private String name;
+          Thread t;
+
+          public MyThread(String threadName) {
+              name = threadName;
+              t = new Thread(this, name);
+              System.out.format("New Thread: %s\n", t.toString());
+              exit = false;
+              t.start(); // Starting the thread
+          }
+
+          @Override
+          public void run() {
+              int i = 0;
+              while (!exit) {
+                  System.out.format("%s: %d\n", name, i);
+                  i++;
+                  try {
+                      Thread.sleep(100); // Sleeping for 100ms
+                  }
+                  catch (InterruptedException e) {
+                      System.out.format("Interrupted Exception:  %s\n",
+                                        e.getMessage());
+                      e.printStackTrace();
+                  }
+              }
+          }
+
+          public void stop() {
+              exit = true;
+          }
+      }
+    #+end_src
+
+    This program declares an inner class called ~MyThread~, which implements the
+    Runnable interface. The class constructor takes as a parameter a string,
+    which represents the name for the instance. Inside of the constructor, the
+    instance declares a thread and starts it with the method =start()=. This
+    method will invoke the method =run=. In this method, it will print the name of
+    the instance with the value of a counter. The counter will increase it every
+    100 milliseconds. The class ~MyThread~ also have a method =stop=, where we
+    indicating when the method =run= should stop.
+
+    Additionally, the ~App~ class will contain the main method. In this method, it
+    will declare two instances of class ~MyThread~ with distinct names. Then, the
+    main thread will do the following:
+
+    - sleeps by 500 milliseconds
+    - calls the method =stop= of the two instances
+    - and then, it sleeps for another 500 milliseconds.
+
+    A possible output for the execution of the previous code is the following:
+
     #+RESULTS:
-    : Future done? false
-    : Error null
+    #+begin_example
+    New Thread: Thread[First Thread,5,main]
+    New Thread: Thread[Second Thread,5,main]
+    First Thread: 0
+    Second Thread: 0
+    Second Thread: 1
+    First Thread: 1
+    Second Thread: 2
+    First Thread: 2
+    First Thread: 3
+    Second Thread: 3
+    Second Thread: 4
+    First Thread: 4
+    Exiting the main thread
+    #+end_example
+
+    The =join()= method allows one thread to wait until another thread completes
+    its execution. From Oracle's documentation:
+
+    #+begin_quote
+    If =t= is a ~Thread~ object whose thread is currently executing, =t.join()=
+    causes the current thread pauses execution until =t='s thread terminates.
+    #+end_quote
+
+    Let's look at a more elaborate example:
+
+    #+caption: Example using =join()= method.
+    #+begin_src java -n :output results
+      public class App {
+
+          static void threadMessage(String message) {
+              String threadName = Thread.currentThread().getName();
+              System.out.format("%s: %s%n", threadName, message);
+          }
+
+          private static class MessageLoop
+              implements Runnable {
+              public void run() {
+                  String importantInfo[] = {
+                      "Some content",
+                      "Another String",
+                      "Doing nothing",
+                      "I'm close to finishing"
+                  };
+                  try {
+                      for (int i = 0; i < importantInfo.length; i++) {
+                          Thread.sleep(4000);
+                          threadMessage(importantInfo[i]);
+                      }
+                  } catch (InterruptedException e) {
+                      threadMessage("I wasn't done!");
+                  }
+              }
+          }
+
+          public static void main(String args[])
+              throws InterruptedException {
+
+              long patience = 1000 * 60 * 60;
+              if (args.length > 0) {
+                  try {
+                      patience = Long.parseLong(args[0]) * 1000;
+                  } catch (NumberFormatException e) {
+                      System.err.println("Argument must be an integer.");
+                      System.exit(1);
+                  }
+              }
+
+              threadMessage("Starting MessageLoop thread");
+              long startTime = System.currentTimeMillis();
+              Thread t = new Thread(new MessageLoop());
+              t.start();
+
+              threadMessage("Waiting for MessageLoop thread to finish");
+              while (t.isAlive()) {
+                  threadMessage("Still waiting...");
+                  t.join(1000);
+                  if (((System.currentTimeMillis() - startTime) > patience)
+                      && t.isAlive()) {
+                      threadMessage("Tired of waiting!");
+                      t.interrupt();
+                      t.join();
+                  }
+              }
+              threadMessage("Finally!");
+          }
+      }
+    #+end_src
+
+    A possible output may be the following:
+
+    #+RESULTS:
+    #+begin_example
+    main: Starting MessageLoop thread
+    main: Waiting for MessageLoop thread to finish
+    main: Still waiting...
+    main: Still waiting...
+    main: Still waiting...
+    main: Still waiting...
+    Thread-0: Some content
+    main: Still waiting...
+    main: Still waiting...
+    main: Still waiting...
+    main: Still waiting...
+    Thread-0: Another String
+    main: Still waiting...
+    main: Still waiting...
+    main: Still waiting...
+    main: Still waiting...
+    Thread-0: Doing nothing
+    main: Still waiting...
+    main: Still waiting...
+    main: Still waiting...
+    main: Still waiting...
+    Thread-0: I'm close to finishing
+    main: Finally!
+    #+end_example
 
 
-    The last method we will cover of ExecutorService (there are a plenty more
-    but we will not cover them) is =invokeAll=. =InvokeAll= allows batch submitting
-    of multiple /callables/. This method accepts a collection of /callables/ and
-    returns a list of /futures/.
+*** Executors
 
-    #+begin_src java :output results
-      import java.util.concurrent.Callable;
+    Sometimes, work directly with threads could be a bit difficult and can
+    introduce some errors or mistakes. To avoid this, the concurrent API of java
+    provides a class called =ExecutorService=
+    (=java.util.conccurent.ExecutorService=). This class is capable of execute
+    asynchronous tasks and manage a pool of threads. Thus, we don't have to
+    create threads by hand. Also, the threads in the pool can be reused
+    throughout the life-cycle of our application.
+
+    The basic way to create an instance of =ExecutorService= is through the factory
+    class =Executors= (=java.util.concurrent.Executors=). This factory class provides
+    many static methods to create different instances. Variants of the
+    instantiated class usually are parameterized according the number of threads
+    or the number of cores available. An small example is shown in the code
+    [[executors]].
+
+    #+caption: Using executors to manage threads and runnables.
+    #+name: executors
+    #+begin_src java -n :output results
       import java.util.concurrent.Executors;
       import java.util.concurrent.ExecutorService;
-      import java.util.concurrent.ExecutionException;
-      import java.util.concurrent.Future;
-      import java.util.concurrent.TimeUnit;
 
       public class App {
-          public static void main(String args[]) throws ExecutionException {
+
+          private static void doLongWork(String name) {
+              String message = String.format("Hello %s, how is going?", name);
+              System.out.println(message);
               try {
-                  ExecutorService executor = Executors.newFixedThreadPool(1);
-
-                  List<Callable<String>> callables = Arrays
-                      .asList(
-                              () -> {
-                                  TimeUnit.SECONDS.sleep(2);
-                                  return "task 1";
-                              },
-                              () -> {
-                                  TimeUnit.SECONDS.sleep(2);
-                                  return "task 2";
-                              },
-                              () -> {
-                                  TimeUnit.SECONDS.sleep(2);
-                                  return "task 3";
-                              });
-
-                  executor.invokeAll(callables)
-                      .stream()
-                      .map(future -> {
-                              try {
-                                  return future.get();
-                              } catch (Exception e) {
-                                  throw new IllegalStateException(e);
-                              }
-                          })
-                      .forEach(System.out::println);
-                  executor.shutdown();
+                  Thread.sleep(1001);
               }
               catch (InterruptedException e) {
                   System.out.println("Error " + e.getMessage());
                   e.printStackTrace();
               }
           }
+
+          public static void main(String[] args) {
+              int numProcessors = Runtime.getRuntime().availableProcessors();
+              ExecutorService executor = Executors
+                  .newFixedThreadPool(numProcessors);
+              for (int i = 0; i < numProcessors; i++) {
+                  final int name = i;
+                  executor.execute(() -> doLongWork(String.format("thread %d",
+                                                                  name)));
+              }
+              executor.shutdown();
+          }
       }
     #+end_src
 
+    In the main method of the code [[executors]], we get the number of hardware
+    threads available in our machine. Then, we declare an instance of
+    ExecutorService with a pool of k threads. Thereafter, we launch a lambda
+    function[fn:4] calling a method that it does some long work. For each core,
+    we run the lambda function. At the end of the program, we have to stop
+    explicitly the ExecutorService, if we did not do that, the service will keep
+    listening for new tasks and never stops. Finally, we get a result like shown
+    below:
+
     #+RESULTS:
-    : task 2
-    : task 3
-    : task 1
+    : Hello thread 0, how is going?
+    : Hello thread 1, how is going?
+    : Hello thread 7, how is going?
+    : Hello thread 6, how is going?
+    : Hello thread 2, how is going?
+    : Hello thread 4, how is going?
+    : Hello thread 5, how is going?
+    : Hello thread 3, how is going?
 
-    We can get better results if we increment the number of available threads
-    for the executorService. By example, using the previous instruction and
-    setting it as the fixed value:
+**** Callables and Futures
 
-    #+begin_src java
-      int numProcessors = Runtime.getRuntime().availableProcessors();
-      ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-    #+end_src
-
-    It is not necessary call =parallelStream= from the *Stream* API because the
-    =executorService= assign each task to an available thread in its pool. But,
-    depending on the method called (=stream= or =parallelStream=), the order of the
-    results may vary. This is due to stream (sequential) is pipelined in a
-    single thread instead of use multiple threads.
-
-
-** Synchronized and locks
+     Like Runnable, executors can work with other kinds of tasks. We called these
+     tasks callables (~Callable~ interface). Such interface is similar to ~Runnable~,
+     but instead of returning void after calling its =run= method, it returns a
+     value. These objects are parameters for the method =submit= of the
+     executorService. This method does not wait until the task completes. The
+     executor service cannot return the result of the callable objecty. In that
+     case, the executor returns an object of type ~Future~. We can retrieve the
+     computation result from the ~Callable~ object using the ~Future~ objects. The
+     /futures/ have a method called =isDone()=, with this method we can check if the
+     /future/ has already finished its execution. Another method available for
+     /futures/ is =get()=. Calling this method blocks the current threads and waits
+     until the /callable/ completes its execution. An example is below:
 
 
-*** Synchronized
+     #+caption: Basic example of callables and futures.
+     #+name: futures
+     #+begin_src java -n
+       import java.util.concurrent.Callable;
+       import java.util.concurrent.Executors;
+       import java.util.concurrent.ExecutorService;
+       import java.util.concurrent.ExecutionException;
+       import java.util.concurrent.Future;
+       import java.util.concurrent.TimeUnit;
 
-    When we implement a more complex multithreaded program, there are sections
-    of code that are accessed by multiple threads. We need to pay attention when
-    accessing to shared mutable variable concurrently. By example, lets think in
-    a counter used by multiple threads concurrently. A first approach could be
-    the following:
+       public class App {
+           public static void main(String args[]) throws ExecutionException {
+               Callable<Integer> task = () -> {
+                   try {
+                       TimeUnit.SECONDS.sleep(2);
+                       return 42;
+                   }
+                   catch (InterruptedException e) {
+                       System.out.println("Error " + e.getMessage());
+                       e.printStackTrace();
+                   }
+                   return -1;
+               };
 
-    #+begin_src java
-      import java.util.concurrent.ExecutorService;
+               ExecutorService executor = Executors.newFixedThreadPool(1);
+               try {
+                   Future<Integer> future = executor.submit(task);
+                   System.out.printf("Future done? %b\n", future.isDone());
+                   Integer result = future.get();
+                   System.out.printf("Future done? %b\n", future.isDone());
+                   System.out.printf("Result: %d\n", result);
+                   executor.shutdown();
+               }
+               catch (InterruptedException | ExecutionException e) {
+                   System.out.printf("Error %s\n", e.getMessage());
+                   e.printStackTrace();
+                   executor.shutdown();
+               }
+           }
+       }
+     #+end_src
+
+     #+RESULTS:
+     : Future done? false
+     : Future done? true
+     : Result: 42
+
+
+     Calls to =future.get()= will block the current thread and wait until the
+     computation finish. But, sometimes this call can runs forever and making the
+     program unresponsive. To counterattack this type of scenarios, you can add a
+     timeout to avoid endless executions. An example below:
+
+     #+caption: Adding timeouts to avoid endless executions.
+     #+begin_src java -n :output results
+       import java.util.concurrent.Callable;
+       import java.util.concurrent.Executors;
+       import java.util.concurrent.ExecutorService;
+       import java.util.concurrent.ExecutionException;
+       import java.util.concurrent.Future;
+       import java.util.concurrent.TimeUnit;
+       import java.util.concurrent.TimeoutException;
+
+       public class App {
+           public static void main(String args[]) throws ExecutionException {
+               Callable<Integer> task = () -> {
+                   try {
+                       TimeUnit.SECONDS.sleep(4);
+                       return 42;
+                   }
+                   catch (InterruptedException e) {
+                       System.out.println("Error " + e.getMessage());
+                       e.printStackTrace();
+                   }
+                   return -1;
+               };
+
+               ExecutorService executor = Executors.newFixedThreadPool(1);
+               try {
+                   Future<Integer> future = executor.submit(task);
+                   System.out.printf("Future done? %b\n", future.isDone());
+                   Integer result = future.get(1, TimeUnit.SECONDS);
+                   System.out.printf("Future done? %b\n", future.isDone());
+                   System.out.printf("Result: %d\n", result);
+                   executor.shutdown();
+               }
+               catch (InterruptedException | ExecutionException
+                      | TimeoutException e) {
+                   System.out.printf("Error %s\n", e.getLocalizedMessage());
+                   e.printStackTrace();
+                   executor.shutdown();
+               }
+           }
+       }
+     #+end_src
+
+     #+RESULTS:
+     : Future done? false
+     : Error null
+
+
+     The last method we will cover of ExecutorService (there are a plenty more
+     but we will not cover them) is =invokeAll=. =InvokeAll= allows batch submitting
+     of multiple /callables/. This method accepts a collection of /callables/ and
+     returns a list of /futures/.
+
+     #+caption: Running tasks in batch
+     #+begin_src java -n :output results
+       import java.util.concurrent.Callable;
+       import java.util.concurrent.Executors;
+       import java.util.concurrent.ExecutorService;
+       import java.util.concurrent.ExecutionException;
+       import java.util.concurrent.Future;
+       import java.util.concurrent.TimeUnit;
+
+       public class App {
+           public static void main(String args[]) throws ExecutionException {
+               try {
+                   ExecutorService executor = Executors.newFixedThreadPool(1);
+
+                   List<Callable<String>> callables = Arrays
+                       .asList(
+                               () -> {
+                                   TimeUnit.SECONDS.sleep(2);
+                                   return "task 1";
+                               },
+                               () -> {
+                                   TimeUnit.SECONDS.sleep(2);
+                                   return "task 2";
+                               },
+                               () -> {
+                                   TimeUnit.SECONDS.sleep(2);
+                                   return "task 3";
+                               });
+
+                   executor.invokeAll(callables)
+                       .stream()
+                       .map(future -> {
+                               try {
+                                   return future.get();
+                               } catch (Exception e) {
+                                   throw new IllegalStateException(e);
+                               }
+                           })
+                       .forEach(System.out::println);
+                   executor.shutdown();
+               }
+               catch (InterruptedException e) {
+                   System.out.println("Error " + e.getMessage());
+                   e.printStackTrace();
+               }
+           }
+       }
+     #+end_src
+
+     #+RESULTS:
+     : task 2
+     : task 3
+     : task 1
+
+     We can get better results if we increment the number of available threads
+     for the executorService. By example, using the previous instruction and
+     setting it as the fixed value:
+
+     #+caption: Getting the total of hardware threads available in the machine.
+     #+begin_src java -n
+       int numProcessors = Runtime.getRuntime().availableProcessors();
+       ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+     #+end_src
+
+     It is not necessary call =parallelStream= from the *Stream* API because the
+     =executorService= assign each task to an available thread in its pool. But,
+     depending on the method called (=stream= or =parallelStream=), the order of the
+     results may vary. This is due to stream (sequential) is pipelined in a
+     single thread instead of use multiple threads.
+
+
+*** Synchronized and locks
+
+
+**** Synchronized
+
+     When we implement a more complex multithreaded program, there are sections
+     of code that are accessed by multiple threads. We need to pay attention when
+     accessing to shared mutable variable concurrently. By example, lets think in
+     a counter used by multiple threads concurrently. A first approach could be
+     the following:
+
+     #+caption: Concurrent counter without synchronization
+     #+begin_src java
+       import java.util.concurrent.ExecutorService;
+       import java.util.concurrent.Executors;
+       import java.util.stream.IntStream;
+
+       public class App {
+           public static void main(String[] args) {
+               Counter c = new Counter();
+               c.test();
+           }
+       }
+
+       class Counter {
+           int count = 0;
+           void increment() {
+               count = count + 1;
+           }
+           public void test() {
+               int numProcessors = Runtime.getRuntime().availableProcessors();
+               ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+               IntStream.range(0, 10000)
+                   .forEach(i -> executor.submit(this::increment));
+               executor.shutdown();
+               System.out.println(count);
+           }
+       }
+     #+end_src
+
+     #+RESULTS:
+     : 3772
+
+     We can see that the value obtained is inconsistent with the value
+     expected. This happen due a race condition.  To avoid this problem, java
+     provides a simple mechanism to provide thread synchronization, this through
+     the keyword =synchronized=. Internally, Java uses a monitor lock to manage
+     synchronization. Let see an example:
+
+     #+caption: Using the keyword =synchronized= to provide basic synchronization.
+     #+begin_src java
+       import java.util.concurrent.ExecutorService;
+       import java.util.concurrent.Executors;
+       import java.util.concurrent.TimeUnit;
+       import java.util.stream.IntStream;
+
+       public class App {
+
+           public static void main(String[] args) throws InterruptedException {
+               Counter c = new Counter();
+               c.test();
+           }
+       }
+       class Counter {
+           int count = 0;
+           synchronized void increment() {
+               count = count + 1;
+           }
+           public void test() throws InterruptedException {
+               int numProcessors = Runtime.getRuntime().availableProcessors();
+               ExecutorService executor = Executors
+                   .newFixedThreadPool(numProcessors);
+               IntStream.range(0, 10000)
+                   .forEach(i -> executor.submit(this::increment));
+
+               stop(executor);
+               System.out.println(count);
+           }
+
+           public static void stop(ExecutorService executor) {
+               try {
+                   executor.shutdown();
+                   // give it time to finish
+                   executor.awaitTermination(60, TimeUnit.SECONDS);
+               } catch (InterruptedException ex) {
+                   ex.printStackTrace();
+               } finally {
+                   if (!executor.isTerminated()) {
+                       System.out.println("Termination interrupted");
+                   }
+                   executor.shutdown();
+               }
+           }
+       }
+     #+end_src
+
+     #+RESULTS:
+     : 10000
+
+     There are more uses to the keyword synchronized, but we do not discuss them
+     in this tutorial.
+
+
+**** Locks
+
+
+     Another tool provide by Java to manage synchronization are the looks. With
+     them, we can set lock mechanisms in an explicit way. Locks support many
+     methods for finer grained synchronization control. Java provides many types
+     of locks, by  example:
+     - =ReentrantLock=,
+     - =ReentrantReadWriteLock= or
+     - =StampedLock=.
+
+     Locks that implement the interface =java.util.concurrent.locks.Lock=, use the
+     methods =lock()= and =unlock()= to provide locking explicitly. Another important
+     operation provided by this interface is tryLock(), used to try get the lock
+     without pausing the current thread. =ReentrantLock= is a class that implements
+     the =Lock= interface.
+
+     Let see an example:
+
+     #+caption: =ReentrantLock= example.
+     #+begin_src java -n
+       import java.util.concurrent.Executors;
+       import java.util.concurrent.ExecutorService;
+       import java.util.concurrent.TimeUnit;
+       import java.util.concurrent.locks.ReentrantLock;
+
+       public class App {
+
+           public static void main(String[] args) throws InterruptedException {
+               int numProcessors = Runtime.getRuntime().availableProcessors();
+               ExecutorService executor = Executors
+                   .newFixedThreadPool(numProcessors);
+               ReentrantLock lock = new ReentrantLock();
+               executor.submit(() -> {
+                       lock.lock();
+                       try {
+                           TimeUnit.SECONDS.sleep(4);
+                           System.out.println("wake up");
+                       } catch (InterruptedException ex) {
+                           ex.printStackTrace();
+                       } finally {
+                           lock.unlock();
+                       }
+                   });
+               executor.submit(() -> {
+                       System.out.printf("Locked: %b\n", lock.isLocked());
+                       System.out.printf("Held by me: %b\n",
+                                          lock.isHeldByCurrentThread());
+                       boolean locked = lock.tryLock();
+                       System.out.printf("Lock aquired: %b\n", locked);
+                   });
+               executor.shutdown();
+           }
+       }
+     #+end_src
+
+     #+RESULTS:
+     : Locked: true
+     : Held by me: false
+     : lock aquired: false
+     : wake up
+
+     The class =ReentrantReadWriteLock= is another lock class that implements the
+     interface =ReadWriteLock=.  The idea behind is to have a pair of locks for
+     read-and-write access. Usually, it is safe to read mutable shared variables
+     while nobody is writing over them. Thus, the read-lock can be held by many
+     threads while no thread holds the write-lock. Using this lock, we can
+     improve performance and throughput when reads are more frequent than
+     writes. An example is below:
+
+     #+caption: =ReentrantReadWriteLock= example.
+     #+begin_src java -n
+       import java.util.concurrent.Executors;
+       import java.util.concurrent.ExecutorService;
+       import java.util.concurrent.TimeUnit;
+       import java.util.concurrent.locks.ReentrantLock;
+       import java.util.concurrent.locks.ReentrantReadWriteLock;
+       import java.util.concurrent.locks.ReadWriteLock;
+       import java.util.Map;
+       import java.util.HashMap;
+
+       public class App {
+
+           public static void main(String[] args) throws InterruptedException {
+               int numProcessors = Runtime.getRuntime().availableProcessors();
+               ExecutorService executor = Executors.
+                   newFixedThreadPool(numProcessors);
+               Map<String, String> map = new HashMap<>();
+               ReadWriteLock lock = new ReentrantReadWriteLock();
+               executor.submit(() -> {
+                       lock.writeLock().lock();
+                       try {
+                           System.out.println("Putting information into the map");
+                           TimeUnit.SECONDS.sleep(4);
+                           map.put("foo", "bar");
+                       } catch (InterruptedException ex) {
+                           ex.printStackTrace();
+                       } finally {
+                           lock.writeLock().unlock();
+                       }
+                   });
+
+               Runnable readTask = () -> {
+                   lock.readLock().lock();
+                   try {
+                       String threadName = Thread.currentThread().getName();
+                       System.out.printf("Name %s, value: %s\n",
+                                         threadName, map.get("foo"));
+                       TimeUnit.SECONDS.sleep(1);
+                   } catch(InterruptedException ex) {
+                       ex.printStackTrace();
+                   } finally {
+                       lock.readLock().unlock();
+                   }
+               };
+
+               executor.submit(readTask);
+               executor.submit(readTask);
+
+               executor.shutdown();
+           }
+       }
+     #+end_src
+
+     #+RESULTS:
+     : Putting information into the map
+     : Name pool-1-thread-2, value: bar
+     : Name pool-1-thread-3, value: bar
+
+*** Atomic Variables
+
+    Java provides many classes to perform atomic operations over multiple data
+    types. Inside of these classes, the atomic operations are handled by
+    compare-and-swap or swap (getAndSet) instructions, which are atomic
+    instructions directly supported by most modern CPUs. These classes lives in
+    the package =java.util.concurrent.atomic= and some examples are:
+
+    - AtomicInteger
+    - AtomicLong
+    - AtomicReference
+    - AtomicStampedReference
+    - AtomicIntegerArray
+
+    The specification for the atomic accesses performed by these classes is
+    described in the documentation of =java.lang.invoke.VarHandle= (for java
+    9+). Some methods that they share are:
+
+    - compareAndExchange
+    - compareAndSet
+    - getAndIncrement
+    - getAndSet
+
+    Let's see an example of how use the atomic variables:
+
+    #+caption: Example of usage for =AtomicInteger=.
+    #+begin_src java -n
       import java.util.concurrent.Executors;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.TimeUnit;
+      import java.util.concurrent.atomic.AtomicInteger;
       import java.util.stream.IntStream;
 
       public class App {
 
-          public static void main(String[] args) {
-              Counter c = new Counter();
-              c.test();
+          public static void stop(ExecutorService executor) {
+              try {
+                  executor.shutdown();
+                  // give it time to finish
+                  executor.awaitTermination(60, TimeUnit.SECONDS);
+              } catch (InterruptedException ex) {
+                  ex.printStackTrace();
+              } finally {
+                  if (!executor.isTerminated()) {
+                      System.out.println("Termination interrupted");
+                  }
+                  executor.shutdown();
+              }
           }
 
-      }
-
-      class Counter {
-          int count = 0;
-
-          void increment() {
-              count = count + 1;
-          }
-
-          public void test() {
+          public static void main(String[] args) throws InterruptedException {
               int numProcessors = Runtime.getRuntime().availableProcessors();
-              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-              IntStream.range(0, 10000)
-                  .forEach(i -> executor.submit(this::increment));
+              ExecutorService executor = Executors
+                  .newFixedThreadPool(numProcessors);
+              AtomicInteger atomicInt = new AtomicInteger(0);
 
-              executor.shutdown();
-              System.out.println(count);
+              IntStream.range(0, 10000)
+                  .forEach(i -> executor.submit(atomicInt::incrementAndGet));
+
+              stop(executor);
+              System.out.println("Value is: " + atomicInt.get());
           }
       }
     #+end_src
 
     #+RESULTS:
-    : 3772
+    : Value is: 10000
 
-    We can see that the value obtained is inconsistent with the value
-    expected. This happen due a race condition.  To avoid this problem, java
-    provides a simple mechanism to provide thread synchronization, this through
-    the keyword =synchronized=. Internally, Java uses a monitor lock to manage
-    synchronization. Let see an example:
 
-    #+begin_src java
-      import java.util.concurrent.ExecutorService;
+*** Synchronizers
+
+    Five classes aid common special purpose synchronization idioms:
+
+    - Semaphore :: This class is capable of maintaining whole set of
+      permits. Useful in scenarios where we need to limit the amount of
+      concurrent access to certain parts of the application. In the next example,
+      we define a semaphore limiting the number of concurrent accesses to the
+      total of available processors divided by 2 and trying execute all tasks
+      (the number the tasks is the number of available processors). The semaphore
+      limits the concurrent access only to the number defined previously. Each
+      task will try acquire the semaphore (trying by one second) and if it got
+      it, it will sleep for 5 seconds. In other case, it will print that could
+      not acquire the semaphore.
+
+    #+caption: First example of synchronizers: =Semaphore=
+    #+begin_src java -n :output results
       import java.util.concurrent.Executors;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.TimeUnit;
+      import java.util.concurrent.Semaphore;
+      import java.util.concurrent.atomic.AtomicInteger;
       import java.util.stream.IntStream;
 
       public class App {
-
-          public static void main(String[] args) {
-              Counter c = new Counter();
-              c.test();
-          }
-
-      }
-
-      class Counter {
-          int count = 0;
-
-          synchronized void increment() {
-              count = count + 1;
-          }
-
-          public void test() {
-              int numProcessors = Runtime.getRuntime().availableProcessors();
-              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-              IntStream.range(0, 10000)
-                  .forEach(i -> executor.submit(this::increment));
-
-              executor.shutdown();
-              System.out.println(count);
-          }
-      }
-    #+end_src
-
-    #+RESULTS:
-    : 10000
-
-    There are more uses to the keyword synchronized, but we do not discuss them
-    in this tutorial.
-
-
-*** Locks
-
-
-    Another tool provide by Java to manage synchronization are the looks. With
-    them, we can set lock mechanisms in an explicit way. Locks support many
-    methods for finer grained synchronization control. Java provides many types
-    of locks, by  example =ReentrantLock=, =ReentrantReadWriteLock= or
-    =StampedLock=. Locks that implement the interface
-    =java.util.concurrent.locks.Lock=, use the methods =lock()= and =unlock()= to
-    provide locking explicitly. Another important operation provided by this
-    interface is tryLock(), used to try get the lock without pausing the current
-    thread. =ReentrantLock= is a class that implements the =Lock= interface.
-
-    Let see an example:
-
-    #+begin_src java
-      import java.util.concurrent.Executors;
-      import java.util.concurrent.ExecutorService;
-      import java.util.concurrent.TimeUnit;
-      import java.util.concurrent.locks.ReentrantLock;
-
-      public class App {
-
           public static void main(String[] args) throws InterruptedException {
               int numProcessors = Runtime.getRuntime().availableProcessors();
-              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-              ReentrantLock lock = new ReentrantLock();
-              executor.submit(() -> {
-                      lock.lock();
-                      try {
-                          TimeUnit.SECONDS.sleep(4);
-                          System.out.println("wake up");
-                      } catch (InterruptedException ex) {
-                          ex.printStackTrace();
-                      } finally {
-                          lock.unlock();
-                      }
-                  });
-              executor.submit(() -> {
-                      System.out.println("Locked: " + lock.isLocked());
-                      System.out.println("Held by me: " + lock.isHeldByCurrentThread());
-                      boolean locked = lock.tryLock();
-                      System.out.println("lock aquired: " + locked);
-                  });
-              executor.shutdown();
-          }
-      }
-    #+end_src
-
-    #+RESULTS:
-    : Locked: true
-    : Held by me: false
-    : lock aquired: false
-    : wake up
-
-    The class =ReentrantReadWriteLock= is another lock class that implements the
-    interface =ReadWriteLock=.  The idea behind is to have a pair of locks for
-    read-and-write access. Usually, it is safe to read mutable shared variables
-    while nobody is writing over them. Thus, the read-lock can be held by many
-    threads while no thread holds the write-lock. Using this lock, we can
-    improve performance and throughput when reads are more frequent than
-    writes. An example is below:
-
-    #+begin_src java
-      import java.util.concurrent.Executors;
-      import java.util.concurrent.ExecutorService;
-      import java.util.concurrent.TimeUnit;
-      import java.util.concurrent.locks.ReentrantLock;
-      import java.util.concurrent.locks.ReentrantReadWriteLock;
-      import java.util.concurrent.locks.ReadWriteLock;
-      import java.util.Map;
-      import java.util.HashMap;
-
-      public class App {
-
-          public static void main(String[] args) throws InterruptedException {
-              int numProcessors = Runtime.getRuntime().availableProcessors();
-              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-              Map<String, String> map = new HashMap<>();
-
-              ReadWriteLock lock = new ReentrantReadWriteLock();
-
-              executor.submit(() -> {
-                      lock.writeLock().lock();
-                      try {
-                          System.out.println("Putting information into the map");
-                          TimeUnit.SECONDS.sleep(4);
-                          map.put("foo", "bar");
-                      } catch (InterruptedException ex) {
-                          ex.printStackTrace();
-                      } finally {
-                          lock.writeLock().unlock();
-                      }
-                  });
-
-              Runnable readTask = () -> {
-                  lock.readLock().lock();
+              ExecutorService executor = Executors
+                  .newFixedThreadPool(numProcessors);
+              Semaphore semaphore = new Semaphore(numProcessors / 2);
+              Runnable longRunningTask = () -> {
+                  boolean permit = false;
                   try {
-                      String threadName = Thread.currentThread().getName();
-                      String message = String.format("Name %s, value: %s", threadName, map.get("foo"));
-                      System.out.println(message);
-                      TimeUnit.SECONDS.sleep(1);
-                  } catch(InterruptedException ex) {
-                      ex.printStackTrace();
+                      permit = semaphore.tryAcquire(1, TimeUnit.SECONDS);
+                      if (permit) {
+                          System.out.println("Semaphore acquired");
+                          sleep(5);
+                      } else {
+                          System.out.println("Could not acquire semaphore");
+                      }
+                  }
+                  catch (InterruptedException e) {
+                      System.out.println("Error " + e.getMessage());
+                      e.printStackTrace();
                   } finally {
-                      lock.readLock().unlock();
+                      if (permit) {
+                          semaphore.release();
+                      }
                   }
               };
-
-              executor.submit(readTask);
-              executor.submit(readTask);
-
-              executor.shutdown();
+              IntStream.range(0, numProcessors)
+                  .forEach(i -> executor.submit(longRunningTask));
+              stop(executor);
+          }
+          public static void stop(ExecutorService executor) {
+              try {
+                  executor.shutdown();
+                  // give it time to finish
+                  executor.awaitTermination(60, TimeUnit.SECONDS);
+              } catch (InterruptedException ex) {
+                  ex.printStackTrace();
+              } finally {
+                  if (!executor.isTerminated()) {
+                      System.out.println("Termination interrupted");
+                  }
+                  executor.shutdown();
+              }
+          }
+          public static void sleep(int seconds) {
+              try {
+                  TimeUnit.SECONDS.sleep(seconds);
+              } catch (InterruptedException e) {
+                  throw new IllegalStateException(e);
+              }
           }
       }
     #+end_src
 
     #+RESULTS:
-    : Putting information into the map
-    : Name pool-1-thread-2, value: bar
-    : Name pool-1-thread-3, value: bar
-
-    - [ ] StampedLock
-    - [ ] Semaphores
-
-** Atomic Variables
-
-   Java provides many classes to perform atomic operations over many data
-   types. Inside of these classes, the atomic operations are handled by
-   compare-and-swap or swap (getAndSet) instructions, which are atomic
-   instructions directly supported by most modern CPUs. These classes lives in
-   the package =java.util.concurrent.atomic= and some examples are:
-
-   - AtomicInteger
-   - AtomicLong
-   - AtomicReference
-   - AtomicStampedReference
-   - AtomicIntegerArray
-
-   The specification for the atomic accesses performed by these classes is
-   described in the documentation of =java.lang.invoke.VarHandle= (for java
-   9+). Some methods that they share are:
-
-   - compareAndExchange
-   - compareAndSet
-   - getAndIncrement
-   - getAndSet
-
-   Let's see an example of how use the atomic variables:
-
-   #+begin_src java
-     import java.util.concurrent.Executors;
-     import java.util.concurrent.ExecutorService;
-     import java.util.concurrent.TimeUnit;
-     import java.util.concurrent.atomic.AtomicInteger;
-     import java.util.stream.IntStream;
-
-     public class App {
-
-         public static void stop(ExecutorService executor) {
-             try {
-                 executor.shutdown();
-                 executor.awaitTermination(60, TimeUnit.SECONDS); // give it time to finish
-             } catch (InterruptedException ex) {
-                 ex.printStackTrace();
-             } finally {
-                 if (!executor.isTerminated()) {
-                     System.out.println("Termination interrupted");
-                 }
-                 executor.shutdown();
-             }
-         }
-
-         public static void main(String[] args) throws InterruptedException {
-             int numProcessors = Runtime.getRuntime().availableProcessors();
-             ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-             AtomicInteger atomicInt = new AtomicInteger(0);
-
-             IntStream.range(0, 10000).forEach(i -> executor.submit(atomicInt::incrementAndGet));
-
-             stop(executor);
-             System.out.println("Value is: " + atomicInt.get());
-         }
-     }
-   #+end_src
-
-   #+RESULTS:
-   : Value is: 10000
+    : Semaphore acquired
+    : Semaphore acquired
+    : Semaphore acquired
+    : Semaphore acquired
+    : Could not acquire semaphore
+    : Could not acquire semaphore
+    : Could not acquire semaphore
+    : Could not acquire semaphore
 
 
-** Synchronizers
+    - CountDownLatch :: This class is a synchronization aid that allows one or
+      more threads to wait until a set of operations being performed in other
+      threads completes. From the java documentation, we have:
 
-   Five classes aid common special purpose synchronization idioms:
+      #+begin_quote
+      A =CountDownLatch= is initialized with a given /count/. The await method
+      blocks until the current count reaches zero due to invocations of the
+      =countDown()= method, after which all waiting threads are released and any
+      subsequent invocations of await return immediately. This is a one-shot
+      phenomenon - count cannot be reset. If you need a version that resets the
+      count, consider using a CyclicBarrier.
+      #+end_quote
 
-   - Semaphore
-   - CountDownLatch
-   - CyclicBarrier
-   - Phaser
-   - Exchanger
 
-** Concurrent Collections
+    #+caption:  =CountDownLatch= example.
+    #+begin_src java -n
+      import java.util.Collections;
+      import java.util.LinkedList;
+      import java.util.List;
+      import java.util.concurrent.CountDownLatch;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.TimeUnit;
+      import java.util.stream.IntStream;
 
-   The Java Concurrent API provides multiple collections designed for use in
-   multithreaded contexts
+      public class App {
+
+          public static void main(String[] argv){
+              int numProcessors = Runtime.getRuntime().availableProcessors();
+              ExecutorService consumerExecutors = Executors.newFixedThreadPool(numProcessors);
+              List<Message> queue = Collections.synchronizedList(new LinkedList<Message>());
+              CountDownLatch doneSignal = new CountDownLatch(1);
+              CountDownLatch doneProducingSignal = new CountDownLatch(1);
+              CountDownLatch doneConsumingSignal = new CountDownLatch(numProcessors);
+              IntStream.range(0, numProcessors)
+                  .forEach(i -> {
+                          String name = String.format("%d", i);
+                          consumerExecutors.execute(new Consumer(name, queue,
+                                                                 doneProducingSignal,
+                                                                 doneConsumingSignal));
+                      });
+              queue.add(new Message( "1", 15000, doneSignal));
+              queue.add(new Message( "2", 15000, new CountDownLatch(1)));
+              doneProducingSignal.countDown();
+              boolean doneProcessing = false;
+              try {
+                  doneProcessing = doneSignal.await(3, TimeUnit.SECONDS);
+              } catch (InterruptedException e1) {
+                  e1.printStackTrace();
+              }
+              if ( doneProcessing ){
+                  System.out.println( "Processing is done.");
+              } else {
+                  System.out.println( "Processing is still running.");
+              }
+
+              System.out.println( "Shutting down the consumerExecutors");
+              doneProducingSignal.countDown();
+              try {
+                  doneConsumingSignal.await();
+              } catch (InterruptedException e1) {
+                  e1.printStackTrace();
+              }
+              consumerExecutors.shutdown();
+              System.out.println( "Done");
+          }
+      }
+
+      class Consumer implements Runnable {
+          private String id;
+          private List<Message> queue;
+          private CountDownLatch doneProducing;
+          private CountDownLatch doneConsuming;
+
+          Consumer(String id, List<Message> queue,
+                   CountDownLatch doneProducing,
+                   CountDownLatch doneConsuming){
+              this.id = id;
+              this.queue = queue;
+              this.doneProducing = doneProducing;
+              this.doneConsuming = doneConsuming;
+          }
+
+          @Override
+          public void run() {
+              while(doneProducing.getCount() != 0 || !queue.isEmpty()){
+                  Message m = null;
+                  synchronized(queue){
+                      if(!queue.isEmpty()) m = queue.remove(0);
+                  }
+                  if(m != null) consume(m);
+              }
+              System.out.printf("Consumer %s done\n", id);
+              doneConsuming.countDown();
+          }
+          public void consume(Message m ){
+              System.out.printf("Consumer %s consuming message %s\n",
+                                id, m.getId());
+              try {
+                  Thread.sleep(m.getTime());
+              } catch (InterruptedException e) {
+                  e.printStackTrace();
+              }
+              System.out.printf("Consumer %s done consumming msssage %s\n",
+                                id, m.getId());
+              m.getLatch().countDown();
+          }
+      }
+
+      class Message {
+          private String id;
+          private int time;
+          private CountDownLatch latch;
+          Message(String id, int time, CountDownLatch latch){
+              this.id = id;
+              this.time = time;
+              this.latch = latch;
+          }
+          public String getId() {
+              return id;
+          }
+          public int getTime() {
+              return time;
+          }
+          public CountDownLatch getLatch() {
+              return latch;
+          }
+      }
+
+    #+end_src
+
+
+    - CyclicBarrier :: This class is a synchronization aid that allows a set of
+      threads to all wait for each other to reach a common barrier
+      point. =CyclicBarriers= are useful in programs involving a fixed sized party
+      of threads that must occasionally wait for each other. The ~barrier~ is
+      called ~cyclic~ because it can reused after the waiting threads are
+      released. An example of use of this class is for using a barrier in a
+      parallel decomposition design:
+
+      #+caption: CyclicBarrier example
+      #+begin_src java -n :output results
+        import java.text.SimpleDateFormat;
+        import java.util.Date;
+        import java.util.concurrent.BrokenBarrierException;
+        import java.util.concurrent.CyclicBarrier;
+        import java.util.concurrent.ExecutorService;
+        import java.util.concurrent.Executors;
+        import java.util.concurrent.TimeUnit;
+        import java.util.stream.IntStream;
+
+        public class App {
+            public static void main(String[] args) {
+                int numProcessors = Runtime.getRuntime().availableProcessors();
+                CyclicBarrier cyclicBarrier = new CyclicBarrier(numProcessors,
+                                                                new CyclicTask());
+                ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+                System.out.println("Spawning Threads");
+                IntStream.range(0, numProcessors)
+                    .forEach(i -> {
+                            String name = String.format("Thread-%d", i);
+                            executor.execute(new WorkerThread(cyclicBarrier, name));
+                        });
+                System.out.println("Spawning Finished");
+                stop(executor);
+            }
+
+            public static void stop(ExecutorService executor) {
+                try {
+                    executor.shutdown();
+                    // give it time to finish
+                    executor.awaitTermination(60, TimeUnit.SECONDS);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                } finally {
+                    if (!executor.isTerminated()) {
+                        System.out.println("Termination interrupted");
+                    }
+                    executor.shutdown();
+                }
+            }
+        }
+
+        class WorkerThread implements Runnable {
+            private CyclicBarrier cyclicBarrier;
+            private String name;
+
+            public WorkerThread(CyclicBarrier cyclicBarrier, String name) {
+                this.name = name;
+                this.cyclicBarrier = cyclicBarrier;
+            }
+
+            public void run() {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    System.out.printf("%s: Doing Step 1 Work on %s\n",
+                                      getFormattedDate(sdf), name);
+                    sleep(getRandomWaitTime());
+                    System.out.printf("%s: Doing Step 1 more work on %s\n",
+                                      getFormattedDate(sdf), name);
+                    sleep(getRandomWaitTime());
+                    System.out.printf("%s: Finished Step 1 work on %s\n",
+                                      getFormattedDate(sdf), name);
+                    // Await returns for the other threads
+                    int count = cyclicBarrier.await();
+                    System.out.printf("%s: Cyclic Barrier count on %s is %d\n",
+                                      getFormattedDate(sdf), name, count);
+                    // If all threads have arrived 2 lines above, reset the barrier
+                    if(count == 0) {
+                        cyclicBarrier.reset();
+                    }
+                    System.out.printf("%s: Doing Step 2 Batch of Work on %s\n",
+                                      getFormattedDate(sdf), name);
+                    sleep(getRandomWaitTime());
+                    System.out.printf("%s: Doing Some more Step 2 Batch of work on %s\n",
+                                      getFormattedDate(sdf), name);
+                    sleep(getRandomWaitTime());
+                    System.out.printf("%s: Finished Step 2 Batch of work on %s\n",
+                                      getFormattedDate(sdf), name);
+                    count = cyclicBarrier.await();
+                    String template = "%s: Cyclic Barrier count end of " +
+                        "Step 2 Batch of work on %s is %d\n";
+                    System.out.printf(template, getFormattedDate(sdf), name, count);
+                } catch(InterruptedException | BrokenBarrierException e) {
+                    e.printStackTrace();
+                }
+            }
+            public static void sleep(int milliseconds) {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(milliseconds);
+                } catch (InterruptedException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+            private String getFormattedDate(SimpleDateFormat sdf) {
+                return sdf.format(new Date());
+            }
+            private int getRandomWaitTime() {
+                return (int) ((Math.random() + 1) * 1000);
+            }
+        }
+        class CyclicTask implements Runnable {
+            private int count = 1;
+
+            @Override
+            public void run() {
+                System.out.printf("Cyclic Barrier Finished %d\n", count++);
+            }
+        }
+      #+end_src
+
+    - Phaser :: This class is similar to =CyclicBarrier= and =CountDownLatch= in
+      functionality but supporting more flexible usage. This class allows
+      register tasks at any time and it permits un-registering also. Like a
+      =CyclicBarrier=, a =Phaser= may be repeatedly awaited for tasks synchronization
+      over the distinct phases. Method =arriveAndAwaitAdvance()= has effect
+      analogous to =CyclicBarrier.await=. With this tool also is possible
+      monitoring its state and determine if it terminate. Let's see an example:
+
+
+    #+caption:  =Phaser= example
+    #+begin_src java -n :results output
+      import java.text.SimpleDateFormat;
+      import java.util.Date;
+      import java.util.concurrent.ExecutorService;
+      import java.util.concurrent.Executors;
+      import java.util.concurrent.TimeUnit;
+      import java.util.concurrent.Phaser;
+      import java.util.stream.IntStream;
+
+      public class App {
+          public static void main(String[] args) {
+              int numProcessors = Runtime.getRuntime().availableProcessors();
+              Phaser phaser = new Phaser();
+              ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
+              System.out.println("Spawning Threads");
+              phaser.register(); // registering main thread
+              IntStream.range(0, numProcessors)
+                  .forEach(i -> {
+                          String name = String.format("Thread-%d", i);
+                          executor.execute(new WorkerThread(phaser, name));
+                      });
+              System.out.println("Spawning Finished");
+              phaser.arriveAndDeregister();
+              stop(executor);
+          }
+          public static void stop(ExecutorService executor) {
+              try {
+                  executor.shutdown();
+                  // give it time to finish
+                  executor.awaitTermination(60, TimeUnit.SECONDS);
+              } catch (InterruptedException ex) {
+                  ex.printStackTrace();
+              } finally {
+                  if (!executor.isTerminated()) {
+                      System.out.println("Termination interrupted");
+                  }
+                  executor.shutdown();
+              }
+          }
+      }
+      class WorkerThread implements Runnable {
+          private Phaser phaser;
+          private String name;
+          public WorkerThread(Phaser phaser, String name) {
+              this.name = name;
+              this.phaser = phaser;
+              this.phaser.register();
+          }
+          public void run() {
+              SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+              System.out.printf("%s:[%s] Doing Step 1 Work\n",
+                                getFormattedDate(sdf), name);
+              sleep(getRandomWaitTime());
+              System.out.printf("%s:[%s] Doing Step 1 more work\n",
+                                getFormattedDate(sdf), name);
+              sleep(getRandomWaitTime());
+              System.out.printf("%s:[%s] Finished Step 1 work\n",
+                                getFormattedDate(sdf), name);
+              phaser.arriveAndAwaitAdvance();
+              System.out.printf("%s:[%s] Past the barrier.\n",
+                                getFormattedDate(sdf), name);
+              int phase = phaser.getPhase();
+              // here we had a reset with CyclicBarrier
+              System.out.printf("%s:[%s] Phaser count on %d\n",
+                                getFormattedDate(sdf), name, phase);
+              System.out.printf("%s:[%s] Doing Step 2 Batch of Work\n",
+                                getFormattedDate(sdf), name);
+              sleep(getRandomWaitTime());
+              System.out.printf("%s:[%s] Doing Some more Step 2 Batch of work\n",
+                                getFormattedDate(sdf), name);
+              sleep(getRandomWaitTime());
+              System.out.printf("%s:[%s] Finished Step 2 Batch of work\n",
+                                getFormattedDate(sdf), name);
+              phaser.arriveAndAwaitAdvance();
+              phase = phaser.getPhase();
+              System.out.printf("%s:[%s] Phaser finish on: %d\n",
+                                getFormattedDate(sdf), name, phase);
+          }
+          public static void sleep(int milliseconds) {
+              try {
+                  TimeUnit.MILLISECONDS.sleep(milliseconds);
+              } catch (InterruptedException e) {
+                  throw new IllegalStateException(e);
+              }
+          }
+          private String getFormattedDate(SimpleDateFormat sdf) {
+              return sdf.format(new Date());
+          }
+          private int getRandomWaitTime() {
+              return (int) ((Math.random() + 1) * 1000);
+          }
+      }
+    #+end_src
+
+    - Exchanger :: A synchronization point at which threads can pair and swap
+      elements within pairs. Each thread presents some object on entry to the
+      =exchange= method, matches with a partner thread, and receives its partner's
+      object on return. An =Exchanger= may be viewed as a bidirectional form of a
+      =SynchronousQueue=. =Exchangers= may be useful in applications such as genetic
+      algorithms and pipeline designs.
+
+    Just to finish this section, an interesting comment taken from stackoverflow
+    about real-life examples for use CountDownLatch, Semaphores, Mutex and
+    CyclicBarriers is the following:
+
+    #+begin_quote
+    In a hypothetical theater:
+
+    - It is called *Mutex* if only one person is allowed to watch the play.
+    - It is called *Semaphore* if N number of people are allowed to watch the
+      play. If anybody leaves the Theater during the play then other person can
+      be allowed to watch the play.
+    - It is called *CountDownLatch* if no one is allowed to enter until every
+      person vacates the theater. Here each person has free will to leave the
+      theater.
+    - It is called *CyclicBarrier* if the play will not start until every person
+      enters the theater. Here a showman can not start the show until all the
+      persons enter and grab the seat. Once the play is finished the same barrier
+      will be applied for next show.
+
+    Here, a person is a thread, a play is a resource.
+    #+end_quote
+
+*** VarHandle
+
+    =VarHandle= (=java.lang.invoke.VarHandle=) is a class that provides low-level
+    mechanisms and APIs for method invocations and memory operations. The goal of
+    this class is replace the operations in =sun.misc.Unsafe=, used in Java version
+    less than 9 but with a safe equivalent. It provides access to variables under
+    various access modes, including plain read/write access, volatile read/write
+    access and compare-and-set. Additionally, it provides a set of static methods
+    referred to as memory fence methods for fine-grained control of memory
+    ordering. The specification of language permits other threads observe
+    operations as if they were executed in orders different than are apparent in
+    program source code, subject to constraint arising. The methods =fullFence=,
+    =acquireFence=, =releaseFence=, =loadLoadFence= and =storeStoreFence=, can be used to
+    impose constraints.
+
+
+*** References
+
+    - https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/invoke/VarHandle.html
+    - https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CyclicBarrier.html
+    - https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Executors.html
+    - https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html
+    - https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Executors.html
+    - https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Phaser.html
+    - https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Semaphore.html
+    - https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CountDownLatch.html
+    - https://winterbe.com/posts/2015/04/07/java8-concurrency-tutorial-thread-executor-examples/
+    - https://winterbe.com/posts/2015/04/30/java8-concurrency-tutorial-synchronized-locks-examples/
+    - https://winterbe.com/posts/2015/05/22/java8-concurrency-tutorial-atomic-concurrent-map-examples/
+    - https://stackoverflow.com/questions/10156191/real-life-examples-for-countdownlatch-and-cyclicbarrier/32416323#32416323
+    - http://oliviertech.com/es/java/CountDownLatch-java-example/
 
 
 * Concurrent programming in Java

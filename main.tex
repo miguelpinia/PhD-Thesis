@@ -1,4 +1,4 @@
-% Created 2023-01-31 mar 11:36
+% Created 2023-02-03 vie 13:19
 % Intended LaTeX compiler: pdflatex
 \documentclass[openany, a4paper]{book}
 \usepackage[utf8]{inputenc}
@@ -24,8 +24,11 @@
 \usepackage{url}
 \usepackage{tabularx}
 \usepackage{xspace}
-\lstset{ basicstyle=\ttfamily, mathescape=true, frame=Trbl, numbers=left}
-\renewcommand{\lstlistingname}{Pseudocódigo}
+\usepackage{courier}
+\definecolor{amber}{rgb}{1.0, 0.49, 0.0}
+\definecolor{x11gray}{rgb}{0.75, 0.75, 0.75}
+\lstset{ basicstyle=\footnotesize\mdseries\ttfamily, mathescape=true, frame=Trbl, numbers=left, keywordstyle=\color{blue}, showstringspaces=false, commentstyle=\color{x11gray}, stringstyle=\color{amber}, breakline=true}
+\renewcommand{\lstlistingname}{Code}
 \setcounter{tocdepth}{1}
 \newtheoremstyle{break}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{\newline}{}
 \theoremstyle{break}
@@ -54,6 +57,7 @@
 \AtBeginDocument{\counterwithin{lstlisting}{section}}
 \newcommand{\R}{{\sf \small Read}\xspace}
 \newcommand{\W}{{\sf \small Write}\xspace}
+\hyphenation{Reentrant-Read-Write-Lock Stamped-Lock}
 \author{Miguel Angel Piña Avelino}
 \date{\today}
 \title{A Study Of Concurrent Data Structures With Relaxed Semantics}
@@ -71,10 +75,10 @@
 
 
 \chapter{Introduction}
-\label{sec:org678387d}
+\label{sec:org3b24ed9}
 
 \section{About Concurrent Computing}
-\label{sec:org1090a9c}
+\label{sec:orgbffe9b2}
 
 What is concurrent computing? This is a good question. We should first talk
 about single-core and multi-core processors manufactured by the computer
@@ -95,7 +99,7 @@ permitting make computing more effectively using \emph{parallelism}, where the
 processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 \subsection{Classic concurrent computing}
-\label{sec:orgeffb576}
+\label{sec:org5312cc2}
 
 \begin{itemize}
 \item[{$\square$}] Basic Definitions
@@ -105,7 +109,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Relaxed concurrent computing}
-\label{sec:org91dbd3b}
+\label{sec:org83acdaa}
 
 \begin{itemize}
 \item[{$\square$}] Relaxing the problem
@@ -114,7 +118,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Work-stealing}
-\label{sec:org3be3f68}
+\label{sec:org11ff069}
 
 \begin{itemize}
 \item[{$\square$}] How it works the work-stealing
@@ -124,7 +128,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Data-Structures}
-\label{sec:orgae0c8ee}
+\label{sec:org88b4a83}
 
 \begin{itemize}
 \item[{$\square$}] Queues with multiplicity
@@ -132,22 +136,22 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Contributions}
-\label{sec:orgdc900d0}
+\label{sec:orgb467ca8}
 
 \subsection{Organization}
-\label{sec:org4f2d5bd}
+\label{sec:org70721cb}
 
 
 \section{Preliminaries}
-\label{sec:org61d2aa8}
+\label{sec:orgbbbcbd1}
 
 
 \subsection{Mathematical model}
-\label{sec:org7b01659}
+\label{sec:orgd9e1324}
 
 
 \subsection{Realistic model of computation}
-\label{sec:org605387a}
+\label{sec:org107922f}
 
 We consider a standard concurrent shared memory system with \(n \ge 2\)
 \emph{asynchronous} processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
@@ -171,7 +175,7 @@ write to a single shared memory space. Usually each processor core has a
 cache to operate with data from the shared memory. Often, this data is
 transferred through a memory bus, allowing connect the processors with the
 memory. The figure \ref{fig:arch} shows a simplified view of this model. In
-the sections: \hyperref[sec:orge3f8056]{Cache memory}, \hyperref[sec:org8b8179b]{Memory bus} and \hyperref[sec:orgd068264]{Main memory}, we explain more in
+the sections: \hyperref[sec:org4b68861]{Cache memory}, \hyperref[sec:orgdc7d102]{Memory bus} and \hyperref[sec:org4682745]{Main memory}, we explain more in
 detail the meaning of each bullet of the list.
 
 \begin{figure}
@@ -184,7 +188,7 @@ detail the meaning of each bullet of the list.
 
 
 \subsection{Cache memory}
-\label{sec:orge3f8056}
+\label{sec:org4b68861}
 
 The cache memory is a special very high-speed memory that is very close to
 the processor and the processes can access it very fast. The caches are used
@@ -203,7 +207,7 @@ are close to be executed. In the third level, this cache is shared by many
 processors and is used as feeder for the L2 cache.
 
 \subsection{Memory bus}
-\label{sec:org8b8179b}
+\label{sec:orgdc7d102}
 
 Is a computer bus that allows transfer data from the primary memory to the
 CPU and the cache memory. It is made up of two parts: the data bus and the
@@ -214,18 +218,18 @@ information.
 
 
 \subsection{Main memory}
-\label{sec:orgd068264}
+\label{sec:org4682745}
 
 Is the responsible of hold the data that CPU need to access frequently, such
 as instructions or data currently being processed. The CPU can access to
 this information faster than the access to secondary memory.
 
 \subsection{Consistency Memory Model and Cache Coherence}
-\label{sec:orga643856}
+\label{sec:orgd723f51}
 
 \begin{enumerate}
 \item Consistency memory model
-\label{sec:orgf26c8ed}
+\label{sec:org0149ca0}
 
 Following the simplified view of the cache architecture, we want to have a
 correct shared memory. And what this means? The correctness of the shared
@@ -250,7 +254,7 @@ considered, because these models shows that most memory orderings in strong
 models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \item Cache coherence
-\label{sec:org693a10b}
+\label{sec:org34b14cd}
 
 Cache coherence protocols are used in response to solve a coherence problem
 in cache. For example, a coherence problem can arise if multiple cores have
@@ -267,7 +271,7 @@ data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 
 \subsection{Memory fences}
-\label{sec:org08b7dd4}
+\label{sec:org84b44c8}
 
 A memory fence is a barrier instruction that causes a CPU or compiler to
 enforce a an ordering constraint on memory operations (loads and stores)
@@ -283,28 +287,31 @@ For example, consider the following multi-thread program, with 2
 threads, each one running in one core in a concurrent way:
 
 Thread 1, core 1
-\begin{verbatim}
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
 while (z == 0);
 print(y);
-\end{verbatim}
+\end{lstlisting}
 
 Thread 2, core 2
-\begin{verbatim}
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
 y = 30;
 z = 1;
-\end{verbatim}
+\end{lstlisting}
 
 In this case, we might expect that the \texttt{print(y)} always print the number 30,
 nevertheless, the compiler or the CPU could change the order of the
 instructions for the thread 2, giving as result an execution where the value
 for \texttt{y} is undefined and the instructions could be interleaved as follows:
 
-\begin{verbatim}
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
 z = 1; // Thread 2
 while (z == 0); // Thread 1
 print(y); // Thread 1
 y = 30; // Thread 2
-\end{verbatim}
+\end{lstlisting}
 
 This execution is sequentially consistent, but is an out-of-order
 execution producing an undefined result. With the use of memory barriers, we
@@ -312,18 +319,20 @@ can ensure that instructions don't be reordered. For example, our code could
 be rewrite as follows:
 
 Thread 1, core 1.
-\begin{verbatim}
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
 while (z == 0);
 fence()
 print(y);
-\end{verbatim}
+\end{lstlisting}
 
 Thread 2, core 2.
-\begin{verbatim}
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
 y = 30;
 fence();
 z = 1;
-\end{verbatim}
+\end{lstlisting}
 
 
 Languages as \texttt{Java} or \texttt{C++} provide instructions to establish synchronization
@@ -378,7 +387,7 @@ full memory fence instruction \texttt{MFENCE}. For other archict
 
 
 \section{Work-Stealing}
-\label{sec:org2311be4}
+\label{sec:org91b0030}
 
 We analyze the algorithms for work-stealing described in the article Fully
 Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
@@ -395,83 +404,83 @@ similar semantic than the prior algorithms.
 
 
 \subsection{Model}
-\label{sec:org05f2423}
+\label{sec:org94f70b6}
 
 \subsection{Known algorithms}
-\label{sec:orgf1b1a9c}
+\label{sec:org2fbf810}
 
 \subsection{Pseudocode for Work-Stealing with Weak Multiplicity}
-\label{sec:org90803a9}
+\label{sec:orgb96b659}
 
 
 
 \section{Data-Structures}
-\label{sec:org49edd0c}
+\label{sec:org3adf7cf}
 
 \subsection{Queues}
-\label{sec:org6fc8525}
+\label{sec:org8939da0}
 
 \subsection{Stacks}
-\label{sec:orgbc4ba3e}
+\label{sec:org658ecc3}
 
 
 \section{Some Hardware Foundations}
-\label{sec:orgf653dfa}
+\label{sec:org8d1ae39}
 
 \subsection{Cache memory}
-\label{sec:orgbcd606e}
+\label{sec:orgc3b42f2}
 
 The cache memory
 
 \begin{enumerate}
 \item Multiple caches
-\label{sec:org8362cac}
+\label{sec:orgf080e0a}
 
 
 \item Cache coherence protocols
-\label{sec:orgf45912e}
+\label{sec:org9bb40cf}
 
 
 
 \begin{enumerate}
 \item MESI
-\label{sec:org9b346e9}
+\label{sec:orgc746723}
 
 
 \item MOESI
-\label{sec:org2262c28}
+\label{sec:org405ea60}
 \end{enumerate}
 
 
 \item Store Buffers
-\label{sec:org80df2ad}
+\label{sec:org2711240}
 \end{enumerate}
 
 
 \subsection{Reordering (CPU or Compiler)}
-\label{sec:org4a4fb03}
+\label{sec:orgc990763}
 
 
 \subsection{Memory Barriers}
-\label{sec:orge54588b}
+\label{sec:orgc26da29}
 
 
 \begin{enumerate}
 \item X86 and TSO architectures
-\label{sec:org69b16e8}
+\label{sec:org4aca42c}
 
 
 \item Memory Fences
-\label{sec:orgc580bd3}
+\label{sec:org4201344}
 \end{enumerate}
 
 
 \subsection{Read-Modify-Write Operations}
-\label{sec:org1509d10}
+\label{sec:org3a50d45}
 
 
 \subsection{Bibliography}
-\label{sec:org62b683e}
+\label{sec:org3c95385}
 
 \begin{itemize}
 \item \url{https://blog.the-pans.com/std-atomic-from-bottom-up/}
@@ -479,7 +488,7 @@ The cache memory
 
 
 \subsection{Memory management}
-\label{sec:orgb4e39fa}
+\label{sec:orgf38bfc0}
 
 To implement efficiently the idempotent algorithms in an enviroment without
 garbage collection, it's necessary use some technique or metodology to
@@ -488,7 +497,7 @@ threads want to reclaim the memory of the object associated to the pointer.
 
 \begin{enumerate}
 \item Strategies to delete shared pointers
-\label{sec:org47e25e0}
+\label{sec:orgc594f66}
 
 \begin{itemize}
 \item Add pointers to list to safety delete.
@@ -502,7 +511,7 @@ it exits.
 
 
 \item Hazard pointers
-\label{sec:orgc766fc5}
+\label{sec:orgc422e92}
 
 The \emph{Hazard Pointers} is a technique to manage memory in languages where there
 are not a garbage collector. This technique was proposed by Maged
@@ -529,7 +538,8 @@ later to see if any of them can be deleted now.
 
 A general pseudocode for this technique could be the following:
 
-\begin{verbatim}
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
 void func() {
     std::atomic<void*>& hp = get_hazard_pointer_for_current_thread();
     void* old_data = data.load();
@@ -555,11 +565,11 @@ void func() {
     }
     delete_nodes_with_no_hazards();
 }
-\end{verbatim}
+\end{lstlisting}
 
 
 \item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
-\label{sec:org8fe5c57}
+\label{sec:orgc40f46b}
 
 
 When a memory region is reclaimed, the programmer cannot know how that
@@ -579,7 +589,7 @@ created
 
 
 \section{Memory management for work-stealing algorithms}
-\label{sec:org3712f06}
+\label{sec:org218a263}
 
 It is well known that C++ does not have a garbage collector like Java. Since
 the publish of the \href{https://en.cppreference.com/w/cpp/11}{Standard C++11}, new features for memory management were
@@ -597,81 +607,81 @@ avoid problems like the \href{https://www.stroustrup.com/isorc2010.pdf}{ABA prob
 
 
 \section{C++ Memory model}
-\label{sec:orgac2e9ab}
+\label{sec:orgc89a3d2}
 
 \subsection{Memory model basics}
-\label{sec:org6c7821e}
+\label{sec:org4c4a87c}
 
 \begin{enumerate}
 \item Objects and memory locations
-\label{sec:org4bad9ab}
+\label{sec:org45decab}
 
 
 \item Objects, memory locations, and concurrency
-\label{sec:org38f9c9f}
+\label{sec:org14496d8}
 
 
 \item Modification orders
-\label{sec:org5dda0c1}
+\label{sec:org20b10ca}
 \end{enumerate}
 
 
 \subsection{Atomic operations and types in C++}
-\label{sec:orgd1276e0}
+\label{sec:orga55b1ec}
 
 
 \begin{enumerate}
 \item The standard atomic types
-\label{sec:org8b5c9e5}
+\label{sec:org3b657c4}
 
 \item Operations on std::atomic\textsubscript{flag}
-\label{sec:org38e105c}
+\label{sec:org6a0fdd8}
 
 \item Operations on std::atomic<boolean>
-\label{sec:org060d3ec}
+\label{sec:org2401081}
 
 \item Operations on std::atomic<T*>: pointer arithmetic
-\label{sec:orgf18322d}
+\label{sec:org675e66e}
 
 \item Operations on standard atomic integral types
-\label{sec:orge17c2df}
+\label{sec:org55393e2}
 
 \item The std::atomic<> primary class template
-\label{sec:org171b0b1}
+\label{sec:org0110b7a}
 
 \item Free functions for atomic operations
-\label{sec:org5b1bc85}
+\label{sec:org7d75cd0}
 \end{enumerate}
 
 \subsection{Synchronizing operations and enforcing ordering}
-\label{sec:orgdd01366}
+\label{sec:orga6cb073}
 
 \begin{enumerate}
 \item The synchronization relationship
-\label{sec:orgdf3b73a}
+\label{sec:org839494e}
 
 \item The happens-before relationship
-\label{sec:orgd6b509c}
+\label{sec:orgcc968fb}
 
 \item Memory ordering for atomic operations
-\label{sec:orga3ca3ff}
+\label{sec:org0b8494e}
 
 \item Release sequences and synchronizes-with
-\label{sec:orgc374c90}
+\label{sec:org6f3fd94}
 
 \item Fences
-\label{sec:org5ba86a1}
+\label{sec:org1f76cfd}
 
 \item Ordering non-atomic operations with atomics
-\label{sec:org9c66203}
+\label{sec:orgae7bcf9}
 
 \item Ordering non-atomic operations
-\label{sec:org543d758}
+\label{sec:org5fd4917}
 \end{enumerate}
 
 
 \section{Guidelines for designing data-structures for concurrency}
-\label{sec:orgfa2cf56}
+\label{sec:org841e179}
 
 \begin{itemize}
 \item Ensure that no thread can see a state where the invariants of the
@@ -692,10 +702,10 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \chapter{Advanced topics in Multi-Core Architecture and Software Systems}
-\label{sec:orged5f0ce}
+\label{sec:org16388b3}
 
 \section{Introduction}
-\label{sec:orgf510603}
+\label{sec:org2a47f30}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.cs.tau.ac.il/\~mad/publications/atc2018-bst.pdf}{Getting to the root of concurrent binary search tree performance}
@@ -708,7 +718,7 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \section{Out-of-order execution and memory-level parallelism}
-\label{sec:org779092e}
+\label{sec:orgdaf8ab2}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.cs.tau.ac.il/\~mad/publications/sosp2021-CT.pdf}{Cuckoo trie: Exploiting Memory-Level Parallelism for Efficient DRAM Indexing}
@@ -716,7 +726,7 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \section{Speculative execution attacks and defenses}
-\label{sec:org78e68d9}
+\label{sec:org3342787}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://eprint.iacr.org/2013/448.pdf}{FLUSH + RELOAD: A High Resolution, Low Noise L3 Cache Side-Channel Attack}
@@ -728,7 +738,7 @@ Speculatively Accesed Data}
 
 
 \section{Reasoning about concurrency (linearizability)}
-\label{sec:org1be89e2}
+\label{sec:org5c445b1}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://cs.brown.edu/\~mph/HerlihyW90/p463-herlihy.pdf}{Linearizability: A Correctness Condition for Concurrent Objects}
@@ -737,7 +747,7 @@ Speculatively Accesed Data}
 
 
 \section{Cache Coherence}
-\label{sec:org99a93d5}
+\label{sec:orgd8a445d}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph\_tau01003094500\&context=L\&vid=TAU2\&search\_scope=Blended\&tab=default\_tab\&lang=iw\_IL}{A Primer on Memory Consistency and Cache Coherence (Chap 2, 6-8)}
@@ -745,7 +755,7 @@ Speculatively Accesed Data}
 
 
 \section{Serializing Efficiently}
-\label{sec:org13b1ec6}
+\label{sec:org6c4f202}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://www.cs.rochester.edu/\~scott/papers/1991\_TOCS\_synch.pdf}{Algorithms for scalable synchronization on shared-memory multiprocessors}
@@ -757,7 +767,7 @@ Speculatively Accesed Data}
 
 
 \section{Memory Consistency Models (Hardware)}
-\label{sec:orgeafbe94}
+\label{sec:orga0a7626}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://tau-primo.hosted.exlibrisgroup.com/primo-explore/fulldisplay?docid=aleph\_tau01003094500\&context=L\&vid=TAU2\&search\_scope=Blended\&tab=default\_tab\&lang=iw\_IL}{A Primer on Memory Consistency and Cache Coherence (Chapters 3-5)}
@@ -766,7 +776,7 @@ Speculatively Accesed Data}
 
 
 \section{Memory Consistency Models (programming language)}
-\label{sec:orgc36524b}
+\label{sec:orgb1334e0}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://www.hpl.hp.com/techreports/2004/HPL-2004-209.pdf}{Threads Cannot be Implemented as a Library}
@@ -778,7 +788,7 @@ Speculatively Accesed Data}
 
 
 \section{Safe Memory Reclamation}
-\label{sec:org74aab42}
+\label{sec:org1208020}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://www.research.ibm.com/people/m/michael/spaa-2002.pdf}{High Performance Dynamic Lock-Free Hash Tables and List-Based Sets}
@@ -795,7 +805,7 @@ compares to Hazard Pointers).
 
 
 \section{Ordered Parallelism and Relaxed Data Structures}
-\label{sec:org00ebb3e}
+\label{sec:org2679db4}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-579.pdf}{Skip Lists (Section 4.3.3 of the thesis)}
@@ -806,7 +816,7 @@ compares to Hazard Pointers).
 
 
 \section{Ordered Parallelism and Relaxed Data Structures}
-\label{sec:org69a435f}
+\label{sec:org999fff0}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://people.csail.mit.edu/sanchez/papers/2015.swarm.micro.pdf}{A Scalable Architecture for Ordered Parallelism}
@@ -814,7 +824,7 @@ compares to Hazard Pointers).
 
 
 \section{Transactional Memory}
-\label{sec:org982ebf9}
+\label{sec:orgb78513f}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://people.cs.umass.edu/\~moss/papers/isca-1993-trans-mem.pdf}{Transactional Memory: Architectural Support For Lock-Free Data Structures}
@@ -827,7 +837,7 @@ compares to Hazard Pointers).
 
 
 \section{Concurrent Search Trees}
-\label{sec:org672c408}
+\label{sec:org826d8ff}
 
 \begin{itemize}
 \item[{$\square$}] \href{http://ppl.stanford.edu/papers/ppopp207-bronson.pdf}{A Practical Concurrent Binary Tree Search}
@@ -838,17 +848,17 @@ compares to Hazard Pointers).
 
 
 \chapter{Work-stealing}
-\label{sec:orgfa7e89b}
+\label{sec:org07b2ec2}
 
 
 \chapter{Modular Basket Queues}
-\label{sec:org1d2fcb3}
+\label{sec:org16620e4}
 
 \section{Measuring Performance}
-\label{sec:orgc571227}
+\label{sec:org30c6ffe}
 
 \subsection{Introduction}
-\label{sec:org4aa3869}
+\label{sec:org3789073}
 
 When we perform experiments derived from our theoretical study, is necessary
 the use of rigorous statistical methods and techniques to evaluate, analyze
@@ -893,7 +903,7 @@ Accuracy & Low & Medium & High\\
 
 
 \subsection{Metrics of performance}
-\label{sec:org41642e8}
+\label{sec:orgb9380e3}
 
 It is important determine the basic characteristics that we need to measure
 from a computer system. Tipically we want measure:
@@ -973,7 +983,7 @@ performance of another system.
 
 
 \subsection{Average performance and variability}
-\label{sec:org4badcc6}
+\label{sec:org31e8489}
 
 In multiple occasions, mean values can be useful for performing coarse
 comparisons. Sometimes we wish to summarize the performance of a system using
@@ -1055,7 +1065,7 @@ variation in the measurements with the mean value of those measurements.
 
 
 \subsection{Errors in experimental measurements}
-\label{sec:orgf2342e1}
+\label{sec:orge40c225}
 
 In trying to measure and understand the performance of computer systems, we
 are constantly confronted by the nitty-gritty details of the real
@@ -1134,7 +1144,7 @@ width.
 
 
 \subsection{Comparing alternatives}
-\label{sec:orge27cd89}
+\label{sec:org49cebca}
 
 While these confidence interval tell us something about how much noise there
 is in our measurements, we ultimately want to use these measurements to make
@@ -1229,7 +1239,7 @@ total measurements.
 
 
 \subsection{Measurement tools and techniques.}
-\label{sec:org231cdd4}
+\label{sec:orgb8e56f6}
 
 \begin{itemize}
 \item Events and measurements strategies
@@ -1312,7 +1322,7 @@ experiments.
 
 
 \subsection{Benchmark programs}
-\label{sec:org309c543}
+\label{sec:org9394af9}
 
 To measure the maximum speed of an automobile, it must be in
 motion. Similarly, a computer must be executing some sort of program when
@@ -1422,7 +1432,7 @@ Another type of benchmarks are:
 \end{itemize}
 
 \begin{table}[h]
-\label{tab:org90d3bbb}
+\label{tab:org30b2265}
 \centering
 \begin{tabularx}{\linewidth}{|l|l|X|}
 \hline
@@ -1439,7 +1449,7 @@ Variable & Variable & Third dimension derived from the statement of the problem,
 
 
 \begin{table}[h]
-\label{tab:org2ee93fd}
+\label{tab:orgacd4683}
 \centering
 \begin{tabularx}{\linewidth}{|l|X|}
 \hline
@@ -1459,7 +1469,7 @@ Your app program & The best benchmark program\\
 
 
 \subsection{Linear Regression Models}
-\label{sec:org6a6fca3}
+\label{sec:org47daa79}
 
 Linear regression uses the least-squares-minimization technique to develop a
 mathematical model of a system from a set of measured data values. This
@@ -1478,7 +1488,7 @@ models then can be applied to the linearized data.
 
 
 \subsection{The design of experiments}
-\label{sec:org7e08ed4}
+\label{sec:org23bc93b}
 
 The primary goal of the design of experiments is to determine the maximum
 amount of information about a system with the minimum amount of effort. A
@@ -1546,7 +1556,7 @@ on these factors alone can then be performed.
 
 
 \section{Modular Basket Queues}
-\label{sec:orgdba2571}
+\label{sec:org762e342}
 
 A modular version of the basket queues of Hoffman, Shalev and Shavit is
 presented. It manipulates the head and tail using a novel object called
@@ -1558,7 +1568,7 @@ head and the tail using \emph{read-modify-write} instructions over a single shar
 register.
 
 \subsection{{\bfseries\sffamily TODO} Review LL/IC implementations}
-\label{sec:org33f43f3}
+\label{sec:org95aefc4}
 
 The specification of \texttt{LL/IC} satisfies the next properties, where the state of
 the object is an integer R, initialized to zero, and assuming that any
@@ -1571,7 +1581,7 @@ invoking process, then do \(R = R + 1\); in any case return \texttt{OK}.
 \end{description}
 
 \subsection{LL/IC Implementations}
-\label{sec:org7e714b5}
+\label{sec:org7f58f66}
 
 \begin{description}
 \item[{CAS based implementation}] It uses a shared register \(R\) initialized to
@@ -1598,7 +1608,7 @@ performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
 \end{description}
 
 \subsection{{\bfseries\sffamily TODO} Basket implementations}
-\label{sec:orgb1b4563}
+\label{sec:orgd2e3872}
 
 \begin{description}
 \item[{K-Basket from FAI and SWAP}] In this first implementation, the processes
@@ -1618,7 +1628,7 @@ to \emph{locally linearizable} generic data structure implementations of
 \end{description}
 
 \subsection{{\bfseries\sffamily TODO} Update experiments}
-\label{sec:org5e86a13}
+\label{sec:orgff97747}
 
 To update the experiments is necessary understand what are metrics that
 allows us compare the algorithms designed for LL/IC objects and Baskets. A
@@ -1693,953 +1703,21 @@ an overly-optimistic performance due to the lower cache miss rate.
 
 
 \subsection{{\bfseries\sffamily TODO} Add rigorous statistics evaluations}
-\label{sec:org961c681}
+\label{sec:org447ac46}
 
 
 \section{Clojure for data-science}
-\label{sec:org5c64e26}
+\label{sec:orgbec9e06}
 
 To load, manipulate and display data, we use the \emph{Incanter} library. Incanter
 is a modular suite of Clojure.
 
 
-\chapter{Introduction to multi-threading programming with Java (2 days)}
-\label{sec:org4fd468b}
-\textbf{Prerrequisites}:
-\begin{itemize}
-\item Maven
-\item An editor like emacs or vi or IDE like Netbeans
-\item JDK 17 (open-jdk)
-\item git
-\end{itemize}
-
-\section{Introduction}
-\label{sec:orgf262823}
-
-In the early 2000s, the multicore revolution began due to was difficult make
-processor chips smaller and faster. Derived from this situation, we had to
-change the way in how we develop software. The multicore chips cause that
-perform computing being more effective by exploiting
-``parallelism''. However, the challenge is in how to exploit that
-parallelism. Those multicore chips or multiprocessors, usually use shared
-memory to communicate the processors between themselves, thus, an important
-aspect to program these multiprocessors is how to coordinate the access to
-shared memory, i.e. how to coordinate the access to some shared data to avoid
-problems while it is manipulated (writes and lectures). The above is
-challenging due to the modern systems are inherently asynchronous and,
-without synchronization mechanisms, unpredictable events can occur while the
-shared data is manipulated.
-
-We will focus on tools and techniques for programming multiprocessors using
-shared memory with java. We will cover some topics related to concurrent and
-parallel computing.
-
-
-\section{Processes and threads}
-\label{sec:orge73cd70}
-
-The first thing that we will talk is what is the difference between a process
-and a thread. Both process and thread are independent sequences of
-execution. Loosely speaking, a process is in practical terms, an executing
-program. A thread is a lightweight process that can run in parallel and share
-resources as memory and disc with its parent process. Usually, threads run in
-process space context.
-
-For example, we can run a program in java (like an IDE as Netbeans). The
-program running is known as the main process, and all those events that
-executes asynchronously inside of our program, like invoke to compile the
-code, debugging or even library search for our project inside the IDE, are
-executed by threads. That's the main difference.
-
-
-\section{Basics}
-\label{sec:orgbbed3a6}
-
-\textbf{Creating the base project}: Lets create a maven based project. In some
-terminal, write:
-
-\begin{verbatim}
-cd ..
-mvn archetype:generate -DgroupId=mx.unam.concurrent \
-    -DartifactId=concurrent-example \
-    -DarchetypeArtifactId=maven-archetype-quickstart \
-    -DarchetypeVersion=1.4 -DinteractiveMode=false
-ls | grep concurrent-example
-\end{verbatim}
-
-It creates a project with a main file called \texttt{App.java}. In that file we
-will work with the tools for write multi-threaded applications. The first
-thing is change some parameters of our project to work with a recent
-java version.
-
-In the file \texttt{pom.xml}, change the target output and compiler version. Those
-values should be changed in the properties section.
-
-\begin{verbatim}
-<maven.compiler.source>17</maven.compiler.source>
-<maven.compiler.target>17</maven.compiler.target>
-\end{verbatim}
-
-To have a \emph{main} method in our application and we have a main point of
-execution, add the next code to the pom.xml in the section of plugins.
-
-\begin{verbatim}
-<plugin>
-  <groupId>org.codehaus.mojo</groupId>
-  <artifactId>exec-maven-plugin</artifactId>
-  <version>1.2.1</version>
-  <executions>
-    <execution>
-      <goals>
-        <goal>java</goal>
-      </goals>
-    </execution>
-  </executions>
-  <configuration>
-    <mainClass>mx.unam.concurrent.App</mainClass>
-  </configuration>
-</plugin>
-\end{verbatim}
-
-Thereafter we can run our project with the following instruction:
-
-\begin{verbatim}
-pwd
-cd ../concurrent-example
-mvn compile exec:java
-\end{verbatim}
-
-
-\section{Defining and starting a Thread}
-\label{sec:orgb2251d1}
-
-In Java, to use threads in our applications, we can create an instance of
-the class \texttt{Thread} (\texttt{java.lang.Thread}) or make a derived subclass. Also we can
-provide an object that implements the \texttt{Runnable} interface
-(\texttt{java.lang.Runnable}). This interface defines a single method, \texttt{run}, meant to
-contain the code executed in the thread. Lets create a basic application
-where we define an instance of Thread and run it.
-
-\begin{verbatim}
-public class App {
-
-    public static void main(String[] args) {
-        MyThread1 obj1 = new MyThread1();
-        MyThread2 obj2 = new MyThread2();
-        Thread t = new Thread(new MyRunnable());
-
-        obj1.start();
-        obj2.start();
-        t.start();
-    }
-}
-
-class MyThread1 extends Thread {
-    @Override
-    public void run() {
-        System.out.println("Thread 1 is running");
-    }
-}
-
-class MyThread2 extends Thread {
-    @Override
-    public void run() {
-        System.out.println("Thread 2 is running");
-    }
-}
-
-class MyRunnable implements Runnable {
-    @Override
-    public void run() {
-        System.out.println("My runnable object is running");
-    }
-}
-\end{verbatim}
-
-A more interesting example could be the following:
-
-\begin{verbatim}
-package mx.unam.concurrent;
-
-public class App {
-
-    public static void main(String[] args) {
-        MyThread1 obj1 = new MyThread1();
-        MyThread2 obj2 = new MyThread2();
-        Thread t = new Thread(new MyRunnable());
-
-        obj1.start();
-        obj2.start();
-        t.start();
-    }
-}
-
-class MyThread1 extends Thread {
-    @Override
-    public void run() {
-        for (int i = 0; i < 10; i++) {
-            String output = String.format("Thread 1 is running. Iter: %d", i);
-            System.out.println(output);
-        }
-    }
-}
-
-class MyThread2 extends Thread {
-    @Override
-    public void run() {
-        for (int i = 0; i < 10; i++) {
-            String output = String.format("Thread 2 is running. Iter: %d", i);
-            System.out.println(output);
-        }
-    }
-}
-
-class MyRunnable implements Runnable {
-    @Override
-    public void run() {
-        for (int i = 0; i < 10; i++) {
-            String output = String
-                .format("My runnable object is running. Iter: %d", i);
-            System.out.println(output);
-        }
-    }
-}
-\end{verbatim}
-
-A possible output for the previous code is the following. We can observe how
-the calls to the \texttt{println} method are interspersed. In a sequential execution,
-the output of the object \texttt{obj1} should be printed (the sequence of printlns
-from zero to nine) followed by the output of the \texttt{obj2} (the sequence of
-printlns from zero to nine) and similarly, in the end, the output from the
-object \texttt{t}, but, in this, there is not a order in how the objects are
-called.
-
-\section{Thread managment}
-\label{sec:orgbc146e9}
-
-After seeing how to use threads in a basic way, now let us discuss some
-methods available to thread management. More documentation about these
-methods is available on
-\url{https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html}.
-The methods that we refer are:
-
-\begin{itemize}
-\item start
-\item suspend
-\item stop
-\item sleep
-\item join
-\end{itemize}
-
-We will exemplify the use of the first four methods using the next program:
-
-\begin{verbatim}
-public class App {
-    public static void main(String[] args) {
-        MyThread t1 = new MyThread("First Thread");
-        MyThread t2 = new MyThread("Second Thread");
-        try {
-            Thread.sleep(500); // Sleeping for 500ms
-            t1.stop();
-            t2.stop();
-            Thread.sleep(500);
-        }
-        catch (InterruptedException e) {
-            System.out.format("Interrupted Exception:  %s\n", e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println("Exiting the main thread");
-    }
-}
-
-
-class MyThread implements Runnable {
-    private boolean exit;
-    private String name;
-    Thread t;
-
-    public MyThread(String threadName) {
-        name = threadName;
-        t = new Thread(this, name);
-        System.out.format("New Thread: %s\n", t.toString());
-        exit = false;
-        t.start(); // Starting the thread
-    }
-
-    @Override
-    public void run() {
-        int i = 0;
-        while (!exit) {
-            System.out.format("%s: %d\n", name, i);
-            i++;
-            try {
-                Thread.sleep(100); // Sleeping for 100ms
-            }
-            catch (InterruptedException e) {
-                System.out.format("Interrupted Exception:  %s\n", e.getMessage());
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void stop() {
-        exit = true;
-    }
-}
-\end{verbatim}
-
-This program declares an inner class called \texttt{MyThread}, which implements the
-Runnable interface. The class constructor takes as a parameter a string,
-which represents the name for the instance. Inside of the constructor, the
-instance declares a thread and starts it with the method \texttt{start()}. This
-method will invoke the method \texttt{run}. In this method, it will print the name of
-the instance with the value of a counter. The counter will increase it every
-100 milliseconds. The class \texttt{MyThread} also have a method \texttt{stop}, where we
-indicating when the method \texttt{run} should stop.
-
-Additionally, the \texttt{App} class will contain the main method. In this method, it
-will declare two instances of class \texttt{MyThread} with distinct names. Then, the
-main thread will do the following:
-
-\begin{itemize}
-\item sleeps by 500 milliseconds
-\item calls the method \texttt{stop} of the two instances
-\item and then, it sleeps for another 500 milliseconds.
-\end{itemize}
-
-A possible output for the execution of the previous code is the following:
-
-\begin{verbatim}
-New Thread: Thread[First Thread,5,main]
-New Thread: Thread[Second Thread,5,main]
-First Thread: 0
-Second Thread: 0
-Second Thread: 1
-First Thread: 1
-Second Thread: 2
-First Thread: 2
-First Thread: 3
-Second Thread: 3
-Second Thread: 4
-First Thread: 4
-Exiting the main thread
-\end{verbatim}
-
-
-The \texttt{join()} method allows one thread to wait until another thread completes
-its execution. From Oracle's documentation:
-
-``If \texttt{t} is a \texttt{Thread} object whose thread is currently executing, \texttt{t.join()}
-causes the current thread pauses execution until \texttt{t}'s thread terminates''
-
-Let see a more elaborated example:
-
-
-\begin{verbatim}
-public class SimpleThreads {
-
-    static void threadMessage(String message) {
-        String threadName = Thread.currentThread().getName();
-        System.out.format("%s: %s%n", threadName, message);
-    }
-
-    private static class MessageLoop
-        implements Runnable {
-        public void run() {
-            String importantInfo[] = {
-                "Mares eat oats",
-                "Does eat oats",
-                "Little lambs eat ivy",
-                "A kid will eat ivy too"
-            };
-            try {
-                for (int i = 0; i < importantInfo.length; i++) {
-                    Thread.sleep(4000);
-                    threadMessage(importantInfo[i]);
-                }
-            } catch (InterruptedException e) {
-                threadMessage("I wasn't done!");
-            }
-        }
-    }
-
-    public static void main(String args[])
-        throws InterruptedException {
-
-        long patience = 1000 * 60 * 60;
-        if (args.length > 0) {
-            try {
-                patience = Long.parseLong(args[0]) * 1000;
-            } catch (NumberFormatException e) {
-                System.err.println("Argument must be an integer.");
-                System.exit(1);
-            }
-        }
-
-        threadMessage("Starting MessageLoop thread");
-        long startTime = System.currentTimeMillis();
-        Thread t = new Thread(new MessageLoop());
-        t.start();
-
-        threadMessage("Waiting for MessageLoop thread to finish");
-        while (t.isAlive()) {
-            threadMessage("Still waiting...");
-            t.join(1000);
-            if (((System.currentTimeMillis() - startTime) > patience)
-                && t.isAlive()) {
-                threadMessage("Tired of waiting!");
-                t.interrupt();
-                t.join();
-            }
-        }
-        threadMessage("Finally!");
-    }
-}
-\end{verbatim}
-
-
-\section{Executors}
-\label{sec:orgb90955a}
-
-Sometimes, work directly with threads could be a bit difficult and can
-introduce some errors or mistakes. To avoid this, the concurrent API of java
-provides a class called \texttt{ExecutorService}
-(\texttt{java.util.conccurent.ExecutorService}). This class is capable of execute
-asynchronous tasks and manage a pool of threads. Thus, we don't have to
-create threads by hand. Also, the threads in the pool can be reused
-throughout the life-cycle of our application.
-
-The basic way to create an instance of \texttt{ExecutorService} is through the factory
-class \texttt{Executors} (\texttt{java.util.concurrent.Executors}). This factory class provides
-many static methods to create different instances. Variants of the
-instantiated class usually are parameterized according the number of threads
-or the number of cores available. An small example is shown below:
-
-\begin{verbatim}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-
-public class App {
-
-    private static void doLongWork(String name) {
-        String message = String.format("Hello %s, how is going?", name);
-        System.out.println(message);
-        try {
-            Thread.sleep(1001);
-        }
-        catch (InterruptedException e) {
-            System.out.println("Error " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        for (int i = 0; i < numProcessors; i++) {
-            final int name = i;
-            executor.execute(() -> doLongWork(String.format("thread %d", name)));
-        }
-        executor.shutdown();
-    }
-}
-\end{verbatim}
-
-In the main block of the previous code, we get the number of cores (k)
-available in our machine. Then, we declare an instance of ExecutorService
-with a pool of k threads. Thereafter, we launch a lambda function\footnote{The lambda function is a \texttt{Runnable}. We can get the same result if we
-declare a class that implements the interface and instantiate it. The instance
-is passed as argument to the method \texttt{execute}.}
-calling a method that it does some long work. For each core, we run the
-lambda function. At the end of the program, we have to stop explicitly the
-ExecutorService, if we didn't do that, the service will keep listening for
-new tasks and never stops. Finally, we get a result like shown below:
-
-\begin{verbatim}
-Hello thread 0, how is going?
-Hello thread 1, how is going?
-Hello thread 7, how is going?
-Hello thread 6, how is going?
-Hello thread 2, how is going?
-Hello thread 4, how is going?
-Hello thread 5, how is going?
-Hello thread 3, how is going?
-\end{verbatim}
-
-\subsection{Callables and Futures}
-\label{sec:org585a208}
-
-Like Runnable, executors can work with other kinds of tasks. We called these
-tasks callables (\texttt{Callable} interface). Such interface is similar to \texttt{Runnable},
-but instead of returning void after calling its \texttt{run} method, it returns a
-value. These objects are parameters for the method \texttt{submit} of the
-executorService. This method does not wait until the task completes. The
-executor service cannot return the result of the callable objecty. In that
-case, the executor returns an object of type \texttt{Future}. We can retrieve the
-computation result from the \texttt{Callable} object using the \texttt{Future} objects. The
-\emph{futures} have a method called \texttt{isDone()}, with this method we can check if the
-\emph{future} has already finished its execution. Another method available for
-\emph{futures} is \texttt{get()}. Calling this method blocks the current threads and waits
-until the \emph{callable} completes its execution. An example is below:
-
-
-\begin{verbatim}
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-public class App {
-    public static void main(String args[]) throws ExecutionException {
-        Callable<Integer> task = () -> {
-            try {
-                TimeUnit.SECONDS.sleep(2);
-                return 42;
-            }
-            catch (InterruptedException e) {
-                System.out.println("Error " + e.getMessage());
-                e.printStackTrace();
-            }
-            return -1;
-        };
-
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        try {
-            Future<Integer> future = executor.submit(task);
-            System.out.println(String.format("Future done? %b", future.isDone()));
-            Integer result = future.get();
-            System.out.println(String.format("Future done? %b", future.isDone()));
-            System.out.println(String.format("Result: %d", result));
-            executor.shutdown();
-        }
-        catch (InterruptedException | ExecutionException e) {
-            System.out.println("Error " + e.getMessage());
-            e.printStackTrace();
-            executor.shutdown();
-        }
-
-    }
-}
-\end{verbatim}
-
-
-Calls to \texttt{future.get()} will block the current thread and wait until the
-computation finish. But, sometimes this call can runs forever and making the
-program unresponsive. To counterattack this type of scenarios, you can add a
-timeout to avoid endless executions. An example below:
-
-\begin{verbatim}
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-
-public class App {
-    public static void main(String args[]) throws ExecutionException {
-        Callable<Integer> task = () -> {
-            try {
-                TimeUnit.SECONDS.sleep(4);
-                return 42;
-            }
-            catch (InterruptedException e) {
-                System.out.println("Error " + e.getMessage());
-                e.printStackTrace();
-            }
-            return -1;
-        };
-
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        try {
-            Future<Integer> future = executor.submit(task);
-            System.out.println(String.format("Future done? %b", future.isDone()));
-            Integer result = future.get(1, TimeUnit.SECONDS);
-            System.out.println(String.format("Future done? %b", future.isDone()));
-            System.out.println(String.format("Result: %d", result));
-            executor.shutdown();
-        }
-        catch (InterruptedException | ExecutionException | TimeoutException e) {
-            System.out.println("Error " + e.getLocalizedMessage());
-            e.printStackTrace();
-            executor.shutdown();
-        }
-    }
-}
-\end{verbatim}
-
-
-The last method we will cover of ExecutorService (there are a plenty more
-but we will not cover them) is \texttt{invokeAll}. \texttt{InvokeAll} allows batch submitting
-of multiple \emph{callables}. This method accepts a collection of \emph{callables} and
-returns a list of \emph{futures}.
-
-\begin{verbatim}
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-public class App {
-    public static void main(String args[]) throws ExecutionException {
-        try {
-            ExecutorService executor = Executors.newFixedThreadPool(1);
-
-            List<Callable<String>> callables = Arrays
-                .asList(
-                        () -> {
-                            TimeUnit.SECONDS.sleep(2);
-                            return "task 1";
-                        },
-                        () -> {
-                            TimeUnit.SECONDS.sleep(2);
-                            return "task 2";
-                        },
-                        () -> {
-                            TimeUnit.SECONDS.sleep(2);
-                            return "task 3";
-                        });
-
-            executor.invokeAll(callables)
-                .stream()
-                .map(future -> {
-                        try {
-                            return future.get();
-                        } catch (Exception e) {
-                            throw new IllegalStateException(e);
-                        }
-                    })
-                .forEach(System.out::println);
-            executor.shutdown();
-        }
-        catch (InterruptedException e) {
-            System.out.println("Error " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-}
-\end{verbatim}
-
-We can get better results if we increment the number of available threads
-for the executorService. By example, using the previous instruction and
-setting it as the fixed value:
-
-\begin{verbatim}
-int numProcessors = Runtime.getRuntime().availableProcessors();
-ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-\end{verbatim}
-
-It is not necessary call \texttt{parallelStream} from the \textbf{Stream} API because the
-\texttt{executorService} assign each task to an available thread in its pool. But,
-depending on the method called (\texttt{stream} or \texttt{parallelStream}), the order of the
-results may vary. This is due to stream (sequential) is pipelined in a
-single thread instead of use multiple threads.
-
-
-\section{Synchronized and locks}
-\label{sec:org336a159}
-
-
-\subsection{Synchronized}
-\label{sec:org9002419}
-
-When we implement a more complex multithreaded program, there are sections
-of code that are accessed by multiple threads. We need to pay attention when
-accessing to shared mutable variable concurrently. By example, lets think in
-a counter used by multiple threads concurrently. A first approach could be
-the following:
-
-\begin{verbatim}
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
-
-public class App {
-
-    public static void main(String[] args) {
-        Counter c = new Counter();
-        c.test();
-    }
-
-}
-
-class Counter {
-    int count = 0;
-
-    void increment() {
-        count = count + 1;
-    }
-
-    public void test() {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        IntStream.range(0, 10000)
-            .forEach(i -> executor.submit(this::increment));
-
-        executor.shutdown();
-        System.out.println(count);
-    }
-}
-\end{verbatim}
-
-We can see that the value obtained is inconsistent with the value
-expected. This happen due a race condition.  To avoid this problem, java
-provides a simple mechanism to provide thread synchronization, this through
-the keyword \texttt{synchronized}. Internally, Java uses a monitor lock to manage
-synchronization. Let see an example:
-
-\begin{verbatim}
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
-
-public class App {
-
-    public static void main(String[] args) {
-        Counter c = new Counter();
-        c.test();
-    }
-
-}
-
-class Counter {
-    int count = 0;
-
-    synchronized void increment() {
-        count = count + 1;
-    }
-
-    public void test() {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        IntStream.range(0, 10000)
-            .forEach(i -> executor.submit(this::increment));
-
-        executor.shutdown();
-        System.out.println(count);
-    }
-}
-\end{verbatim}
-
-There are more uses to the keyword synchronized, but we do not discuss them
-in this tutorial.
-
-
-\subsection{Locks}
-\label{sec:org509ca4e}
-
-
-Another tool provide by Java to manage synchronization are the looks. With
-them, we can set lock mechanisms in an explicit way. Locks support many
-methods for finer grained synchronization control. Java provides many types
-of locks, by  example \texttt{ReentrantLock}, \texttt{ReentrantReadWriteLock} or
-\texttt{StampedLock}. Locks that implement the interface
-\texttt{java.util.concurrent.locks.Lock}, use the methods \texttt{lock()} and \texttt{unlock()} to
-provide locking explicitly. Another important operation provided by this
-interface is tryLock(), used to try get the lock without pausing the current
-thread. \texttt{ReentrantLock} is a class that implements the \texttt{Lock} interface.
-
-Let see an example:
-
-\begin{verbatim}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
-public class App {
-
-    public static void main(String[] args) throws InterruptedException {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        ReentrantLock lock = new ReentrantLock();
-        executor.submit(() -> {
-                lock.lock();
-                try {
-                    TimeUnit.SECONDS.sleep(4);
-                    System.out.println("wake up");
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                } finally {
-                    lock.unlock();
-                }
-            });
-        executor.submit(() -> {
-                System.out.println("Locked: " + lock.isLocked());
-                System.out.println("Held by me: " + lock.isHeldByCurrentThread());
-                boolean locked = lock.tryLock();
-                System.out.println("lock aquired: " + locked);
-            });
-        executor.shutdown();
-    }
-}
-\end{verbatim}
-
-The class \texttt{ReentrantReadWriteLock} is another lock class that implements the
-interface \texttt{ReadWriteLock}.  The idea behind is to have a pair of locks for
-read-and-write access. Usually, it is safe to read mutable shared variables
-while nobody is writing over them. Thus, the read-lock can be held by many
-threads while no thread holds the write-lock. Using this lock, we can
-improve performance and throughput when reads are more frequent than
-writes. An example is below:
-
-\begin{verbatim}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.Map;
-import java.util.HashMap;
-
-public class App {
-
-    public static void main(String[] args) throws InterruptedException {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        Map<String, String> map = new HashMap<>();
-
-        ReadWriteLock lock = new ReentrantReadWriteLock();
-
-        executor.submit(() -> {
-                lock.writeLock().lock();
-                try {
-                    System.out.println("Putting information into the map");
-                    TimeUnit.SECONDS.sleep(4);
-                    map.put("foo", "bar");
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                } finally {
-                    lock.writeLock().unlock();
-                }
-            });
-
-        Runnable readTask = () -> {
-            lock.readLock().lock();
-            try {
-                String threadName = Thread.currentThread().getName();
-                String message = String.format("Name %s, value: %s", threadName, map.get("foo"));
-                System.out.println(message);
-                TimeUnit.SECONDS.sleep(1);
-            } catch(InterruptedException ex) {
-                ex.printStackTrace();
-            } finally {
-                lock.readLock().unlock();
-            }
-        };
-
-        executor.submit(readTask);
-        executor.submit(readTask);
-
-        executor.shutdown();
-    }
-}
-\end{verbatim}
-
-\begin{itemize}
-\item[{$\square$}] StampedLock
-\item[{$\square$}] Semaphores
-\end{itemize}
-
-\section{Atomic Variables}
-\label{sec:org8d33c4e}
-
-Java provides many classes to perform atomic operations over many data
-types. Inside of these classes, the atomic operations are handled by
-compare-and-swap or swap (getAndSet) instructions, which are atomic
-instructions directly supported by most modern CPUs. These classes lives in
-the package \texttt{java.util.concurrent.atomic} and some examples are:
-
-\begin{itemize}
-\item AtomicInteger
-\item AtomicLong
-\item AtomicReference
-\item AtomicStampedReference
-\item AtomicIntegerArray
-\end{itemize}
-
-The specification for the atomic accesses performed by these classes is
-described in the documentation of \texttt{java.lang.invoke.VarHandle} (for java
-9+). Some methods that they share are:
-
-\begin{itemize}
-\item compareAndExchange
-\item compareAndSet
-\item getAndIncrement
-\item getAndSet
-\end{itemize}
-
-Let's see an example of how use the atomic variables:
-
-\begin{verbatim}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
-
-public class App {
-
-    public static void stop(ExecutorService executor) {
-        try {
-            executor.shutdown();
-            executor.awaitTermination(60, TimeUnit.SECONDS); // give it time to finish
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (!executor.isTerminated()) {
-                System.out.println("Termination interrupted");
-            }
-            executor.shutdown();
-        }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        AtomicInteger atomicInt = new AtomicInteger(0);
-
-        IntStream.range(0, 10000).forEach(i -> executor.submit(atomicInt::incrementAndGet));
-
-        stop(executor);
-        System.out.println("Value is: " + atomicInt.get());
-    }
-}
-\end{verbatim}
-
-
-\section{Synchronizers}
-\label{sec:org6d54f78}
-
-Five classes aid common special purpose synchronization idioms:
-
-\begin{itemize}
-\item Semaphore
-\item CountDownLatch
-\item CyclicBarrier
-\item Phaser
-\item Exchanger
-\end{itemize}
-
-\section{Concurrent Collections}
-\label{sec:org3882d62}
-
-The Java Concurrent API provides multiple collections designed for use in
-multithreaded contexts
-
-
 \chapter{Concurrent programming in Java}
-\label{sec:org709268f}
+\label{sec:org1ede13a}
 
 \section{1.1 Threads}
-\label{sec:org885425f}
+\label{sec:org52622cc}
 Each process can create and execute threads.
 Create thread: t1 = new Thread(s1); Where s1 is a computation unit modifying x
 = 0.
@@ -2655,7 +1733,7 @@ t1 join to t2 and t2 join to t1;
 A very common error is deadlock.
 
 \section{Structured locks}
-\label{sec:org769ddf0}
+\label{sec:orgb8836b7}
 
 Inc(A) \{
   synchronized(A) \{
@@ -2668,10 +1746,10 @@ and this will give us a problem known as data race.
 
 
 \chapter{Other links}
-\label{sec:orgc129efc}
+\label{sec:orgf343086}
 
 \section{Youtube videos}
-\label{sec:orgbc42475}
+\label{sec:orgc63f2fc}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.youtube.com/watch?v=drXrIVfBKaQ}{Safe Memory Reclamation (Hazard Pointers)}
@@ -2685,7 +1763,7 @@ Safe and Efficient Teardown"}
 
 
 \section{Tools}
-\label{sec:org4ab46cb}
+\label{sec:org9522094}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://valgrind.org/docs/manual/cg-manual.html}{Cachegrind}
@@ -2695,7 +1773,7 @@ Safe and Efficient Teardown"}
 
 
 \section{Readings}
-\label{sec:orgb25463d}
+\label{sec:org012e994}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://frankdenneman.nl/2016/07/07/numa-deep-dive-part-1-uma-numa/}{Numa Deep Dive Part 1: From UMA To NUMA}
@@ -2722,7 +1800,7 @@ Safe and Efficient Teardown"}
 
 
 \section{Clojure things}
-\label{sec:org3da352e}
+\label{sec:orgae157e2}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://github.com/jepsen-io/jepsen}{Jepsen: Clojure library to set up a distributed system and verify if an
@@ -2735,7 +1813,7 @@ execution is linearizable}
 
 
 \section{Python things}
-\label{sec:org7454439}
+\label{sec:orgf9827d0}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://bytes.yingw787.com/posts/2019/01/11/concurrency\_with\_python\_why/}{Concurrency with python series}
@@ -2743,7 +1821,7 @@ execution is linearizable}
 
 
 \section{CPP Things}
-\label{sec:orgc7f9c7a}
+\label{sec:org22cd358}
 
 \begin{itemize}
 \item[{$\square$}] \href{https://www.mygreatlearning.com/blog/cpp-interview-questions/?gl\_blog\_id=25150}{CPP interview}
@@ -2752,28 +1830,28 @@ execution is linearizable}
 
 
 \chapter{Notes}
-\label{sec:org52b33c2}
+\label{sec:org58f2daf}
 
 \section{Concurrent computing}
-\label{sec:orgd4cd369}
+\label{sec:org33e7518}
 
 \subsection{Work-Stealing}
-\label{sec:org8788022}
+\label{sec:orgf883442}
 
 \subsection{Article}
-\label{sec:org5759e49}
+\label{sec:org990dcf6}
 
 \begin{enumerate}
 \item Work-stealing with multiplicity
-\label{sec:org25076bb}
+\label{sec:org33ff5f0}
 
 \begin{enumerate}
 \item Experiments C++
-\label{sec:orgac3a3e7}
+\label{sec:org0c5154e}
 
 \begin{enumerate}
 \item What to use?
-\label{sec:org34efc61}
+\label{sec:org35773e7}
 
 \begin{itemize}
 \item std::thread
@@ -2805,13 +1883,13 @@ pthreads directly.
 
 
 \item Why are important tests in concurrent code
-\label{sec:org7e5cc68}
+\label{sec:orgc74be63}
 
 \href{https://www.youtube.com/watch?v=tRe3ddG8O1Y}{Unit testing patterns for concurrent code}
 
 \begin{enumerate}
 \item The dark art of concurrent code
-\label{sec:orga360beb}
+\label{sec:org29734a9}
 
 \begin{itemize}
 \item Several actions at the same time
@@ -2820,7 +1898,7 @@ pthreads directly.
 \end{itemize}
 
 \item A good unit test must be:
-\label{sec:org0aab23a}
+\label{sec:org7e591f4}
 
 \begin{itemize}
 \item Trustworthy
@@ -2829,7 +1907,7 @@ pthreads directly.
 \end{itemize}
 
 \item Concurrency test "smells"
-\label{sec:orgf9f5ce7}
+\label{sec:org3b0d1c2}
 
 \begin{itemize}
 \item Inconsistent results
@@ -2839,7 +1917,7 @@ pthreads directly.
 \end{itemize}
 
 \item Test smell - using "sleep" in test
-\label{sec:org841fdd9}
+\label{sec:org9d07b47}
 
 \begin{itemize}
 \item Time based - fail/pass inconsistently
@@ -2857,10 +1935,10 @@ component into a component that is testeable via synchronous tests.
 \end{description}
 
 \item Model
-\label{sec:orge22badc}
+\label{sec:orgf179c9d}
 
 \item Technology to use
-\label{sec:org6abe9f0}
+\label{sec:orgb805172}
 
 \begin{itemize}
 \item Google Test
@@ -2874,7 +1952,7 @@ component into a component that is testeable via synchronous tests.
 
 
 \subsection{Related topics}
-\label{sec:org294d890}
+\label{sec:org3ea7a1a}
 \begin{itemize}
 \item \href{https://epub.jku.at/obvulihs/download/pdf/6196854?originalFilename=true}{Thesis} on the use of work-stealing applied to garbage collection. In this
 thesis they mention how to implement Garbage Collector Garbage First (G1)
@@ -2882,10 +1960,10 @@ in the HotSpot virtual machine of the Open JDK.
 \end{itemize}
 
 \subsection{Links}
-\label{sec:orgf57cdf9}
+\label{sec:orgd3fcca2}
 \begin{enumerate}
 \item Philosophy
-\label{sec:org67c0b00}
+\label{sec:orgc1855ce}
 
 \begin{itemize}
 \item \href{https://assets.bitbashing.io/papers/concurrency-primer.pdf}{What every systems programmer should know about concurrency}
@@ -2893,17 +1971,17 @@ in the HotSpot virtual machine of the Open JDK.
 \end{itemize}
 
 \item Courses
-\label{sec:orgd4c0212}
+\label{sec:orga953e38}
 \begin{itemize}
 \item \href{https://ocw.mit.edu/courses/find-by-topic/\#cat=engineering\&subcat=computerscience\&spec=algorithmsanddatastructures}{Cursos MIT CS}
 \item
 \end{itemize}
 
 \item Programming Languages\hfill{}\textsc{cpp:java:rust}
-\label{sec:orgd433c6e}
+\label{sec:orgf774dfd}
 \begin{enumerate}
 \item C/C++/Java
-\label{sec:orgdc28312}
+\label{sec:orgd6baa78}
 \begin{itemize}
 \item \href{https://www.linuxjournal.com/article/6700}{Cross-Platform Software Development Using CMake}
 \item \href{https://atomheartother.github.io/c++/2018/07/12/CPPDynLib.html}{Writing a cross platform dynamic library}
@@ -2924,7 +2002,7 @@ in the HotSpot virtual machine of the Open JDK.
 
 \begin{enumerate}
 \item STL C++
-\label{sec:orgf1f6df4}
+\label{sec:orgfb58473}
 \begin{itemize}
 \item \href{https://www.geeksforgeeks.org/vector-in-cpp-stl/}{vector}
 \item \href{https://www.geeksforgeeks.org/list-cpp-stl/?ref=lbp}{List}
@@ -2940,7 +2018,7 @@ in the HotSpot virtual machine of the Open JDK.
 \end{enumerate}
 
 \item Techniques
-\label{sec:orgcd43ea7}
+\label{sec:orgbd95691}
 \begin{itemize}
 \item \href{https://mziccard.me/2015/05/08/modulo-and-division-vs-bitwise-operations/}{Modulo and Division vs Bitwise Operations}
 \item \url{https://en.wikipedia.org/wiki/Locality\_of\_reference}
@@ -2952,13 +2030,13 @@ in the HotSpot virtual machine of the Open JDK.
 \end{enumerate}
 
 \item Others
-\label{sec:org3e6e12a}
+\label{sec:org42a0d10}
 \begin{itemize}
 \item \href{https://ariannadanielle.com/why-you-need-a-website-how-to-create-your-own-website-in-a-day-for-free/}{Why you need a website as phd}
 \end{itemize}
 
 \item Techniques\hfill{}\textsc{cpp}
-\label{sec:org87d8914}
+\label{sec:org254ffcd}
 \begin{itemize}
 \item \href{https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.395.378\&rep=rep1\&type=pdf}{Hazard pointers: Safe memory reclamation for lock-free objects}
 \item \href{https://comp.lang.cpp.moderated.narkive.com/vAi9h9q9/lock-free-programming-with-boost-shared-ptr-instead-of-hazard-pointers}{Shared pointers vs hazard pointers}
@@ -2973,13 +2051,13 @@ reclamation}
 
 
 \section{Notes}
-\label{sec:org622db7e}
+\label{sec:org009c1ed}
 
 \subsection{Git}
-\label{sec:org9c4f67d}
+\label{sec:org65f5138}
 \begin{enumerate}
 \item Write git messages that your colleagues will love
-\label{sec:org5a03436}
+\label{sec:orgdc4af7c}
 \begin{itemize}
 \item Why git commit messages are important
 \item Reading vs writing code
@@ -2992,10 +2070,10 @@ reclamation}
 
 
 \section{Statistics}
-\label{sec:orgcb2b6c7}
+\label{sec:org14cb7d9}
 
 \subsection{Temario tentativo}
-\label{sec:org618ab64}
+\label{sec:orgbdf306e}
 
 
 \begin{itemize}
@@ -3013,11 +2091,11 @@ reclamation}
 \end{itemize}
 
 \subsection{\href{https://www.youtube.com/watch?v=kS7nIEzyAcU}{Estadística para diseños experimentales}}
-\label{sec:org022a610}
+\label{sec:org6f0e8c9}
 
 \begin{enumerate}
 \item Diseño experimental
-\label{sec:orgabe9a85}
+\label{sec:org3f9ed3a}
 \begin{itemize}
 \item Población objetivo
 \begin{itemize}
@@ -3033,7 +2111,7 @@ reclamation}
 \end{itemize}
 
 \item Distribución de frecuencias
-\label{sec:orga00f529}
+\label{sec:org3b33b81}
 
 \begin{itemize}
 \item Distribución normal
@@ -3066,7 +2144,7 @@ reclamation}
 \end{itemize}
 
 \item Pruebas de hipótesis
-\label{sec:orgf3540ad}
+\label{sec:orgf7c1d3d}
 
 2 Hipótesis
 \begin{itemize}
@@ -3086,11 +2164,11 @@ Valor de probabilidad (p)
 \end{itemize}
 
 \item Pruebas estadísticas
-\label{sec:org1d8049a}
+\label{sec:orgab7b68f}
 
 \begin{enumerate}
 \item Pruebas para dos grupos (muestras)
-\label{sec:org1290322}
+\label{sec:org2f7d511}
 
 \begin{itemize}
 \item T de student (versión paramétrica)
@@ -3110,22 +2188,22 @@ Valor de probabilidad (p)
 \end{itemize}
 
 \item Pruebas para más de dos grupos
-\label{sec:org9d0117c}
+\label{sec:org127769f}
 
 \item Pruebas para variables continuas y categóricas
-\label{sec:orgcb06724}
+\label{sec:org35853f0}
 \end{enumerate}
 \end{enumerate}
 
 
 
 \subsection{Estadística para ciencia de datos}
-\label{sec:org4d3acf1}
+\label{sec:org7bd69dd}
 
 
 \begin{enumerate}
 \item Data Science
-\label{sec:org923e82b}
+\label{sec:orgab3a0ed}
 
 \begin{itemize}
 \item ¿Qué es ciencia de datos?
@@ -3135,7 +2213,7 @@ como se comporta nuestra materia prima.
 
 \begin{enumerate}
 \item Estadística básica
-\label{sec:orgdf954c7}
+\label{sec:org15709ae}
 
 \begin{description}
 \item[{Variable}] Características de un objeto o individuo que pueden medirse y
@@ -3151,13 +2229,13 @@ aquellos valores que estén por debajo.
 
 
 \item Data Science Steps
-\label{sec:orgefb0d84}
+\label{sec:org276f3c4}
 
 \item Main Concepts
-\label{sec:org9faace0}
+\label{sec:orgdadef59}
 
 \item Match Between Statistic and Data Science
-\label{sec:org6db4a37}
+\label{sec:orgc252cbd}
 \end{enumerate}
 
 
@@ -3167,7 +2245,7 @@ aquellos valores que estén por debajo.
 
 
 \chapter{Plan last 2 semesters}
-\label{sec:org74430dd}
+\label{sec:orgefe0737}
 
 \begin{itemize}
 \item[{$\square$}] Plan de experimentos para colas concurrentes
@@ -3229,13 +2307,13 @@ aquellos valores que estén por debajo.
 \end{itemize}
 
 \section{Memory management}
-\label{sec:org146f5e1}
+\label{sec:org376c4ad}
 
 \subsection{A study of dynamic memory management in C++ programs (2002)}
-\label{sec:org3d6b223}
+\label{sec:org6e813bc}
 \begin{enumerate}
 \item Main ideas
-\label{sec:org71a36da}
+\label{sec:orgc6710a0}
 
 \begin{itemize}
 \item Dynamic memory management has been a high cost component in many software
@@ -3271,7 +2349,7 @@ to a free-list which is maintained by the \textbf{overloaded new operator}.
 \end{itemize}
 
 \item Garbage Collector Design
-\label{sec:org4a5b644}
+\label{sec:orga7ee8a0}
 
 \begin{itemize}
 \item The garbage collector maintains objects with segregated memory blocks. In
@@ -3292,10 +2370,10 @@ objects are re-inserted in the list.
 
 
 \subsection{Hazard Pointers: Safe Memory Reclamation for Lock-Free Objects}
-\label{sec:org21b0e86}
+\label{sec:org9cf868e}
 \begin{enumerate}
 \item Main ideas
-\label{sec:org19a446c}
+\label{sec:org3d6a20f}
 
 \begin{itemize}
 \item In languages without automatic memory reclamation or support for
@@ -3327,7 +2405,7 @@ Without special scheduler support, these methods are blocking.
 \end{itemize}
 
 \item Model
-\label{sec:org11fed32}
+\label{sec:org822e4a9}
 
 \begin{itemize}
 \item The model
@@ -3340,7 +2418,7 @@ Without special scheduler support, these methods are blocking.
 \end{itemize}
 
 \item The Methodology
-\label{sec:orgf62ae80}
+\label{sec:orgf24856f}
 \begin{itemize}
 \item Associate hazard pointers with threads. A hazard pointer is a single
 write multireader pointer. The number of hazard pointers per thread
@@ -3357,7 +2435,8 @@ guarantee the safety of memory reclamation and ABA prevention.
 \end{enumerate}
 
 \item Shared and private structures used by the algorithm:
-\begin{verbatim}
+\lstset{language=cpp,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
 #include <list>
 
 const int K = 2;
@@ -3409,13 +2488,13 @@ void scaScan(HPRecType* head) {
     }
     plist.free();
 }
-\end{verbatim}
+\end{lstlisting}
 \end{itemize}
 \end{enumerate}
 
 
 \chapter{Articles to begin with}
-\label{sec:org07849a7}
+\label{sec:org2bf72a7}
 
   Seed Papers
 TITLE	FIRST AUTHOR	YEAR	CITED BY
@@ -3456,7 +2535,7 @@ Fully Read/Write Fence-Free Work-Stealing with Multiplicity	Armando Castaneda	20
 
 
 \chapter{Bibliography}
-\label{sec:orgfb25282}
+\label{sec:org2dfee6f}
 \bibliographystyle{plainurl}
 \bibliography{refs}
 \end{document}
