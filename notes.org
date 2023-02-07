@@ -940,7 +940,7 @@
    \(c_2\), such that the probability of the mean value being between that two
    values is \(1 - \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 -
    \alpha\). \(c_1\) and \(c_2\) are chosen to form a symmetric interval around
-   \bar{x} such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
+   \(\bar{x}\) such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
    interval \([c_1, c_2]\) is called /confidence interval/ for \(\bar{x}\) and
    \(\alpha\) is called the /significance level/ and the value \((1 - \alpha)\) is
    called the /confidence level/. From the central-limit theorem, we have:

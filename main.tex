@@ -1,4 +1,4 @@
-% Created 2023-02-07 mar 17:05
+% Created 2023-02-07 mar 17:08
 % Intended LaTeX compiler: pdflatex
 \documentclass{latex/classes/thesis}
 \usepackage[utf8]{inputenc}
@@ -29,22 +29,22 @@
 
 
 \chapter{{\bfseries\sffamily TODO} Introduction}
-\label{sec:org0125d0e}
+\label{sec:org42dc639}
 
 \section{{\bfseries\sffamily TODO} Overview}
-\label{sec:org12445cb}
+\label{sec:orgd05ae45}
 
 \section{{\bfseries\sffamily TODO} Motivation}
-\label{sec:orgddafab8}
+\label{sec:orgc61d50f}
 
 \section{{\bfseries\sffamily TODO} Objectives and contributions}
-\label{sec:orgaa120d3}
+\label{sec:orge5ac9a4}
 
 \section{{\bfseries\sffamily TODO} Organization}
-\label{sec:org11cbdae}
+\label{sec:org717efa6}
 
 \chapter{{\bfseries\sffamily TODO} Concurrent Computing}
-\label{sec:org1679fe1}
+\label{sec:org433370b}
 
 What is concurrent computing? This is a good question. We should first talk
 about single-core and multi-core processors manufactured by the computer
@@ -65,7 +65,7 @@ permitting make computing more effectively using \emph{parallelism}, where the
 processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 \section{{\bfseries\sffamily TODO} Classic concurrent computing}
-\label{sec:orgdfe4f39}
+\label{sec:org64e85ee}
 
 \begin{itemize}
 \item[{$\square$}] Basic Definitions
@@ -76,7 +76,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 
 \section{{\bfseries\sffamily TODO} Relaxed concurrent computing}
-\label{sec:org965e4a0}
+\label{sec:orgd4decbd}
 
 \begin{itemize}
 \item[{$\square$}] Relaxing the problem
@@ -85,7 +85,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} Work-stealing}
-\label{sec:orgd07d63e}
+\label{sec:orge695e75}
 
 \begin{itemize}
 \item[{$\square$}] How it works the work-stealing
@@ -95,20 +95,20 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} Data-Structures}
-\label{sec:org70a65d9}
+\label{sec:org87cb114}
 
 \begin{itemize}
 \item[{$\square$}] Queues with multiplicity
 \end{itemize}
 
 \chapter{{\bfseries\sffamily TODO} Preliminaries}
-\label{sec:orgeade041}
+\label{sec:org4973e48}
 
 \section{{\bfseries\sffamily TODO} Mathematical model}
-\label{sec:org06bc16c}
+\label{sec:orgbcde4bf}
 
 \section{{\bfseries\sffamily TODO} Realistic model of computation}
-\label{sec:orgda66595}
+\label{sec:orge3cb8d8}
 
 We consider a standard concurrent shared memory system with \(n \ge 2\)
 \emph{asynchronous} processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
@@ -132,7 +132,7 @@ write to a single shared memory space. Usually each processor core has a
 cache to operate with data from the shared memory. Often, this data is
 transferred through a memory bus, allowing connect the processors with the
 memory. The figure \ref{fig:arch} shows a simplified view of this model. In
-the sections: \hyperref[sec:orga01d03c]{Cache memory}, \hyperref[sec:org764b14a]{Memory bus} and \hyperref[sec:org58651a9]{Main memory}, we explain more in
+the sections: \hyperref[sec:org356909b]{Cache memory}, \hyperref[sec:orgc422088]{Memory bus} and \hyperref[sec:orgdfc917e]{Main memory}, we explain more in
 detail the meaning of each bullet of the list.
 
 \begin{figure}
@@ -145,7 +145,7 @@ detail the meaning of each bullet of the list.
 
 
 \subsection{Cache memory}
-\label{sec:orga01d03c}
+\label{sec:org356909b}
 
 The cache memory is a special very high-speed memory that is very close to
 the processor and the processes can access it very fast. The caches are used
@@ -164,7 +164,7 @@ are close to be executed. In the third level, this cache is shared by many
 processors and is used as feeder for the L2 cache.
 
 \subsection{Memory bus}
-\label{sec:org764b14a}
+\label{sec:orgc422088}
 
 Is a computer bus that allows transfer data from the primary memory to the
 CPU and the cache memory. It is made up of two parts: the data bus and the
@@ -175,18 +175,18 @@ information.
 
 
 \subsection{Main memory}
-\label{sec:org58651a9}
+\label{sec:orgdfc917e}
 
 Is the responsible of hold the data that CPU need to access frequently, such
 as instructions or data currently being processed. The CPU can access to
 this information faster than the access to secondary memory.
 
 \subsection{Consistency Memory Model and Cache Coherence}
-\label{sec:org26cc5f0}
+\label{sec:orgeda4069}
 
 \begin{enumerate}
 \item Consistency memory model
-\label{sec:org52357c0}
+\label{sec:orgb5b8a7b}
 
 Following the simplified view of the cache architecture, we want to have a
 correct shared memory. And what this means? The correctness of the shared
@@ -211,7 +211,7 @@ considered, because these models shows that most memory orderings in strong
 models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \item Cache coherence
-\label{sec:orgd5e8fd4}
+\label{sec:orgf21d97e}
 
 Cache coherence protocols are used in response to solve a coherence problem
 in cache. For example, a coherence problem can arise if multiple cores have
@@ -228,7 +228,7 @@ data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 
 \subsection{Memory fences}
-\label{sec:org31b06ca}
+\label{sec:org07f766d}
 
 A memory fence is a barrier instruction that causes a CPU or compiler to
 enforce a an ordering constraint on memory operations (loads and stores)
@@ -344,148 +344,148 @@ full memory fence instruction \texttt{MFENCE}. For other archict
 
 
 \section{{\bfseries\sffamily TODO} Data-Structures}
-\label{sec:org567a703}
+\label{sec:org75fdb32}
 
 \subsection{Queues}
-\label{sec:org059a483}
+\label{sec:org414c73c}
 
 \subsection{Stacks}
-\label{sec:orga03feea}
+\label{sec:org89ec2ca}
 
 
 \section{{\bfseries\sffamily TODO} Some Hardware Foundations}
-\label{sec:orgf9f51f6}
+\label{sec:org3f925ee}
 
 \subsection{Cache memory}
-\label{sec:org8afde3a}
+\label{sec:orgfd8d3e6}
 
 The cache memory
 
 \begin{enumerate}
 \item Multiple caches
-\label{sec:org24c4d87}
+\label{sec:org679bdd9}
 
 
 \item Cache coherence protocols
-\label{sec:org78bb710}
+\label{sec:orgdb98898}
 
 
 
 \begin{enumerate}
 \item MESI
-\label{sec:org2460a41}
+\label{sec:orgf5764b1}
 
 
 \item MOESI
-\label{sec:org7868b52}
+\label{sec:orgd8973b7}
 \end{enumerate}
 
 
 \item Store Buffers
-\label{sec:org969cdfa}
+\label{sec:org17335d3}
 \end{enumerate}
 
 
 \subsection{Reordering (CPU or Compiler)}
-\label{sec:org8b26808}
+\label{sec:org7bbeaa5}
 
 \subsection{Memory Barriers}
-\label{sec:orgf4481ce}
+\label{sec:orge0e257a}
 
 \begin{enumerate}
 \item X86 and TSO architectures
-\label{sec:org19d5e8c}
+\label{sec:orge956e40}
 
 \item Memory Fences
-\label{sec:orgf47c388}
+\label{sec:orgc5c7637}
 \end{enumerate}
 
 \subsection{Read-Modify-Write Operations}
-\label{sec:org4ba33d4}
+\label{sec:orgd3049a6}
 
 \subsection{Bibliography}
-\label{sec:org3b72499}
+\label{sec:org6637d0b}
 
 \begin{itemize}
 \item \url{https://blog.the-pans.com/std-atomic-from-bottom-up/}
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} C++ Memory model}
-\label{sec:org92bdae2}
+\label{sec:org6aaa68d}
 
 \subsection{Memory model basics}
-\label{sec:orgff0b3cc}
+\label{sec:org9e88abd}
 
 \begin{enumerate}
 \item Objects and memory locations
-\label{sec:org7d811a5}
+\label{sec:orgc962e2e}
 
 
 \item Objects, memory locations, and concurrency
-\label{sec:org4f8ae4c}
+\label{sec:org8ec2aa1}
 
 
 \item Modification orders
-\label{sec:org2acc76d}
+\label{sec:org5694c9a}
 \end{enumerate}
 
 
 \subsection{Atomic operations and types in C++}
-\label{sec:org7034871}
+\label{sec:orgaf839c9}
 
 
 \begin{enumerate}
 \item The standard atomic types
-\label{sec:orgc6a779d}
+\label{sec:orgd650de3}
 
 \item Operations on std::atomic\textsubscript{flag}
-\label{sec:orgc847d45}
+\label{sec:orgd7bb424}
 
 \item Operations on std::atomic<boolean>
-\label{sec:orgf14cb9d}
+\label{sec:org9044568}
 
 \item Operations on std::atomic<T*>: pointer arithmetic
-\label{sec:org9519f47}
+\label{sec:orgea6b6b8}
 
 \item Operations on standard atomic integral types
-\label{sec:org936e524}
+\label{sec:org1af3c0a}
 
 \item The std::atomic<> primary class template
-\label{sec:orgeb08638}
+\label{sec:org20973d2}
 
 \item Free functions for atomic operations
-\label{sec:org5d9a612}
+\label{sec:org871838f}
 \end{enumerate}
 
 \subsection{Synchronizing operations and enforcing ordering}
-\label{sec:org4ccb2f1}
+\label{sec:org5135e33}
 
 \begin{enumerate}
 \item The synchronization relationship
-\label{sec:orgeefc45b}
+\label{sec:org0ea9afd}
 
 \item The happens-before relationship
-\label{sec:org465ba7d}
+\label{sec:org414a712}
 
 \item Memory ordering for atomic operations
-\label{sec:org2914b74}
+\label{sec:org324216a}
 
 \item Release sequences and synchronizes-with
-\label{sec:org1e5d065}
+\label{sec:org03036d4}
 
 \item Fences
-\label{sec:orgdec4778}
+\label{sec:orge14e0b1}
 
 \item Ordering non-atomic operations with atomics
-\label{sec:org7414fe6}
+\label{sec:orgb97603a}
 
 \item Ordering non-atomic operations
-\label{sec:orga70c3ef}
+\label{sec:orgd934a44}
 \end{enumerate}
 
 
 \section{{\bfseries\sffamily TODO} Guidelines for designing data-structures for concurrency}
-\label{sec:org5e109ac}
+\label{sec:org3d2597b}
 
 \begin{itemize}
 \item Ensure that no thread can see a state where the invariants of the
@@ -507,7 +507,7 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \chapter{{\bfseries\sffamily TODO} Work Stealing}
-\label{sec:org095f54f}
+\label{sec:org99d3e31}
 
 We analyze the algorithms for work-stealing described in the article Fully
 Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
@@ -524,16 +524,16 @@ similar semantic than the prior algorithms.
 
 
 \section{{\bfseries\sffamily TODO} Model}
-\label{sec:orgaadebe3}
+\label{sec:org47af23e}
 
 \section{{\bfseries\sffamily TODO} Known algorithms}
-\label{sec:orgff05363}
+\label{sec:orgd81f6af}
 
 \section{{\bfseries\sffamily TODO} Pseudocode for Work-Stealing with Weak Multiplicity}
-\label{sec:org2723475}
+\label{sec:org26ea387}
 
 \section{{\bfseries\sffamily TODO} Memory management}
-\label{sec:org03fef68}
+\label{sec:org230d30d}
 
 To implement efficiently the idempotent algorithms in an enviroment without
 garbage collection, it's necessary use some technique or metodology to
@@ -542,7 +542,7 @@ threads want to reclaim the memory of the object associated to the pointer.
 
 \begin{enumerate}
 \item Strategies to delete shared pointers
-\label{sec:org797adb4}
+\label{sec:orgc644d3d}
 
 \begin{itemize}
 \item Add pointers to list to safety delete.
@@ -556,7 +556,7 @@ it exits.
 
 
 \item Hazard pointers
-\label{sec:org3491402}
+\label{sec:org86c1a75}
 
 The \emph{Hazard Pointers} is a technique to manage memory in languages where there
 are not a garbage collector. This technique was proposed by Maged
@@ -614,7 +614,7 @@ void func() {
 
 
 \item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
-\label{sec:org15f6d43}
+\label{sec:org9d6caaa}
 
 
 When a memory region is reclaimed, the programmer cannot know how that
@@ -634,7 +634,7 @@ created
 
 
 \section{{\bfseries\sffamily TODO} Memory management for work-stealing algorithms}
-\label{sec:org11b8baa}
+\label{sec:org396f1b2}
 
 It is well known that C++ does not have a garbage collector like Java. Since
 the publish of the \href{https://en.cppreference.com/w/cpp/11}{Standard C++11}, new features for memory management were
@@ -653,7 +653,7 @@ avoid problems like the \href{https://www.stroustrup.com/isorc2010.pdf}{ABA prob
 
 
 \chapter{{\bfseries\sffamily TODO} Modular Basket Queues}
-\label{sec:orgc87be98}
+\label{sec:org96bad19}
 
 A modular version of the basket queues of Hoffman, Shalev and Shavit is
 presented. It manipulates the head and tail using a novel object called
@@ -665,7 +665,7 @@ head and the tail using \emph{read-modify-write} instructions over a single shar
 register.
 
 \section{{\bfseries\sffamily TODO} Review LL/IC implementations}
-\label{sec:org64fa9ea}
+\label{sec:orga2dc273}
 
 The specification of \texttt{LL/IC} satisfies the next properties, where the state of
 the object is an integer R, initialized to zero, and assuming that any
@@ -678,7 +678,7 @@ invoking process, then do \(R = R + 1\); in any case return \texttt{OK}.
 \end{description}
 
 \section{LL/IC Implementations}
-\label{sec:org8fd7327}
+\label{sec:orgf8267eb}
 
 \begin{description}
 \item[{CAS based implementation}] It uses a shared register \(R\) initialized to
@@ -705,7 +705,7 @@ performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
 \end{description}
 
 \section{{\bfseries\sffamily TODO} Basket implementations}
-\label{sec:org582564d}
+\label{sec:org0da3780}
 
 \begin{description}
 \item[{K-Basket from FAI and SWAP}] In this first implementation, the processes
@@ -725,7 +725,7 @@ to \emph{locally linearizable} generic data structure implementations of
 \end{description}
 
 \section{{\bfseries\sffamily TODO} Update experiments}
-\label{sec:orgd093411}
+\label{sec:org02345df}
 
 To update the experiments is necessary understand what are metrics that
 allows us compare the algorithms designed for LL/IC objects and Baskets. A
@@ -793,7 +793,7 @@ by the same process without this being interrupted, so, this would display
 an overly-optimistic performance due to the lower cache miss rate.
 
 \section{{\bfseries\sffamily TODO} Experimental setup}
-\label{sec:org4585887}
+\label{sec:org2e99fa1}
 
 To evaluate our modular queue with all its variants, we need to determine a
 methodology to know their performance and the throughput of each
@@ -881,7 +881,7 @@ quantify the precision of the measurements searching two values \(c_1\) and
 \(c_2\), such that the probability of the mean value being between that two
 values is \(1 - \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 -
    \alpha\). \(c_1\) and \(c_2\) are chosen to form a symmetric interval around
-\bar{x} such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
+\(\bar{x}\) such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
 interval \([c_1, c_2]\) is called \emph{confidence interval} for \(\bar{x}\) and
 \(\alpha\) is called the \emph{significance level} and the value \((1 - \alpha)\) is
 called the \emph{confidence level}. From the central-limit theorem, we have:
@@ -895,18 +895,18 @@ c_2 = \bar{x} + z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
 
 
 \section{{\bfseries\sffamily TODO} Experiments}
-\label{sec:org742e88b}
+\label{sec:orgc267531}
 
 
 \chapter{{\bfseries\sffamily TODO} Conclusions}
-\label{sec:org0bdbce7}
+\label{sec:orgb2c1c5a}
 
 
 \chapter{Material for courses}
-\label{sec:org6efd52b}
+\label{sec:org39e22c9}
 
 \section{Introduction to multi-threading programming with Java (notes)}
-\label{sec:org21810ca}
+\label{sec:org843edb4}
 \textbf{Prerequisites to take the course}:
 \begin{itemize}
 \item Basic knowledge about Maven
@@ -916,7 +916,7 @@ c_2 = \bar{x} + z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
 \end{itemize}
 
 \subsection{Introduction}
-\label{sec:org45fb835}
+\label{sec:org681edd2}
 
 In the early 2000s, the multicore revolution began due to was difficulty
 built processor chips smaller and faster. Derived from this situation, we had
@@ -938,7 +938,7 @@ related to concurrent and parallel computing.
 
 
 \subsection{Processes and threads}
-\label{sec:org984bdd8}
+\label{sec:orgc1adbcf}
 
 What is the difference between a process and a thread? Both process and
 thread are independent sequences of execution. Loosely speaking, in practical
@@ -954,7 +954,7 @@ programs. Commonly, these events are performed in threads to avoid freeze the
 main thread and are called asynchronously.
 
 \subsection{Basics}
-\label{sec:org5f04900}
+\label{sec:org8d63095}
 
 
 \textbf{Creating the base project}: Let's create a maven based project. In a terminal,
@@ -976,19 +976,19 @@ is change some parameters of our project to work with a recent java version.
 
 In the file \texttt{pom.xml}, change the target output and compiler version. Those
 values should be changed in the properties section as shown in code
-\ref{org872645d}.
+\ref{orgbd8ce7f}.
 
-\lstset{language=XML,label=org872645d,caption={Changing content of file pom.xml},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=XML,label=orgbd8ce7f,caption={Changing content of file pom.xml},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 <maven.compiler.source>17</maven.compiler.source>
 <maven.compiler.target>17</maven.compiler.target>
 \end{lstlisting}
 
 However, our application still not have defined a main class used to execute
-the program. To allow this, add the code shown in code \ref{orgbc0b10d} to the \texttt{pom.xml},
+the program. To allow this, add the code shown in code \ref{orgef3ec06} to the \texttt{pom.xml},
 in the plugins section.
 
-\lstset{language=XML,label=orgbc0b10d,caption={Adding a plugin to execute directly from maven},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=XML,label=orgef3ec06,caption={Adding a plugin to execute directly from maven},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 <plugin>
   <groupId>org.codehaus.mojo</groupId>
@@ -1018,7 +1018,7 @@ mvn compile exec:java
 
 
 \subsection{Creating and starting a Thread}
-\label{sec:org852dc4e}
+\label{sec:orgb6e78bc}
 
 In Java, to use threads in our applications, we can create an instance of the
 class \texttt{Thread} (\texttt{java.lang.Thread}) or make a derived subclass. Also we can
@@ -1123,7 +1123,7 @@ object \texttt{t}, but, in this, there is not a order in how the objects are
 called.
 
 \subsection{Thread managment}
-\label{sec:org0b4ff1c}
+\label{sec:org28d9727}
 
 After seeing how to use threads in a basic way, now let us discuss some
 methods available to thread management. More documentation about these
@@ -1140,9 +1140,9 @@ The methods that we refer are:
 \end{itemize}
 
 We will exemplify the use of the first four methods using the program shown
-in the code \ref{orgb0572ae}.
+in the code \ref{orgf8f645f}.
 
-\lstset{language=java,label=orgb0572ae,caption={Code example using methods for control threads.},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=java,label=orgf8f645f,caption={Code example using methods for control threads.},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 public class App {
     public static void main(String[] args) {
@@ -1338,7 +1338,7 @@ main: Finally!
 
 
 \subsection{Executors}
-\label{sec:orgc218cf6}
+\label{sec:org47b0dff}
 
 Sometimes, work directly with threads could be a bit difficult and can
 introduce some errors or mistakes. To avoid this, the concurrent API of java
@@ -1353,9 +1353,9 @@ class \texttt{Executors} (\texttt{java.util.concurrent.Executors}). This factory
 many static methods to create different instances. Variants of the
 instantiated class usually are parameterized according the number of threads
 or the number of cores available. An small example is shown in the code
-\ref{orge1a46c8}.
+\ref{org3dd1c43}.
 
-\lstset{language=java,label=orge1a46c8,caption={Using executors to manage threads and runnables.},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=java,label=org3dd1c43,caption={Using executors to manage threads and runnables.},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -1388,7 +1388,7 @@ public class App {
 }
 \end{lstlisting}
 
-In the main method of the code \ref{orge1a46c8}, we get the number of hardware
+In the main method of the code \ref{org3dd1c43}, we get the number of hardware
 threads available in our machine. Then, we declare an instance of
 ExecutorService with a pool of k threads. Thereafter, we launch a lambda
 function\footnote{The lambda function is a \texttt{Runnable}. We can get the same result if we
@@ -1412,7 +1412,7 @@ Hello thread 3, how is going?
 
 \begin{enumerate}
 \item Callables and Futures
-\label{sec:orgc40b92a}
+\label{sec:org7e10aa2}
 
 Like Runnable, executors can work with other kinds of tasks. We called these
 tasks callables (\texttt{Callable} interface). Such interface is similar to \texttt{Runnable},
@@ -1428,7 +1428,7 @@ computation result from the \texttt{Callable} object using the \texttt{Future} o
 until the \emph{callable} completes its execution. An example is below:
 
 
-\lstset{language=java,label=org43fe0eb,caption={Basic example of callables and futures.},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=java,label=org1c632e8,caption={Basic example of callables and futures.},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -1599,12 +1599,12 @@ single thread instead of use multiple threads.
 
 
 \subsection{Synchronized and locks}
-\label{sec:orgd550a00}
+\label{sec:org0a0238b}
 
 
 \begin{enumerate}
 \item Synchronized
-\label{sec:orgb3cd1bd}
+\label{sec:org16e62ad}
 
 When we implement a more complex multithreaded program, there are sections
 of code that are accessed by multiple threads. We need to pay attention when
@@ -1699,7 +1699,7 @@ in this tutorial.
 
 
 \item Locks
-\label{sec:org646183b}
+\label{sec:org061499b}
 
 
 Another tool provide by Java to manage synchronization are the looks. With
@@ -1821,7 +1821,7 @@ public class App {
 \end{enumerate}
 
 \subsection{Atomic Variables}
-\label{sec:org555ecfa}
+\label{sec:orga962e1b}
 
 Java provides many classes to perform atomic operations over multiple data
 types. Inside of these classes, the atomic operations are handled by
@@ -1892,7 +1892,7 @@ public class App {
 
 
 \subsection{Synchronizers}
-\label{sec:org30f5f8a}
+\label{sec:org46181c9}
 
 Five classes aid common special purpose synchronization idioms:
 
@@ -2366,7 +2366,7 @@ Here, a person is a thread, a play is a resource.
 \end{quote}
 
 \subsection{VarHandle}
-\label{sec:org3296c75}
+\label{sec:org9832ad1}
 
 \texttt{VarHandle} (\texttt{java.lang.invoke.VarHandle}) is a class that provides low-level
 mechanisms and APIs for method invocations and memory operations. The goal of
@@ -2383,7 +2383,7 @@ impose constraints.
 
 
 \subsection{References}
-\label{sec:orge8efa05}
+\label{sec:orga0fba88}
 
 \begin{itemize}
 \item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/invoke/VarHandle.html}
@@ -2403,7 +2403,7 @@ impose constraints.
 
 
 \chapter{Bibliography}
-\label{sec:orgb76d398}
+\label{sec:orgb553875}
 \bibliographystyle{plainurl}
 \bibliography{refs}
 \end{document}
