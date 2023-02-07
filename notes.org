@@ -15,7 +15,7 @@
 ** Org LaTeX Setup
 
    #+latex_class: book-noparts
-   #+latex_class_options: [openany, a4paper]
+   #+latex_class_options: [openany, a4paper, 12pt]
    #+latex_header: \usepackage{amsmath,amssymb,amsthm,geometry,hyperref,paralist,svg,thmtools,tikz,tikz-cd}
    #+latex_header: \usepackage{mathtools}
    #+latex_header: \usepackage[capitalise,noabbrev]{cleveref}
@@ -784,6 +784,106 @@
 * Work Stealing
 
 * Modular Basket Queues
+
+** Experimental setup
+
+   To evaluate our modular queue with all its variants, we need to determine a
+   methodology to know their performance and the throughput of each
+   variant. Also, we need to compare them with other queue algorithms in the
+   literature to check if it is competitive. We will divide the experiments into
+   two categories, the first one is related to measuring the performance of the
+   distinct variants described previously. The second is to compare our best
+   queue algorithm (or the two best) to related queue algorithms in the
+   literature. To know the performance of our algorithms, we want to measure the
+   time required to execute a set of operations over an interval of time, i.e.,
+   how quickly complete its execution the program. The technique used to measure
+   the time of an event is the following:
+
+   - Read the current time and store it in a variable =start_count=.
+   - Let the portion of program execute.
+   - Read the current time and store it in a variable =stop_count=.
+   - Take the difference between =start_count= and =stop_count=. This will be the
+     total time required to execute the event.
+
+   This technique for measuring the execution time of any portion of a program
+   is known as the /wall clock/ time[[cite:&lilja2005measuring]]. All the events we
+   want to measure will use this technique to get their execution time.
+   However, this measurement includes the time spent on other system operations,
+   like memory paging, thread interleaving, input/output operations and network
+   communication, if applicable. Those external events could introduce
+   uncertainty into our measurements. We refer to these uncertainties in
+   measurements as errors or noise. To know how much uncertainty exists, we must
+   use probability and statistics tools to quantify it. To summarize a
+   collection of measures, we can use indices of central tendency (the mean, the
+   median, and the mode). The most commonly used index is the (sample
+   arithmetic) mean or average, which can summarize all the measurements
+   performed into a single number that somehow represents the center of the
+   distribution of these values. To quantify the precision of our measurements,
+   we can use a /confidence interval/ for the mean
+   value[[cite:&lilja2005measuring;&DBLP_conf_oopsla_GeorgesBE07]]. Another tools we
+   need are the /sample variance/, the /standard deviation/ and the /coefficient of
+   variation/. Formally, the /(sample arithmetic) mean/ is defined to be:
+
+   \begin{equation}
+   \bar{x}_A = \frac{1}{n}\sum^n_{i = 1}x_i
+   \end{equation}
+
+   Where \(x_i\) values the individual measurements. The /sample variance/
+   represent our calculated estimated of the actual variance. It is defined to
+   be:
+
+   \begin{equation}
+   s^2 = \frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}
+   \end{equation}
+
+   Where the \(x_i\) are the \(n\) independent measurements and \(\bar{x}\) is
+   the corresponding sample mean. From the previous equation, the standard
+   deviation is defined as the positive square root of the variance:
+
+   \begin{equation}
+   s = \sqrt{s^2} = \sqrt{\frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}}
+   \end{equation}
+
+   The coefficient of variation (COV) is defined to be:
+
+   \begin{equation}
+     COV = \frac{s}{\bar{x}}
+   \end{equation}
+
+   If we can approximate the distribution of random errors by a Gaussian
+   distribution, we determine how well is our estimate of the true value respect
+   to the actual true value using the properties of the distribution. We use
+   confidence intervals to find a range of values that has a given probability
+   of including the actual true value. For do that, we must consider two cases:
+
+   1. When the number of measurements is large \((n \ge 30)\).
+   2. When the number of measurements is small \((n < 30)\).
+
+   For the first case, we use the sample mean \((\bar{x})\) as the best
+   approximation of the true value. If the \(n\) samples used to calculate
+   \(\bar{x}\) are all independents with mean \(\mu\) y standard deviation
+   \(\sigma\), the central limit theorem then assures us that, for large values
+   of \(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed
+   with mean \(\mu\) and standard deviation \(\sigma / \sqrt{n}\). We can
+   quantify the precision of the measurements searching two values \(c_1\) and
+   \(c_2\), such that the probability of the mean value being between that two
+   values is \(1 - \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 -
+   \alpha\). \(c_1\) and \(c_2\) are chosen to form a symmetric interval around
+   \bar{x} such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
+   interval \([c_1, c_2]\) is called /confidence interval/ for \(\bar{x}\) and
+   \(\alpha\) is called the /significance level/ and the value \((1 - \alpha)\) is
+   called the /confidence level/. From the central-limit theorem, we have:
+
+   \begin{equation}
+   c_1 = \bar{x} - z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
+   \end{equation}
+   \begin{equation}
+   c_2 = \bar{x} + z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
+   \end{equation}
+
+** Experiments
+
+
 
 * Conclusions
 

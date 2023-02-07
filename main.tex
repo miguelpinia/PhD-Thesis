@@ -1,6 +1,6 @@
-% Created 2023-02-06 lun 12:21
+% Created 2023-02-07 mar 12:24
 % Intended LaTeX compiler: pdflatex
-\documentclass[openany, a4paper]{book}
+\documentclass[openany, a4paper, 12pt]{book}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
@@ -73,10 +73,10 @@
 
 
 \chapter{Introduction}
-\label{sec:org7d6637c}
+\label{sec:org75ded65}
 
 \section{About Concurrent Computing}
-\label{sec:org62b4aa0}
+\label{sec:org2995069}
 
 What is concurrent computing? This is a good question. We should first talk
 about single-core and multi-core processors manufactured by the computer
@@ -97,7 +97,7 @@ permitting make computing more effectively using \emph{parallelism}, where the
 processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 \subsection{Classic concurrent computing}
-\label{sec:org7c7fd0b}
+\label{sec:org7799ab9}
 
 \begin{itemize}
 \item[{$\square$}] Basic Definitions
@@ -107,7 +107,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Relaxed concurrent computing}
-\label{sec:org91e2490}
+\label{sec:org607f1de}
 
 \begin{itemize}
 \item[{$\square$}] Relaxing the problem
@@ -116,7 +116,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Work-stealing}
-\label{sec:org05d3929}
+\label{sec:org569f9c2}
 
 \begin{itemize}
 \item[{$\square$}] How it works the work-stealing
@@ -126,7 +126,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Data-Structures}
-\label{sec:org02d4e9c}
+\label{sec:org7b84348}
 
 \begin{itemize}
 \item[{$\square$}] Queues with multiplicity
@@ -134,31 +134,31 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \subsection{Contributions}
-\label{sec:org0570d1d}
+\label{sec:orgf4cab85}
 
 \subsection{Organization}
-\label{sec:org9d691f4}
+\label{sec:org02884bd}
 
 
 \section{Classic Concurrent Computing}
-\label{sec:org5cee39c}
+\label{sec:orgfc54a4e}
 
 \section{Relaxed Concurrent Computing}
-\label{sec:orga9439ba}
+\label{sec:org6d251d9}
 
 
 
 
 \chapter{Preliminaries}
-\label{sec:org7471195}
+\label{sec:orgae4b0a4}
 
 
 \subsection{Mathematical model}
-\label{sec:org42a5ccb}
+\label{sec:orgf551523}
 
 
 \subsection{Realistic model of computation}
-\label{sec:orge2a5bfb}
+\label{sec:org984b8b2}
 
 We consider a standard concurrent shared memory system with \(n \ge 2\)
 \emph{asynchronous} processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
@@ -182,7 +182,7 @@ write to a single shared memory space. Usually each processor core has a
 cache to operate with data from the shared memory. Often, this data is
 transferred through a memory bus, allowing connect the processors with the
 memory. The figure \ref{fig:arch} shows a simplified view of this model. In
-the sections: \hyperref[sec:org12e37bc]{Cache memory}, \hyperref[sec:org90b8344]{Memory bus} and \hyperref[sec:orgad92fc2]{Main memory}, we explain more in
+the sections: \hyperref[sec:org2703386]{Cache memory}, \hyperref[sec:org826e16c]{Memory bus} and \hyperref[sec:orgf1fe780]{Main memory}, we explain more in
 detail the meaning of each bullet of the list.
 
 \begin{figure}
@@ -195,7 +195,7 @@ detail the meaning of each bullet of the list.
 
 
 \subsection{Cache memory}
-\label{sec:org12e37bc}
+\label{sec:org2703386}
 
 The cache memory is a special very high-speed memory that is very close to
 the processor and the processes can access it very fast. The caches are used
@@ -214,7 +214,7 @@ are close to be executed. In the third level, this cache is shared by many
 processors and is used as feeder for the L2 cache.
 
 \subsection{Memory bus}
-\label{sec:org90b8344}
+\label{sec:org826e16c}
 
 Is a computer bus that allows transfer data from the primary memory to the
 CPU and the cache memory. It is made up of two parts: the data bus and the
@@ -225,18 +225,18 @@ information.
 
 
 \subsection{Main memory}
-\label{sec:orgad92fc2}
+\label{sec:orgf1fe780}
 
 Is the responsible of hold the data that CPU need to access frequently, such
 as instructions or data currently being processed. The CPU can access to
 this information faster than the access to secondary memory.
 
 \subsection{Consistency Memory Model and Cache Coherence}
-\label{sec:orgb568483}
+\label{sec:orgdaf977d}
 
 \begin{enumerate}
 \item Consistency memory model
-\label{sec:orge350402}
+\label{sec:orgd8a8ab6}
 
 Following the simplified view of the cache architecture, we want to have a
 correct shared memory. And what this means? The correctness of the shared
@@ -261,7 +261,7 @@ considered, because these models shows that most memory orderings in strong
 models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \item Cache coherence
-\label{sec:org56f38c2}
+\label{sec:org962ec99}
 
 Cache coherence protocols are used in response to solve a coherence problem
 in cache. For example, a coherence problem can arise if multiple cores have
@@ -278,7 +278,7 @@ data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 
 \subsection{Memory fences}
-\label{sec:org63671c4}
+\label{sec:org309213a}
 
 A memory fence is a barrier instruction that causes a CPU or compiler to
 enforce a an ordering constraint on memory operations (loads and stores)
@@ -394,7 +394,7 @@ full memory fence instruction \texttt{MFENCE}. For other archict
 
 
 \section{Work-Stealing}
-\label{sec:org7032d8f}
+\label{sec:orgd6c649d}
 
 We analyze the algorithms for work-stealing described in the article Fully
 Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
@@ -411,83 +411,83 @@ similar semantic than the prior algorithms.
 
 
 \subsection{Model}
-\label{sec:org0c21abb}
+\label{sec:orgc574f7a}
 
 \subsection{Known algorithms}
-\label{sec:org4caeb29}
+\label{sec:org5ef6692}
 
 \subsection{Pseudocode for Work-Stealing with Weak Multiplicity}
-\label{sec:org15543fc}
+\label{sec:orgda65370}
 
 
 
 \section{Data-Structures}
-\label{sec:orgd01690d}
+\label{sec:org091412c}
 
 \subsection{Queues}
-\label{sec:org931c8a3}
+\label{sec:org5220baa}
 
 \subsection{Stacks}
-\label{sec:orgb62d6d6}
+\label{sec:org7e4cf92}
 
 
 \section{Some Hardware Foundations}
-\label{sec:org7b00bdf}
+\label{sec:org2b56ac6}
 
 \subsection{Cache memory}
-\label{sec:org259fb84}
+\label{sec:org7bc0480}
 
 The cache memory
 
 \begin{enumerate}
 \item Multiple caches
-\label{sec:org86b0fa4}
+\label{sec:org37a4b8a}
 
 
 \item Cache coherence protocols
-\label{sec:orgb59a235}
+\label{sec:orgd5859ce}
 
 
 
 \begin{enumerate}
 \item MESI
-\label{sec:orgf1d207a}
+\label{sec:org8f12937}
 
 
 \item MOESI
-\label{sec:org8780c37}
+\label{sec:org36c890e}
 \end{enumerate}
 
 
 \item Store Buffers
-\label{sec:orga851279}
+\label{sec:org2c25d90}
 \end{enumerate}
 
 
 \subsection{Reordering (CPU or Compiler)}
-\label{sec:org0ed4a81}
+\label{sec:orga40d5c0}
 
 
 \subsection{Memory Barriers}
-\label{sec:orgdb4a426}
+\label{sec:orgbbe389a}
 
 
 \begin{enumerate}
 \item X86 and TSO architectures
-\label{sec:org514df84}
+\label{sec:orgca67d6e}
 
 
 \item Memory Fences
-\label{sec:orgcd9933e}
+\label{sec:orgac73872}
 \end{enumerate}
 
 
 \subsection{Read-Modify-Write Operations}
-\label{sec:orgd4318a6}
+\label{sec:org7b8e6d3}
 
 
 \subsection{Bibliography}
-\label{sec:org958e680}
+\label{sec:org6694edd}
 
 \begin{itemize}
 \item \url{https://blog.the-pans.com/std-atomic-from-bottom-up/}
@@ -495,7 +495,7 @@ The cache memory
 
 
 \subsection{Memory management}
-\label{sec:org1260e75}
+\label{sec:org1bf9996}
 
 To implement efficiently the idempotent algorithms in an enviroment without
 garbage collection, it's necessary use some technique or metodology to
@@ -504,7 +504,7 @@ threads want to reclaim the memory of the object associated to the pointer.
 
 \begin{enumerate}
 \item Strategies to delete shared pointers
-\label{sec:org64fd8d2}
+\label{sec:org10b7074}
 
 \begin{itemize}
 \item Add pointers to list to safety delete.
@@ -518,7 +518,7 @@ it exits.
 
 
 \item Hazard pointers
-\label{sec:orgc4bc9f0}
+\label{sec:org5c2320c}
 
 The \emph{Hazard Pointers} is a technique to manage memory in languages where there
 are not a garbage collector. This technique was proposed by Maged
@@ -576,7 +576,7 @@ void func() {
 
 
 \item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
-\label{sec:orgbcd15f1}
+\label{sec:org320a705}
 
 
 When a memory region is reclaimed, the programmer cannot know how that
@@ -596,7 +596,7 @@ created
 
 
 \section{Memory management for work-stealing algorithms}
-\label{sec:orge078315}
+\label{sec:org5f10dfe}
 
 It is well known that C++ does not have a garbage collector like Java. Since
 the publish of the \href{https://en.cppreference.com/w/cpp/11}{Standard C++11}, new features for memory management were
@@ -614,81 +614,81 @@ avoid problems like the \href{https://www.stroustrup.com/isorc2010.pdf}{ABA prob
 
 
 \section{C++ Memory model}
-\label{sec:org1c123b4}
+\label{sec:org520fb94}
 
 \subsection{Memory model basics}
-\label{sec:orgaccdc95}
+\label{sec:org3962b78}
 
 \begin{enumerate}
 \item Objects and memory locations
-\label{sec:orga356001}
+\label{sec:org42df930}
 
 
 \item Objects, memory locations, and concurrency
-\label{sec:org1aaf9a3}
+\label{sec:org849bc7d}
 
 
 \item Modification orders
-\label{sec:org2eec728}
+\label{sec:org448c2e8}
 \end{enumerate}
 
 
 \subsection{Atomic operations and types in C++}
-\label{sec:org0bcdb11}
+\label{sec:orgf2d0b4a}
 
 
 \begin{enumerate}
 \item The standard atomic types
-\label{sec:org12d65ef}
+\label{sec:orga9b1e03}
 
 \item Operations on std::atomic\textsubscript{flag}
-\label{sec:org202253b}
+\label{sec:orgfc386d2}
 
 \item Operations on std::atomic<boolean>
-\label{sec:org0ff3d70}
+\label{sec:orgb989c2a}
 
 \item Operations on std::atomic<T*>: pointer arithmetic
-\label{sec:orgc885c52}
+\label{sec:org95070d1}
 
 \item Operations on standard atomic integral types
-\label{sec:orgeb9b6c3}
+\label{sec:org946a5b7}
 
 \item The std::atomic<> primary class template
-\label{sec:orgc369aaa}
+\label{sec:org12c073c}
 
 \item Free functions for atomic operations
-\label{sec:org27a7154}
+\label{sec:orgea09ec1}
 \end{enumerate}
 
 \subsection{Synchronizing operations and enforcing ordering}
-\label{sec:orga51ca08}
+\label{sec:orge9392e3}
 
 \begin{enumerate}
 \item The synchronization relationship
-\label{sec:org8e0ff0d}
+\label{sec:org909fa50}
 
 \item The happens-before relationship
-\label{sec:org30baa7e}
+\label{sec:org75b917b}
 
 \item Memory ordering for atomic operations
-\label{sec:orgdedcff1}
+\label{sec:orgea57f3f}
 
 \item Release sequences and synchronizes-with
-\label{sec:orga2858a7}
+\label{sec:orgf0d5ee2}
 
 \item Fences
-\label{sec:org8d90edf}
+\label{sec:org1eeef73}
 
 \item Ordering non-atomic operations with atomics
-\label{sec:org85c712e}
+\label{sec:orgcf2df2e}
 
 \item Ordering non-atomic operations
-\label{sec:orgd158665}
+\label{sec:orgbe9c2ba}
 \end{enumerate}
 
 
 \section{Guidelines for designing data-structures for concurrency}
-\label{sec:org695e5c3}
+\label{sec:org0bba6aa}
 
 \begin{itemize}
 \item Ensure that no thread can see a state where the invariants of the
@@ -710,17 +710,123 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \chapter{Work Stealing}
-\label{sec:orgd528155}
+\label{sec:org5982790}
 
 \chapter{Modular Basket Queues}
-\label{sec:org6d7bfa6}
+\label{sec:org8961bb5}
+
+\section{Experimental setup}
+\label{sec:org472837d}
+
+To evaluate our modular queue with all its variants, we need to determine a
+methodology to know their performance and the throughput of each
+variant. Also, we need to compare them with other queue algorithms in the
+literature to check if it is competitive. We will divide the experiments into
+two categories, the first one is related to measuring the performance of the
+distinct variants described previously. The second is to compare our best
+queue algorithm (or the two best) to related queue algorithms in the
+literature. To know the performance of our algorithms, we want to measure the
+time required to execute a set of operations over an interval of time, i.e.,
+how quickly complete its execution the program. The technique used to measure
+the time of an event is the following:
+
+\begin{itemize}
+\item Read the current time and store it in a variable \texttt{start\_count}.
+\item Let the portion of program execute.
+\item Read the current time and store it in a variable \texttt{stop\_count}.
+\item Take the difference between \texttt{start\_count} and \texttt{stop\_count}. This will be the
+total time required to execute the event.
+\end{itemize}
+
+This technique for measuring the execution time of any portion of a program
+is known as the \emph{wall clock} time\cite{lilja2005measuring}. All the events we
+want to measure will use this technique to get their execution time.
+However, this measurement includes the time spent on other system operations,
+like memory paging, thread interleaving, input/output operations and network
+communication, if applicable. Those external events could introduce
+uncertainty into our measurements. We refer to these uncertainties in
+measurements as errors or noise. To know how much uncertainty exists, we must
+use probability and statistics tools to quantify it. To summarize a
+collection of measures, we can use indices of central tendency (the mean, the
+median, and the mode). The most commonly used index is the (sample
+arithmetic) mean or average, which can summarize all the measurements
+performed into a single number that somehow represents the center of the
+distribution of these values. To quantify the precision of our measurements,
+we can use a \emph{confidence interval} for the mean
+value\cite{lilja2005measuring,DBLP_conf_oopsla_GeorgesBE07}. Another tools we
+need are the \emph{sample variance}, the \emph{standard deviation} and the \emph{coefficient of
+variation}. Formally, the \emph{(sample arithmetic) mean} is defined to be:
+
+\begin{equation}
+\bar{x}_A = \frac{1}{n}\sum^n_{i = 1}x_i
+\end{equation}
+
+Where \(x_i\) values the individual measurements. The \emph{sample variance}
+represent our calculated estimated of the actual variance. It is defined to
+be:
+
+\begin{equation}
+s^2 = \frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}
+\end{equation}
+
+Where the \(x_i\) are the \(n\) independent measurements and \(\bar{x}\) is
+the corresponding sample mean. From the previous equation, the standard
+deviation is defined as the positive square root of the variance:
+
+\begin{equation}
+s = \sqrt{s^2} = \sqrt{\frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}}
+\end{equation}
+
+The coefficient of variation (COV) is defined to be:
+
+\begin{equation}
+  COV = \frac{s}{\bar{x}}
+\end{equation}
+
+If we can approximate the distribution of random errors by a Gaussian
+distribution, we determine how well is our estimate of the true value respect
+to the actual true value using the properties of the distribution. We use
+confidence intervals to find a range of values that has a given probability
+of including the actual true value. For do that, we must consider two cases:
+
+\begin{enumerate}
+\item When the number of measurements is large \((n \ge 30)\).
+\item When the number of measurements is small \((n < 30)\).
+\end{enumerate}
+
+For the first case, we use the sample mean \((\bar{x})\) as the best
+approximation of the true value. If the \(n\) samples used to calculate
+\(\bar{x}\) are all independents with mean \(\mu\) y standard deviation
+\(\sigma\), the central limit theorem then assures us that, for large values
+of \(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed
+with mean \(\mu\) and standard deviation \(\sigma / \sqrt{n}\). We can
+quantify the precision of the measurements searching two values \(c_1\) and
+\(c_2\), such that the probability of the mean value being between that two
+values is \(1 - \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 -
+   \alpha\). \(c_1\) and \(c_2\) are chosen to form a symmetric interval around
+\bar{x} such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
+interval \([c_1, c_2]\) is called \emph{confidence interval} for \(\bar{x}\) and
+\(\alpha\) is called the \emph{significance level} and the value \((1 - \alpha)\) is
+called the \emph{confidence level}. From the central-limit theorem, we have:
+
+\begin{equation}
+c_1 = \bar{x} - z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
+\end{equation}
+\begin{equation}
+c_2 = \bar{x} + z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
+\end{equation}
+
+\section{Experiments}
+\label{sec:orgc78692a}
+
+
 
 \chapter{Conclusions}
-\label{sec:orgb5374c4}
+\label{sec:org410d9fc}
 
 
 \chapter{Bibliography}
-\label{sec:org17d95f1}
+\label{sec:org2db85fd}
 \bibliographystyle{plainurl}
 \bibliography{refs}
 \end{document}
