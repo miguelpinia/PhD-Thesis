@@ -14,53 +14,7 @@
 
 ** Org LaTeX Setup
 
-   #+latex_class: book-noparts
-   #+latex_class_options: [openany, a4paper, 12pt]
-   #+latex_header: \usepackage{amsmath,amssymb,amsthm,geometry,hyperref,paralist,svg,thmtools,tikz,tikz-cd}
-   #+latex_header: \usepackage{mathtools}
-   #+latex_header: \usepackage[capitalise,noabbrev]{cleveref}
-   #+latex_header: \usepackage{mdframed} \usepackage{svg}
-   #+latex_header: \usepackage{environ} \NewEnviron{abmn}{\marginnote{\BODY}}
-   #+latex_header: \usepackage{url}
-   #+latex_header: \usepackage{color}
-   #+latex_header: \usepackage{listings,chngcntr}% http://ctan.org/pkg/listings
-   #+latex_header: \usepackage{multicol}
-   #+latex_header: \usepackage{url}
-   #+latex_header: \usepackage{tabularx}
-   #+latex_header: \usepackage{xspace}
-   #+latex_header: \usepackage{courier}
-   #+latex_header: \definecolor{amber}{rgb}{1.0, 0.49, 0.0}
-   #+latex_header: \definecolor{x11gray}{rgb}{0.75, 0.75, 0.75}
-   #+latex_header: \lstset{ basicstyle=\footnotesize\mdseries\ttfamily, mathescape=true, frame=Trbl, numbers=left, keywordstyle=\color{blue}, showstringspaces=false, commentstyle=\color{x11gray}, stringstyle=\color{amber}, breaklines=true}
-   #+latex_header: \renewcommand{\lstlistingname}{Code}
-   #+latex_header: \setcounter{tocdepth}{1}
-   #+latex_header: \newtheoremstyle{break}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{\newline}{}
-   #+latex_header: \theoremstyle{plain}
-   #+latex_header: \newtheorem{theorem}{Theorem}
-   #+latex_header: \newtheorem{corollary}[theorem]{Corollary}
-   #+latex_header: \newtheorem{proposition}[theorem]{Proposition}
-   #+latex_header: \newtheorem{definition}[theorem]{Definition}
-   #+latex_header: \newtheorem{lemma}[theorem]{Lemma}
-   #+latex_header: \newtheorem{affirmation}[theorem]{Affirmation}
-   #+latex_header: \theoremstyle{definition}
-   #+latex_header: \newtheorem{example}{Example}
-   #+latex_header: \newtheorem{exmpl}{Example}
-   #+latex_header: \newtheorem{exercise}{Exercise}
-   #+latex_header: \theoremstyle{remark}
-   #+latex_header: \newtheorem{note}{Note}
-   #+latex_header: \newtheorem{remark}{Remark}
-   #+latex_header: \usetikzlibrary{arrows,automata,positioning}
-   #+latex_header: \NewEnviron{obs}{\begin{mdframed}\begin{remark} \BODY \end{remark}\end{mdframed}}
-   #+latex_header: \NewEnviron{nota}{\begin{mdframed}\begin{note} \BODY \end{note}\end{mdframed}}
-   #+latex_header: \renewcommand{\qedsymbol}{\textbf{\therefore}}
-   #+latex_header: \NewEnviron{blk}{\begin{mdframed}\BODY\end{mdframed}}
-   #+latex_header: \newcommand{\nimplies}{\;\not\nobreak\!\!\!\!\implies}
-   #+latex_header: \AtBeginDocument{\renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}}
-   #+latex_header: \AtBeginDocument{\counterwithin{lstlisting}{section}}
-   #+latex_header: \newcommand{\R}{{\sf \small Read}\xspace}
-   #+latex_header: \newcommand{\W}{{\sf \small Write}\xspace}
-   #+latex_header: \hyphenation{Reentrant-Read-Write-Lock Stamped-Lock}
-
+   #+latex_class: thesis
 
 ** Export settings
 
@@ -89,9 +43,17 @@
      ;;                ("\\paragraph{%s}" . "\\paragraph*{%s}")
      ;;                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
      (add-to-list 'org-latex-classes
-                '("book-noparts"
-                   "\\documentclass{book}"
+                '("thesis"
+                   "\\documentclass{latex/classes/thesis}"
                    ("\\chapter{%s}" . "\\chapter*{%s}")
+                   ("\\section{%s}" . "\\section*{%s}")
+                   ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+     (add-to-list 'org-latex-classes
+                '("myarticle"
+                   "\\documentclass{latex/classes/myarticle}"
                    ("\\section{%s}" . "\\section*{%s}")
                    ("\\subsection{%s}" . "\\subsection*{%s}")
                    ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -104,6 +66,7 @@
                                    " -output-directory %o %f")))
                    (list "cp ~/Dropbox/org/phd/research/refs.bib refs.bib"
                          "cp refs.bib %o/"
+                         "cp -R latex %o/"
                          "cp *.svg figs/"
                          "cp *.png figs/"
                          "mv *.svg %o/figs"
@@ -124,78 +87,72 @@
    #+end_src
 
 
-* Introduction
+* TODO Introduction
 
-** About Concurrent Computing
+** TODO Overview
 
-   What is concurrent computing? This is a good question. We should first talk
-   about single-core and multi-core processors manufactured by the computer
-   industry. After the second world war and until the 90's the general purpose
-   cpus were single-core. All processes were executed in a single-core, and the
-   operating systems simulated concurrency using schedulers and other
-   techniques. In 2001, IBM introduce the first multi-core processor
-   [[cite:&ibmIBM100Power]], it allows that two processors work together at a very
-   high bandwidth (for the epoch) with large on-chip memories and with
-   high-speed buses. Since then, the amount of cores in each processors has been
-   increasing. We must consider as well the Moore's law, loosely speaking, this
-   law tells us that each year more and more transistors are placed into the
-   same space (i.e. electronic components and circuits are reduced in size), but
-   their speed cannot be increased without overheating. Consequently, the
-   industry move to ``multi-core'' architectures. In this architecture multiple
-   processors communicate through shared memory (RAM, hardware caches),
-   permitting make computing more effectively using /parallelism/, where the
-   processors work together on a single task [[cite:&DBLP_books_daglib_0020056]].
+** TODO Motivation
 
-   # Explain why the increase of cores in the processors should studied to know
-   # how we develop software
+** TODO Objectives and contributions
 
-*** Classic concurrent computing
+** TODO Organization
 
-    - [ ] Basic Definitions
-    - [ ] FLP impossibility result
-    - [ ] Asynchronous Shared Memory
-    - [ ] Primitive Synchronization Operations and Consensus
+* TODO Concurrent Computing
 
-    # Definitions
-    # FLP result
+  What is concurrent computing? This is a good question. We should first talk
+  about single-core and multi-core processors manufactured by the computer
+  industry. After the second world war and until the 90's the general purpose
+  cpus were single-core. All processes were executed in a single-core, and the
+  operating systems simulated concurrency using schedulers and other
+  techniques. In 2001, IBM introduce the first multi-core processor
+  [[cite:&ibmIBM100Power]], it allows that two processors work together at a very
+  high bandwidth (for the epoch) with large on-chip memories and with
+  high-speed buses. Since then, the amount of cores in each processors has been
+  increasing. We must consider as well the Moore's law, loosely speaking, this
+  law tells us that each year more and more transistors are placed into the
+  same space (i.e. electronic components and circuits are reduced in size), but
+  their speed cannot be increased without overheating. Consequently, the
+  industry move to ``multi-core'' architectures. In this architecture multiple
+  processors communicate through shared memory (RAM, hardware caches),
+  permitting make computing more effectively using /parallelism/, where the
+  processors work together on a single task [[cite:&DBLP_books_daglib_0020056]].
 
-*** Relaxed concurrent computing
+  # Explain why the increase of cores in the processors should studied to know
+  # how we develop software
 
-    - [ ] Relaxing the problem
-    - [ ] Multiplicity preliminaries
-    - [ ] Another relaxations?
+** TODO Classic concurrent computing
 
-*** Work-stealing
+   - [ ] Basic Definitions
+   - [ ] FLP impossibility result
+   - [ ] Asynchronous Shared Memory
+   - [ ] Primitive Synchronization Operations and Consensus
 
-    - [ ] How it works the work-stealing
-    - [ ] Classic algorithms
-    - [ ] Idempotent algorithms
-    - [ ] Work-stealing with multiplicity
-
-*** Data-Structures
-
-    - [ ] Queues with multiplicity
-    - [ ]
-
-*** Contributions
-
-*** Organization
+   # Definitions
+   # FLP result
 
 
-** Classic Concurrent Computing
+** TODO Relaxed concurrent computing
 
-** Relaxed Concurrent Computing
+   - [ ] Relaxing the problem
+   - [ ] Multiplicity preliminaries
+   - [ ] Another relaxations?
 
+** TODO Work-stealing
 
+   - [ ] How it works the work-stealing
+   - [ ] Classic algorithms
+   - [ ] Idempotent algorithms
+   - [ ] Work-stealing with multiplicity
 
+** TODO Data-Structures
 
-* Preliminaries
+   - [ ] Queues with multiplicity
 
+* TODO Preliminaries
 
-*** Mathematical model
+** TODO Mathematical model
 
-
-*** Realistic model of computation
+** TODO Realistic model of computation
 
     We consider a standard concurrent shared memory system with \(n \ge 2\)
     /asynchronous/ processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
@@ -442,7 +399,116 @@
 
 
 
-** Work-Stealing
+** TODO Data-Structures
+
+*** Queues
+
+*** Stacks
+
+
+** TODO Some Hardware Foundations
+
+*** Cache memory
+
+    The cache memory
+
+**** Multiple caches
+
+
+**** Cache coherence protocols
+
+
+
+***** MESI
+
+
+***** MOESI
+
+
+**** Store Buffers
+
+
+*** Reordering (CPU or Compiler)
+
+*** Memory Barriers
+
+**** X86 and TSO architectures
+
+**** Memory Fences
+
+*** Read-Modify-Write Operations
+
+*** Bibliography
+
+    - https://blog.the-pans.com/std-atomic-from-bottom-up/
+
+** TODO C++ Memory model
+
+*** Memory model basics
+
+**** Objects and memory locations
+
+
+**** Objects, memory locations, and concurrency
+
+
+**** Modification orders
+
+
+*** Atomic operations and types in C++
+
+
+**** The standard atomic types
+
+**** Operations on std::atomic_flag
+
+**** Operations on std::atomic<boolean>
+
+**** Operations on std::atomic<T*>: pointer arithmetic
+
+**** Operations on standard atomic integral types
+
+**** The std::atomic<> primary class template
+
+**** Free functions for atomic operations
+
+*** Synchronizing operations and enforcing ordering
+
+**** The synchronization relationship
+
+**** The happens-before relationship
+
+**** Memory ordering for atomic operations
+
+**** Release sequences and synchronizes-with
+
+**** Fences
+
+**** Ordering non-atomic operations with atomics
+
+**** Ordering non-atomic operations
+
+
+** TODO Guidelines for designing data-structures for concurrency
+
+   - Ensure that no thread can see a state where the invariants of the
+     data-structure have been broken by the action of the another thread.
+
+   - Take care to avoid race conditions inherent in the interface to the
+     data-structure by providing functions for complete operations rather than
+     for operations steps.
+
+   - Pay attention to how the data-structure behaves in the presence of
+     exceptions to ensure that the invariants are not broken.
+
+   - Minimize the opportunities for deadlock when using the data-structure by
+     restricting the scope of locks and avoiding nested locks where possible.
+
+
+
+
+
+* TODO Work Stealing
 
    We analyze the algorithms for work-stealing described in the article Fully
    Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
@@ -547,70 +613,19 @@
   #+end_figure
 
 
-*** Model
+** TODO Model
 
     # TSO? x86
 
-*** Known algorithms
+** TODO Known algorithms
 
-*** Pseudocode for Work-Stealing with Weak Multiplicity
+** TODO Pseudocode for Work-Stealing with Weak Multiplicity
 
    #+begin_src language
 
    #+end_src
 
-
-
-** Data-Structures
-
-*** Queues
-
-*** Stacks
-
-
-** Some Hardware Foundations
-
-*** Cache memory
-
-    The cache memory
-
-**** Multiple caches
-
-
-**** Cache coherence protocols
-
-
-
-***** MESI
-
-
-***** MOESI
-
-
-**** Store Buffers
-
-
-*** Reordering (CPU or Compiler)
-
-
-*** Memory Barriers
-
-
-**** X86 and TSO architectures
-
-
-**** Memory Fences
-
-
-*** Read-Modify-Write Operations
-
-
-*** Bibliography
-
-    - https://blog.the-pans.com/std-atomic-from-bottom-up/
-
-
-*** Memory management
+** TODO Memory management
 
     To implement efficiently the idempotent algorithms in an enviroment without
     garbage collection, it's necessary use some technique or metodology to
@@ -698,7 +713,7 @@
      created
 
 
-** Memory management for work-stealing algorithms
+** TODO Memory management for work-stealing algorithms
 
    It is well known that C++ does not have a garbage collector like Java. Since
    the publish of the [[https://en.cppreference.com/w/cpp/11][Standard C++11]], new features for memory management were
@@ -715,77 +730,133 @@
    avoid problems like the [[https://www.stroustrup.com/isorc2010.pdf][ABA problem]].
 
 
-** C++ Memory model
 
-*** Memory model basics
+* TODO Modular Basket Queues
 
-**** Objects and memory locations
+   A modular version of the basket queues of Hoffman, Shalev and Shavit is
+   presented. It manipulates the head and tail using a novel object called
+   load-link/incremental-conditional, which can be implemented using only
+   READ/WRITE instructions, and admits implementations that spread
+   contention. This suggest that there might be an alternative to the seemingly
+   inherent bottleneck in previous queue implementations that manipulate the
+   head and the tail using /read-modify-write/ instructions over a single shared
+   register.
 
+** TODO Review LL/IC implementations
 
-**** Objects, memory locations, and concurrency
+   The specification of =LL/IC= satisfies the next properties, where the state of
+   the object is an integer R, initialized to zero, and assuming that any
+   process invokes IC only if it has invoked LL before:
 
+   - LL() :: Returns the current value in \(R\).
+   - IC() :: If \(R\) has not been incremented since the last LL of the
+     invoking process, then do \(R = R + 1\); in any case return =OK=.
 
-**** Modification orders
+** LL/IC Implementations
 
+   - CAS based implementation :: It uses a shared register \(R\) initialized to
+     zero. =LL= first reads \(R\) and stores the value in a persistent variable
+     \(r_p\) of \(p\), and then returns \(r_p\). =IC= first reads \(R\) and if
+     that value is equals to \(r_p\), then it performs \(CAS(R, r_p, r_p +
+     1)\); in any case returns =OK=.
+   - READ/WRITE based implementation :: It uses a shared array \(M\) with \(n\)
+     entries initialized to zero. =LL= first reads all entries of M (in some
+     order) and stores the maximum value in a persistent variable \(max_p\) of
+     \(p\), and then returns \(max_p\). =IC= first reads all entries of \(M\),
+     and if the maximum among these values is equals to \(max_p\), it performs
+     \(\W(M[p], max_p + 1)\); in any case returns =OK=.
+   - Mixed implementation :: It uses a shared array \(M\) with \(K < n\)
+     entries initialized to zero. =LL= reads all entries of \(M\) and stores the
+     maximum value and its index in persistent variables \(max_p\) and
+     \(indmax_p\). =IC= non-deterministically picks and index \(pos \in \{0, 1,
+     \ldots, K - 1\} \setminus \{indmax_p\}\). If \(M[pos]\) contains a value
+     \(x\) less than \(max_p + 1\), then it performs \(CAS(M[pos], x, max_p +
+     1)\); if the =CAS= is successful, it returns =OK=. Otherwise, it reads the
+     value in \(M[indmax_p]\), and if it is equals to \(max_p\), then it
+     performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
+     =OK=.
 
-*** Atomic operations and types in C++
+** TODO Basket implementations
 
+   - K-Basket from FAI and SWAP :: In this first implementation, the processes
+     use FAI to guarantee that at most two ``opposite'' operations ``compete''
+     for the same location in the shared array, which can be resolved with a
+     SWAP; the idea is similar to the approach in the LCRQ algorithm
+     [[cite:&ppopp2013x86queues]].
+   - n-Basket from CAS :: Each process has a dedicated location in the shared
+     array where it tries to put its item when it invokes =PUT=. When a process
+     invokes =TAKE=, it first tries to take an item from its dedicated location,
+     and if it does not succeed, it randomly picks non-previously-picked
+     location and does the same, and repeats until takes an item or all
+     locations have been canceled. Since several operations might ``compete''
+     for the same location, CAS is needed. This implementation is reminiscent
+     to /locally linearizable/ generic data structure implementations of
+     [[cite:&DBLP_conf_concur_HaasHHKLPSSV16]].
 
-**** The standard atomic types
+** TODO Update experiments
 
-**** Operations on std::atomic_flag
+   To update the experiments is necessary understand what are metrics that
+   allows us compare the algorithms designed for LL/IC objects and Baskets. A
+   common way to evaluate experimental results is the use of measurements to
+   understand what is the performance or the throughput of the experiments;
+   but, what are the meaning of performance and throughput. According to the
+   Cambridge Dictionary, /Throughput/ is the amount of work done in a particular
+   period of time, in other side, performance is how well someone o something
+   functions, works, etc. By other side, /Performance/ is referred to the amount
+   of useful work accomplished by a system. Performance usually is measured in
+   terms of accuracy, efficiency and speed of executing instructions. From
+   [[cite:&lilja2005measuring]], some strategies for measurement are:
 
-**** Operations on std::atomic<boolean>
+   - Event driven :: It records the information necessary to calculate the
+     performance metric whenever an event occurs.
+   - Tracing :: Similarly to the previous, but, instead of recording the event
+     has occurred, a portion of the system is recorded to identify the event.
+   - Sampling :: This strategy records a portion of the system in a fixed time
+     interval.
+   - Indirect measurement :: This type occurs when the metric data is not
+     directly accessible and you must find another metric that can be measured
+     directly.
 
-**** Operations on std::atomic<T*>: pointer arithmetic
+   We can combine those strategies with the use of interval timers to measure
+   how much time take execute the program or some section of code, due this can
+   also provide a time basis for sampling.
+   # Expand previous
 
-**** Operations on standard atomic integral types
+   # Rewrite and expand next paragraph, taken from wikipedia.
+   In [[https://en.wikipedia.org/wiki/Computer_performance][terms of computing]], the performance is refered to the amount of useful
+   work accomplished by a computer system. Computer performance is measured in
+   terms of accuracy, efficiency and speed of executing computer program
+   instructions. One or more of the following factor might be involved:
 
-**** The std::atomic<> primary class template
+   1. Short response time for a given piece of work.
+   2. High throughput.
+   3. Low utilization of computing resources.
+   4. High availability of a computing system.
+   5. High bandwidth.
+   6. Short data transmission time.
 
-**** Free functions for atomic operations
+   To begin with a performance-analysis problem, there are three techniques
+   that can be used to find the desired solution:
 
-*** Synchronizing operations and enforcing ordering
+   1. Measurements of existing systems.
+   2. Simulation.
+   3. Analytical modeling.2
 
-**** The synchronization relationship
+   # Benchmarking in articles about queues
 
-**** The happens-before relationship
+   Some benchmarks used to test concurrent queues are:
 
-**** Memory ordering for atomic operations
+   - enqueue - dequeue pairs:
+   - 50% enqueues
 
-**** Release sequences and synchronizes-with
+   In both benchmarks, some work is added to avoid long run scenarios. This
+   anomaly is described in [[cite:&DBLP_conf_podc_MichaelS96]] and to avoid it, the
+   work added consists in spinning a small amount of time (6 \(\mu\)s) in an
+   empty loop. The idea behind of this is prevent long runs of queue operations
+   by the same process without this being interrupted, so, this would display
+   an overly-optimistic performance due to the lower cache miss rate.
 
-**** Fences
-
-**** Ordering non-atomic operations with atomics
-
-**** Ordering non-atomic operations
-
-
-** Guidelines for designing data-structures for concurrency
-
-   - Ensure that no thread can see a state where the invariants of the
-     data-structure have been broken by the action of the another thread.
-
-   - Take care to avoid race conditions inherent in the interface to the
-     data-structure by providing functions for complete operations rather than
-     for operations steps.
-
-   - Pay attention to how the data-structure behaves in the presence of
-     exceptions to ensure that the invariants are not broken.
-
-   - Minimize the opportunities for deadlock when using the data-structure by
-     restricting the scope of locks and avoiding nested locks where possible.
-
-
-
-
-
-* Work Stealing
-
-* Modular Basket Queues
-
-** Experimental setup
+** TODO Experimental setup
 
    To evaluate our modular queue with all its variants, we need to determine a
    methodology to know their performance and the throughput of each
@@ -881,11 +952,11 @@
    c_2 = \bar{x} + z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
    \end{equation}
 
-** Experiments
+
+** TODO Experiments
 
 
-
-* Conclusions
+* TODO Conclusions
 
 
 * Advanced topics in Multi-Core Architecture and Software Systems  :noexport:
@@ -1635,138 +1706,6 @@
 
 ** Modular Basket Queues
 
-   A modular version of the basket queues of Hoffman, Shalev and Shavit is
-   presented. It manipulates the head and tail using a novel object called
-   load-link/incremental-conditional, which can be implemented using only
-   READ/WRITE instructions, and admits implementations that spread
-   contention. This suggest that there might be an alternative to the seemingly
-   inherent bottleneck in previous queue implementations that manipulate the
-   head and the tail using /read-modify-write/ instructions over a single shared
-   register.
-
-*** TODO Review LL/IC implementations
-
-    The specification of =LL/IC= satisfies the next properties, where the state of
-    the object is an integer R, initialized to zero, and assuming that any
-    process invokes IC only if it has invoked LL before:
-
-    - LL() :: Returns the current value in \(R\).
-    - IC() :: If \(R\) has not been incremented since the last LL of the
-      invoking process, then do \(R = R + 1\); in any case return =OK=.
-
-*** LL/IC Implementations
-
-    - CAS based implementation :: It uses a shared register \(R\) initialized to
-      zero. =LL= first reads \(R\) and stores the value in a persistent variable
-      \(r_p\) of \(p\), and then returns \(r_p\). =IC= first reads \(R\) and if
-      that value is equals to \(r_p\), then it performs \(CAS(R, r_p, r_p +
-      1)\); in any case returns =OK=.
-    - READ/WRITE based implementation :: It uses a shared array \(M\) with \(n\)
-      entries initialized to zero. =LL= first reads all entries of M (in some
-      order) and stores the maximum value in a persistent variable \(max_p\) of
-      \(p\), and then returns \(max_p\). =IC= first reads all entries of \(M\),
-      and if the maximum among these values is equals to \(max_p\), it performs
-      \(\W(M[p], max_p + 1)\); in any case returns =OK=.
-    - Mixed implementation :: It uses a shared array \(M\) with \(K < n\)
-      entries initialized to zero. =LL= reads all entries of \(M\) and stores the
-      maximum value and its index in persistent variables \(max_p\) and
-      \(indmax_p\). =IC= non-deterministically picks and index \(pos \in \{0, 1,
-      \ldots, K - 1\} \setminus \{indmax_p\}\). If \(M[pos]\) contains a value
-      \(x\) less than \(max_p + 1\), then it performs \(CAS(M[pos], x, max_p +
-      1)\); if the =CAS= is successful, it returns =OK=. Otherwise, it reads the
-      value in \(M[indmax_p]\), and if it is equals to \(max_p\), then it
-      performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
-      =OK=.
-
-*** TODO Basket implementations
-
-    - K-Basket from FAI and SWAP :: In this first implementation, the processes
-      use FAI to guarantee that at most two ``opposite'' operations ``compete''
-      for the same location in the shared array, which can be resolved with a
-      SWAP; the idea is similar to the approach in the LCRQ algorithm
-      [[cite:&ppopp2013x86queues]].
-    - n-Basket from CAS :: Each process has a dedicated location in the shared
-      array where it tries to put its item when it invokes =PUT=. When a process
-      invokes =TAKE=, it first tries to take an item from its dedicated location,
-      and if it does not succeed, it randomly picks non-previously-picked
-      location and does the same, and repeats until takes an item or all
-      locations have been canceled. Since several operations might ``compete''
-      for the same location, CAS is needed. This implementation is reminiscent
-      to /locally linearizable/ generic data structure implementations of
-      [[cite:&DBLP_conf_concur_HaasHHKLPSSV16]].
-
-*** TODO Update experiments
-
-    To update the experiments is necessary understand what are metrics that
-    allows us compare the algorithms designed for LL/IC objects and Baskets. A
-    common way to evaluate experimental results is the use of measurements to
-    understand what is the performance or the throughput of the experiments;
-    but, what are the meaning of performance and throughput. According to the
-    Cambridge Dictionary, /Throughput/ is the amount of work done in a particular
-    period of time, in other side, performance is how well someone o something
-    functions, works, etc. By other side, /Performance/ is referred to the amount
-    of useful work accomplished by a system. Performance usually is measured in
-    terms of accuracy, efficiency and speed of executing instructions. From
-    [[cite:&lilja2005measuring]], some strategies for measurement are:
-
-    - Event driven :: It records the information necessary to calculate the
-      performance metric whenever an event occurs.
-    - Tracing :: Similarly to the previous, but, instead of recording the event
-      has occurred, a portion of the system is recorded to identify the event.
-    - Sampling :: This strategy records a portion of the system in a fixed time
-      interval.
-    - Indirect measurement :: This type occurs when the metric data is not
-      directly accessible and you must find another metric that can be measured
-      directly.
-
-    We can combine those strategies with the use of interval timers to measure
-    how much time take execute the program or some section of code, due this can
-    also provide a time basis for sampling.
-    # Expand previous
-
-    # Rewrite and expand next paragraph, taken from wikipedia.
-    In [[https://en.wikipedia.org/wiki/Computer_performance][terms of computing]], the performance is refered to the amount of useful
-    work accomplished by a computer system. Computer performance is measured in
-    terms of accuracy, efficiency and speed of executing computer program
-    instructions. One or more of the following factor might be involved:
-
-    1. Short response time for a given piece of work.
-    2. High throughput.
-    3. Low utilization of computing resources.
-    4. High availability of a computing system.
-    5. High bandwidth.
-    6. Short data transmission time.
-
-    To begin with a performance-analysis problem, there are three techniques
-    that can be used to find the desired solution:
-
-    1. Measurements of existing systems.
-    2. Simulation.
-    3. Analytical modeling.2
-
-    # Benchmarking in articles about queues
-
-    Some benchmarks used to test concurrent queues are:
-
-    - enqueue - dequeue pairs:
-    - 50% enqueues
-
-    In both benchmarks, some work is added to avoid long run scenarios. This
-    anomaly is described in [[cite:&DBLP_conf_podc_MichaelS96]] and to avoid it, the
-    work added consists in spinning a small amount of time (6 \(\mu\)s) in an
-    empty loop. The idea behind of this is prevent long runs of queue operations
-    by the same process without this being interrupted, so, this would display
-    an overly-optimistic performance due to the lower cache miss rate.
-
-
-
-
-
-
-
-
-*** TODO Add rigorous statistics evaluations
-
 
 ** Clojure for data-science
 
@@ -1774,11 +1713,11 @@
    is a modular suite of Clojure.
 
 
-* Material for courses                                             :noexport:
+* Material for courses
 
 ** Introduction to multi-threading programming with Java (notes)
    :properties:
-   :export_latex_class: article
+   :export_latex_class: myarticle
    :export_options: toc:nil
    :export_file_name: artifacts/multithreading
    :end:
