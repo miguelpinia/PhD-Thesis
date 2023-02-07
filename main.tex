@@ -1,6 +1,6 @@
-% Created 2023-02-07 mar 16:59
+% Created 2023-02-07 mar 17:05
 % Intended LaTeX compiler: pdflatex
-\documentclass{latex/classes/myarticle}
+\documentclass{latex/classes/thesis}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
@@ -14,10 +14,10 @@
 \usepackage{hyperref}
 \author{Miguel Angel Piña Avelino}
 \date{\today}
-\title{Introduction to multi-threading programming with Java (notes)}
+\title{A Study Of Concurrent Data Structures With Relaxed Semantics}
 \hypersetup{
  pdfauthor={Miguel Angel Piña Avelino},
- pdftitle={Introduction to multi-threading programming with Java (notes)},
+ pdftitle={A Study Of Concurrent Data Structures With Relaxed Semantics},
  pdfkeywords={},
  pdfsubject={},
  pdfcreator={Emacs 28.2 (Org mode 9.5.5)},
@@ -25,6 +25,888 @@
 \begin{document}
 
 \maketitle
+\tableofcontents
+
+
+\chapter{{\bfseries\sffamily TODO} Introduction}
+\label{sec:org0125d0e}
+
+\section{{\bfseries\sffamily TODO} Overview}
+\label{sec:org12445cb}
+
+\section{{\bfseries\sffamily TODO} Motivation}
+\label{sec:orgddafab8}
+
+\section{{\bfseries\sffamily TODO} Objectives and contributions}
+\label{sec:orgaa120d3}
+
+\section{{\bfseries\sffamily TODO} Organization}
+\label{sec:org11cbdae}
+
+\chapter{{\bfseries\sffamily TODO} Concurrent Computing}
+\label{sec:org1679fe1}
+
+What is concurrent computing? This is a good question. We should first talk
+about single-core and multi-core processors manufactured by the computer
+industry. After the second world war and until the 90's the general purpose
+cpus were single-core. All processes were executed in a single-core, and the
+operating systems simulated concurrency using schedulers and other
+techniques. In 2001, IBM introduce the first multi-core processor
+\cite{ibmIBM100Power}, it allows that two processors work together at a very
+high bandwidth (for the epoch) with large on-chip memories and with
+high-speed buses. Since then, the amount of cores in each processors has been
+increasing. We must consider as well the Moore's law, loosely speaking, this
+law tells us that each year more and more transistors are placed into the
+same space (i.e. electronic components and circuits are reduced in size), but
+their speed cannot be increased without overheating. Consequently, the
+industry move to ``multi-core'' architectures. In this architecture multiple
+processors communicate through shared memory (RAM, hardware caches),
+permitting make computing more effectively using \emph{parallelism}, where the
+processors work together on a single task \cite{DBLP_books_daglib_0020056}.
+
+\section{{\bfseries\sffamily TODO} Classic concurrent computing}
+\label{sec:orgdfe4f39}
+
+\begin{itemize}
+\item[{$\square$}] Basic Definitions
+\item[{$\square$}] FLP impossibility result
+\item[{$\square$}] Asynchronous Shared Memory
+\item[{$\square$}] Primitive Synchronization Operations and Consensus
+\end{itemize}
+
+
+\section{{\bfseries\sffamily TODO} Relaxed concurrent computing}
+\label{sec:org965e4a0}
+
+\begin{itemize}
+\item[{$\square$}] Relaxing the problem
+\item[{$\square$}] Multiplicity preliminaries
+\item[{$\square$}] Another relaxations?
+\end{itemize}
+
+\section{{\bfseries\sffamily TODO} Work-stealing}
+\label{sec:orgd07d63e}
+
+\begin{itemize}
+\item[{$\square$}] How it works the work-stealing
+\item[{$\square$}] Classic algorithms
+\item[{$\square$}] Idempotent algorithms
+\item[{$\square$}] Work-stealing with multiplicity
+\end{itemize}
+
+\section{{\bfseries\sffamily TODO} Data-Structures}
+\label{sec:org70a65d9}
+
+\begin{itemize}
+\item[{$\square$}] Queues with multiplicity
+\end{itemize}
+
+\chapter{{\bfseries\sffamily TODO} Preliminaries}
+\label{sec:orgeade041}
+
+\section{{\bfseries\sffamily TODO} Mathematical model}
+\label{sec:org06bc16c}
+
+\section{{\bfseries\sffamily TODO} Realistic model of computation}
+\label{sec:orgda66595}
+
+We consider a standard concurrent shared memory system with \(n \ge 2\)
+\emph{asynchronous} processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
+during an execution. The processes communicate with each other by invoking
+atomic instructions of base objects: either simple Read/Write instructions to
+\textbf{atomic objects}, or more powerful \textbf{Read-Modify-Write} instructions, such as
+\texttt{Test-And-Set}, \texttt{Swap} or \texttt{Compare-And-Set}.
+
+For simplicity we assume a single multicore chip where the processes run. In
+our system we consider a memory hierarchy, where we have the following
+elements in the hierarchy:
+
+\begin{itemize}
+\item Cache memory
+\item Memory bus
+\item Main memory
+\end{itemize}
+
+In this model, each processor core may read and
+write to a single shared memory space. Usually each processor core has a
+cache to operate with data from the shared memory. Often, this data is
+transferred through a memory bus, allowing connect the processors with the
+memory. The figure \ref{fig:arch} shows a simplified view of this model. In
+the sections: \hyperref[sec:orga01d03c]{Cache memory}, \hyperref[sec:org764b14a]{Memory bus} and \hyperref[sec:org58651a9]{Main memory}, we explain more in
+detail the meaning of each bullet of the list.
+
+\begin{figure}
+\begin{minipage}{\linewidth}
+  \includesvg[width=\linewidth]{figs/architecture}
+\end{minipage}
+\caption{Simplified view of a modern computer system cache architecture}
+\label{fig:arch}
+\end{figure}
+
+
+\subsection{Cache memory}
+\label{sec:orga01d03c}
+
+The cache memory is a special very high-speed memory that is very close to
+the processor and the processes can access it very fast. The caches are used
+to reduce average latencies to access storage structures
+\cite{DBLP_series_synthesis_2020Nagarajan}. In recent multicore chips, the
+cache memory is divided in three levels, two private levels (L1 and L2) for
+each processor and a third level (L3) that is shared by the cores. The
+purpose of the first two levels is to provide fast access to data and
+instructions for the processors.
+
+Each processor use the first level of cache to get the data and instructions
+to execute them, usually the access to this level of cache is very fast
+respect to the access to other levels.  The second level is often more
+capacious than first level and is used to store data and instructions that
+are close to be executed. In the third level, this cache is shared by many
+processors and is used as feeder for the L2 cache.
+
+\subsection{Memory bus}
+\label{sec:org764b14a}
+
+Is a computer bus that allows transfer data from the primary memory to the
+CPU and the cache memory. It is made up of two parts: the data bus and the
+address bus. The data bus is in charge of transfer information between the
+primary memory and the correspondent chipset.
+The address bus is used to retrieve information about the location of stored
+information.
+
+
+\subsection{Main memory}
+\label{sec:org58651a9}
+
+Is the responsible of hold the data that CPU need to access frequently, such
+as instructions or data currently being processed. The CPU can access to
+this information faster than the access to secondary memory.
+
+\subsection{Consistency Memory Model and Cache Coherence}
+\label{sec:org26cc5f0}
+
+\begin{enumerate}
+\item Consistency memory model
+\label{sec:org52357c0}
+
+Following the simplified view of the cache architecture, we want to have a
+correct shared memory. And what this means? The correctness of the shared
+memory can be separated into two sub-issues: \emph{consistency} and \emph{correctness}.
+
+The consistency (definitions) provide rules about loads and stores (memory
+reads and writes) and how they act upon memory. These definitions must take
+into account the behaviour of those operations on memory through access of
+multiple threads or even a single thread. The consistency models define
+correct shared memory behavior in terms of loads and stores, without
+reference to caches or coherence \cite{DBLP_series_synthesis_2020Nagarajan}.
+Shared memory correctness is specified by a memory consistency model (or
+memory model). This specifies the allowed behavior of multithreaded programs
+executing with shared memory.
+
+The most intuitive and strongest memory model is the \emph{Sequential Consistency}
+(SC). Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order}
+(TSO), motivated by the desire of use \emph{first-in-first-out} write buffers to
+hold the results of committed stores before writing results to the caches.
+Additional to the prior memory model, "relaxed" or "weak" memory models are
+considered, because these models shows that most memory orderings in strong
+models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
+
+\item Cache coherence
+\label{sec:orgd5e8fd4}
+
+Cache coherence protocols are used in response to solve a coherence problem
+in cache. For example, a coherence problem can arise if multiple cores have
+access to multiple copies of a datum, each one in a core, and at least one
+them is a write access. The cache coherence protocols prevent the access to
+stale data (incoherent data); this can be done using a set of rules
+implemented by the distributed set of cores within a system. These
+protocols use the common MOESI coherence states: modified (M), owned (O),
+exclusive (E), shared (S) and invalid (I). The protocol acts like a state
+machine, moving from one state to another based on the conditions of the
+data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
+\end{enumerate}
+
+
+
+\subsection{Memory fences}
+\label{sec:org31b06ca}
+
+A memory fence is a barrier instruction that causes a CPU or compiler to
+enforce a an ordering constraint on memory operations (loads and stores)
+issued before and after the barrier instruction.
+
+These instructions are necessary because most modern CPUs or compilers
+employ performance optimizations, changing the order of the instructions on
+one program, that could result in out-of-order execution. Normally these
+optimizations are unnoticed in a single thread program, but can cause an
+unpredictable behavior in concurrent programs.
+
+For example, consider the following multi-thread program, with 2
+threads, each one running in one core in a concurrent way:
+
+Thread 1, core 1
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+while (z == 0);
+print(y);
+\end{lstlisting}
+
+Thread 2, core 2
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+y = 30;
+z = 1;
+\end{lstlisting}
+
+In this case, we might expect that the \texttt{print(y)} always print the number 30,
+nevertheless, the compiler or the CPU could change the order of the
+instructions for the thread 2, giving as result an execution where the value
+for \texttt{y} is undefined and the instructions could be interleaved as follows:
+
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+z = 1; // Thread 2
+while (z == 0); // Thread 1
+print(y); // Thread 1
+y = 30; // Thread 2
+\end{lstlisting}
+
+This execution is sequentially consistent, but is an out-of-order
+execution producing an undefined result. With the use of memory barriers, we
+can ensure that instructions don't be reordered. For example, our code could
+be rewrite as follows:
+
+Thread 1, core 1.
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+while (z == 0);
+fence()
+print(y);
+\end{lstlisting}
+
+Thread 2, core 2.
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+y = 30;
+fence();
+z = 1;
+\end{lstlisting}
+
+
+Languages as \texttt{Java} or \texttt{C++} provide instructions to establish synchronization
+and ordering constraints between threads without an atomic operation. These
+instructions have semantics well defined for
+
+In the case of Java, we have static methods of the class VarHandle
+(\texttt{java.lang.invoke.VarHandle}) that are refered as memory fence methods which
+helps to provide fine-grained control of memory ordering. These statics
+methods are \cite{varHandleJdk92017}:
+
+\begin{description}
+\item[{fullFence}] Ensures that loads and stores before the fence will not be
+reordered with loads and stores after the fence. This method has memory
+ordering effects compatible with
+\texttt{atomic\_thread\_fence(memory\_order\_seq\_cst)}.
+\item[{acquireFence}] Ensures that loads before the fence will not be reordered
+with loads and stores after the fence. This method has memory ordering
+effects compatible with \texttt{atomic\_thread\_fence(memory\_order\_acquire)}.
+\item[{releaseFence}] Ensures that loads and stores before the fence will not
+be reordered with stores after the fence. This method has memory ordering
+effects compatible with \texttt{atomic\_thread\_fence(memory\_order\_release)}.
+\item[{loadLoadFence}] Ensures that loads before the fence will not be
+reordered with loads after the fence.
+\item[{storeStoreFence}] Ensures that stores before the fence will not be
+reordered with stores after the fence.
+\end{description}
+
+For C++, we have the function
+\texttt{std::atomic\_thread\_fence}\cite{threadFenceCpp2020}, which establishes
+memory synchronization ordering of non-atomic and relaxed atomic access, as
+instructed by order, without an associated atomic operation. The type of
+synchronization that can handle are the following:
+
+\begin{itemize}
+\item Fence-atomic synchronization
+\item Atomic-fence synchronization
+\item Fence-Fence Synchronization
+\end{itemize}
+
+And using a memory order\cite{memoryOrderCpp2020}, it can specifies how
+memory accesses, including regular, non atomic memory accesses, are to be
+ordered around an atomic operation. In total are six orders, from the
+relaxed memory order to the sequential consistent memory order. They are:
+\texttt{memory\_order\_relaxed}, \texttt{memory\_order\_consume}, \texttt{memory\_order\_acquire},
+\texttt{memory\_order\_acq\_rel} and \texttt{memory\_order\_seq\_cst}. A note about
+\texttt{atomic\_thread\_fence} functions, is that on x86 (x86\textsubscript{64}), these functions
+issue no CPU instructions and only affect compile time code, with exception
+for \texttt{std::atomic\_thread\_fence(std::memory\_order::seq\_cst)}, which issue the
+full memory fence instruction \texttt{MFENCE}. For other archict
+
+
+
+\section{{\bfseries\sffamily TODO} Data-Structures}
+\label{sec:org567a703}
+
+\subsection{Queues}
+\label{sec:org059a483}
+
+\subsection{Stacks}
+\label{sec:orga03feea}
+
+
+\section{{\bfseries\sffamily TODO} Some Hardware Foundations}
+\label{sec:orgf9f51f6}
+
+\subsection{Cache memory}
+\label{sec:org8afde3a}
+
+The cache memory
+
+\begin{enumerate}
+\item Multiple caches
+\label{sec:org24c4d87}
+
+
+\item Cache coherence protocols
+\label{sec:org78bb710}
+
+
+
+\begin{enumerate}
+\item MESI
+\label{sec:org2460a41}
+
+
+\item MOESI
+\label{sec:org7868b52}
+\end{enumerate}
+
+
+\item Store Buffers
+\label{sec:org969cdfa}
+\end{enumerate}
+
+
+\subsection{Reordering (CPU or Compiler)}
+\label{sec:org8b26808}
+
+\subsection{Memory Barriers}
+\label{sec:orgf4481ce}
+
+\begin{enumerate}
+\item X86 and TSO architectures
+\label{sec:org19d5e8c}
+
+\item Memory Fences
+\label{sec:orgf47c388}
+\end{enumerate}
+
+\subsection{Read-Modify-Write Operations}
+\label{sec:org4ba33d4}
+
+\subsection{Bibliography}
+\label{sec:org3b72499}
+
+\begin{itemize}
+\item \url{https://blog.the-pans.com/std-atomic-from-bottom-up/}
+\end{itemize}
+
+\section{{\bfseries\sffamily TODO} C++ Memory model}
+\label{sec:org92bdae2}
+
+\subsection{Memory model basics}
+\label{sec:orgff0b3cc}
+
+\begin{enumerate}
+\item Objects and memory locations
+\label{sec:org7d811a5}
+
+
+\item Objects, memory locations, and concurrency
+\label{sec:org4f8ae4c}
+
+
+\item Modification orders
+\label{sec:org2acc76d}
+\end{enumerate}
+
+
+\subsection{Atomic operations and types in C++}
+\label{sec:org7034871}
+
+
+\begin{enumerate}
+\item The standard atomic types
+\label{sec:orgc6a779d}
+
+\item Operations on std::atomic\textsubscript{flag}
+\label{sec:orgc847d45}
+
+\item Operations on std::atomic<boolean>
+\label{sec:orgf14cb9d}
+
+\item Operations on std::atomic<T*>: pointer arithmetic
+\label{sec:org9519f47}
+
+\item Operations on standard atomic integral types
+\label{sec:org936e524}
+
+\item The std::atomic<> primary class template
+\label{sec:orgeb08638}
+
+\item Free functions for atomic operations
+\label{sec:org5d9a612}
+\end{enumerate}
+
+\subsection{Synchronizing operations and enforcing ordering}
+\label{sec:org4ccb2f1}
+
+\begin{enumerate}
+\item The synchronization relationship
+\label{sec:orgeefc45b}
+
+\item The happens-before relationship
+\label{sec:org465ba7d}
+
+\item Memory ordering for atomic operations
+\label{sec:org2914b74}
+
+\item Release sequences and synchronizes-with
+\label{sec:org1e5d065}
+
+\item Fences
+\label{sec:orgdec4778}
+
+\item Ordering non-atomic operations with atomics
+\label{sec:org7414fe6}
+
+\item Ordering non-atomic operations
+\label{sec:orga70c3ef}
+\end{enumerate}
+
+
+\section{{\bfseries\sffamily TODO} Guidelines for designing data-structures for concurrency}
+\label{sec:org5e109ac}
+
+\begin{itemize}
+\item Ensure that no thread can see a state where the invariants of the
+data-structure have been broken by the action of the another thread.
+
+\item Take care to avoid race conditions inherent in the interface to the
+data-structure by providing functions for complete operations rather than
+for operations steps.
+
+\item Pay attention to how the data-structure behaves in the presence of
+exceptions to ensure that the invariants are not broken.
+
+\item Minimize the opportunities for deadlock when using the data-structure by
+restricting the scope of locks and avoiding nested locks where possible.
+\end{itemize}
+
+
+
+
+
+\chapter{{\bfseries\sffamily TODO} Work Stealing}
+\label{sec:org095f54f}
+
+We analyze the algorithms for work-stealing described in the article Fully
+Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
+called "Idempotent FIFO Work-Stealing", this because the algorithm have a
+similar semantic than the prior algorithms.
+
+\begin{figure}
+\begin{minipage}{\linewidth}
+  \includegraphics[width=\linewidth]{figs/objects.png}
+\end{minipage}
+\caption{Class Diagrama}
+\label{fig:class_diagram}
+\end{figure}
+
+
+\section{{\bfseries\sffamily TODO} Model}
+\label{sec:orgaadebe3}
+
+\section{{\bfseries\sffamily TODO} Known algorithms}
+\label{sec:orgff05363}
+
+\section{{\bfseries\sffamily TODO} Pseudocode for Work-Stealing with Weak Multiplicity}
+\label{sec:org2723475}
+
+\section{{\bfseries\sffamily TODO} Memory management}
+\label{sec:org03fef68}
+
+To implement efficiently the idempotent algorithms in an enviroment without
+garbage collection, it's necessary use some technique or metodology to
+provide garbage collection when atomic pointers are used or when distinct
+threads want to reclaim the memory of the object associated to the pointer.
+
+\begin{enumerate}
+\item Strategies to delete shared pointers
+\label{sec:org797adb4}
+
+\begin{itemize}
+\item Add pointers to list to safety delete.
+\item Do this when there aren't more threads accessing to methods.
+\begin{itemize}
+\item Increase the counter when a thread enter to the method and decrease when
+it exits.
+\item Delete all pointers when the counter be equal to zero.
+\end{itemize}
+\end{itemize}
+
+
+\item Hazard pointers
+\label{sec:org3491402}
+
+The \emph{Hazard Pointers} is a technique to manage memory in languages where there
+are not a garbage collector. This technique was proposed by Maged
+Michael \cite{DBLP_journals_tpds_Michael04}. They are so called because
+deleting a pointer that might be referenced by other thread(s) is
+dangerous. If another threads keep holding references to that pointer and
+proceed to access to that pointer after be deleted, you have a undefined
+behavior \cite{DBLP_journals_tpds_Michael04}.
+
+The basic idea of this technique is the following:
+
+\begin{itemize}
+\item If a thread want to use a pointer that another thread might want to
+delete, it first sets a hazard pointer to the pointer, informing to the
+other thread that deleting the pointer would be dangerous. Once the object
+is not longer needed, the hazard pointer is cleared.
+\item When a thread wants to delete the pointer, it must check if the hazard
+pointers belonging to the other threads in the system. If no one has a
+reference to the pointer, then, it's safe to delete the
+pointer. Otherwise, it must be left until later.
+\item Periodically, we must check the list of objects that have been left until
+later to see if any of them can be deleted now.
+\end{itemize}
+
+A general pseudocode for this technique could be the following:
+
+\lstset{language=c++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+void func() {
+    std::atomic<void*>& hp = get_hazard_pointer_for_current_thread();
+    void* old_data = data.load();
+    do {
+        void* temp;
+        do{ // Loop until you've set the hazard pointer
+            temp = old_data;
+            hp.store(old_data);
+            old_data = data.load();
+        } while (old_data != temp);
+          }while (old_data &&
+            !data.compare_exchange_strong(old_data, old_data->next);
+    // Do something with old_data
+    hp.store(nullptr); // clearing usage of hazard pointer
+    // Trying clearing
+    if (outstanding_hazard_pointers_for(old_head))
+    {
+        reclaim_later(old_data);
+    }
+    else
+    {
+        delete old_data;
+    }
+    delete_nodes_with_no_hazards();
+}
+\end{lstlisting}
+
+
+\item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
+\label{sec:org15f6d43}
+
+
+When a memory region is reclaimed, the programmer cannot know how that
+region of memory will be reused or if even whether it is reused. We need a
+way of developing a (general) solution to prevent the sorts of races
+when a memory region is reclaimed by many threads asynchronously. We can to
+do this by delaying reclamation.
+Thinking in terms of pending operations on a concurrent data structure, a
+sufficient condition is that \emph{memmory is only reclaimed when it is impossible
+for any pending operation to access in the future}.
+
+This property could be also achieved by \emph{reference counting}. In a reference
+counted implementation of a data-structure (like a list), a counter of type
+atomic<int> is associated with each node. Whenever a reference to node N is
+created
+\end{enumerate}
+
+
+\section{{\bfseries\sffamily TODO} Memory management for work-stealing algorithms}
+\label{sec:org11b8baa}
+
+It is well known that C++ does not have a garbage collector like Java. Since
+the publish of the \href{https://en.cppreference.com/w/cpp/11}{Standard C++11}, new features for memory management were
+added. For example, a concurrency support library and smart pointers. These
+last are used to help ensure that programs are free of memory and resources
+leaks and are exception safe.
+
+For algorithms like Chaselev\cite{circular.work.stealing},
+cilk\cite{implementation_cilk5}, Idempotent FIFO and Idempotent
+LIFO\cite{maged.vechev.2009}, whose specification describe the use of simple
+structures and variables, we can manage them using smart pointers to avoid
+problems with memory management, but in the case of Idempotent
+DEQUE\cite{maged.vechev.2009}, it need to use a more complex structure to
+avoid problems like the \href{https://www.stroustrup.com/isorc2010.pdf}{ABA problem}.
+
+
+
+\chapter{{\bfseries\sffamily TODO} Modular Basket Queues}
+\label{sec:orgc87be98}
+
+A modular version of the basket queues of Hoffman, Shalev and Shavit is
+presented. It manipulates the head and tail using a novel object called
+load-link/incremental-conditional, which can be implemented using only
+READ/WRITE instructions, and admits implementations that spread
+contention. This suggest that there might be an alternative to the seemingly
+inherent bottleneck in previous queue implementations that manipulate the
+head and the tail using \emph{read-modify-write} instructions over a single shared
+register.
+
+\section{{\bfseries\sffamily TODO} Review LL/IC implementations}
+\label{sec:org64fa9ea}
+
+The specification of \texttt{LL/IC} satisfies the next properties, where the state of
+the object is an integer R, initialized to zero, and assuming that any
+process invokes IC only if it has invoked LL before:
+
+\begin{description}
+\item[{LL()}] Returns the current value in \(R\).
+\item[{IC()}] If \(R\) has not been incremented since the last LL of the
+invoking process, then do \(R = R + 1\); in any case return \texttt{OK}.
+\end{description}
+
+\section{LL/IC Implementations}
+\label{sec:org8fd7327}
+
+\begin{description}
+\item[{CAS based implementation}] It uses a shared register \(R\) initialized to
+zero. \texttt{LL} first reads \(R\) and stores the value in a persistent variable
+\(r_p\) of \(p\), and then returns \(r_p\). \texttt{IC} first reads \(R\) and if
+that value is equals to \(r_p\), then it performs \(CAS(R, r_p, r_p +
+     1)\); in any case returns \texttt{OK}.
+\item[{READ/WRITE based implementation}] It uses a shared array \(M\) with \(n\)
+entries initialized to zero. \texttt{LL} first reads all entries of M (in some
+order) and stores the maximum value in a persistent variable \(max_p\) of
+\(p\), and then returns \(max_p\). \texttt{IC} first reads all entries of \(M\),
+and if the maximum among these values is equals to \(max_p\), it performs
+\(\W(M[p], max_p + 1)\); in any case returns \texttt{OK}.
+\item[{Mixed implementation}] It uses a shared array \(M\) with \(K < n\)
+entries initialized to zero. \texttt{LL} reads all entries of \(M\) and stores the
+maximum value and its index in persistent variables \(max_p\) and
+\(indmax_p\). \texttt{IC} non-deterministically picks and index \(pos \in \{0, 1,
+     \ldots, K - 1\} \setminus \{indmax_p\}\). If \(M[pos]\) contains a value
+\(x\) less than \(max_p + 1\), then it performs \(CAS(M[pos], x, max_p +
+     1)\); if the \texttt{CAS} is successful, it returns \texttt{OK}. Otherwise, it reads the
+value in \(M[indmax_p]\), and if it is equals to \(max_p\), then it
+performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
+\texttt{OK}.
+\end{description}
+
+\section{{\bfseries\sffamily TODO} Basket implementations}
+\label{sec:org582564d}
+
+\begin{description}
+\item[{K-Basket from FAI and SWAP}] In this first implementation, the processes
+use FAI to guarantee that at most two ``opposite'' operations ``compete''
+for the same location in the shared array, which can be resolved with a
+SWAP; the idea is similar to the approach in the LCRQ algorithm
+\cite{ppopp2013x86queues}.
+\item[{n-Basket from CAS}] Each process has a dedicated location in the shared
+array where it tries to put its item when it invokes \texttt{PUT}. When a process
+invokes \texttt{TAKE}, it first tries to take an item from its dedicated location,
+and if it does not succeed, it randomly picks non-previously-picked
+location and does the same, and repeats until takes an item or all
+locations have been canceled. Since several operations might ``compete''
+for the same location, CAS is needed. This implementation is reminiscent
+to \emph{locally linearizable} generic data structure implementations of
+\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
+\end{description}
+
+\section{{\bfseries\sffamily TODO} Update experiments}
+\label{sec:orgd093411}
+
+To update the experiments is necessary understand what are metrics that
+allows us compare the algorithms designed for LL/IC objects and Baskets. A
+common way to evaluate experimental results is the use of measurements to
+understand what is the performance or the throughput of the experiments;
+but, what are the meaning of performance and throughput. According to the
+Cambridge Dictionary, \emph{Throughput} is the amount of work done in a particular
+period of time, in other side, performance is how well someone o something
+functions, works, etc. By other side, \emph{Performance} is referred to the amount
+of useful work accomplished by a system. Performance usually is measured in
+terms of accuracy, efficiency and speed of executing instructions. From
+\cite{lilja2005measuring}, some strategies for measurement are:
+
+\begin{description}
+\item[{Event driven}] It records the information necessary to calculate the
+performance metric whenever an event occurs.
+\item[{Tracing}] Similarly to the previous, but, instead of recording the event
+has occurred, a portion of the system is recorded to identify the event.
+\item[{Sampling}] This strategy records a portion of the system in a fixed time
+interval.
+\item[{Indirect measurement}] This type occurs when the metric data is not
+directly accessible and you must find another metric that can be measured
+directly.
+\end{description}
+
+We can combine those strategies with the use of interval timers to measure
+how much time take execute the program or some section of code, due this can
+also provide a time basis for sampling.
+
+In \href{https://en.wikipedia.org/wiki/Computer\_performance}{terms of computing}, the performance is refered to the amount of useful
+work accomplished by a computer system. Computer performance is measured in
+terms of accuracy, efficiency and speed of executing computer program
+instructions. One or more of the following factor might be involved:
+
+\begin{enumerate}
+\item Short response time for a given piece of work.
+\item High throughput.
+\item Low utilization of computing resources.
+\item High availability of a computing system.
+\item High bandwidth.
+\item Short data transmission time.
+\end{enumerate}
+
+To begin with a performance-analysis problem, there are three techniques
+that can be used to find the desired solution:
+
+\begin{enumerate}
+\item Measurements of existing systems.
+\item Simulation.
+\item Analytical modeling.2
+\end{enumerate}
+
+Some benchmarks used to test concurrent queues are:
+
+\begin{itemize}
+\item enqueue - dequeue pairs:
+\item 50\% enqueues
+\end{itemize}
+
+In both benchmarks, some work is added to avoid long run scenarios. This
+anomaly is described in \cite{DBLP_conf_podc_MichaelS96} and to avoid it, the
+work added consists in spinning a small amount of time (6 \(\mu\)s) in an
+empty loop. The idea behind of this is prevent long runs of queue operations
+by the same process without this being interrupted, so, this would display
+an overly-optimistic performance due to the lower cache miss rate.
+
+\section{{\bfseries\sffamily TODO} Experimental setup}
+\label{sec:org4585887}
+
+To evaluate our modular queue with all its variants, we need to determine a
+methodology to know their performance and the throughput of each
+variant. Also, we need to compare them with other queue algorithms in the
+literature to check if it is competitive. We will divide the experiments into
+two categories, the first one is related to measuring the performance of the
+distinct variants described previously. The second is to compare our best
+queue algorithm (or the two best) to related queue algorithms in the
+literature. To know the performance of our algorithms, we want to measure the
+time required to execute a set of operations over an interval of time, i.e.,
+how quickly complete its execution the program. The technique used to measure
+the time of an event is the following:
+
+\begin{itemize}
+\item Read the current time and store it in a variable \texttt{start\_count}.
+\item Let the portion of program execute.
+\item Read the current time and store it in a variable \texttt{stop\_count}.
+\item Take the difference between \texttt{start\_count} and \texttt{stop\_count}. This will be the
+total time required to execute the event.
+\end{itemize}
+
+This technique for measuring the execution time of any portion of a program
+is known as the \emph{wall clock} time\cite{lilja2005measuring}. All the events we
+want to measure will use this technique to get their execution time.
+However, this measurement includes the time spent on other system operations,
+like memory paging, thread interleaving, input/output operations and network
+communication, if applicable. Those external events could introduce
+uncertainty into our measurements. We refer to these uncertainties in
+measurements as errors or noise. To know how much uncertainty exists, we must
+use probability and statistics tools to quantify it. To summarize a
+collection of measures, we can use indices of central tendency (the mean, the
+median, and the mode). The most commonly used index is the (sample
+arithmetic) mean or average, which can summarize all the measurements
+performed into a single number that somehow represents the center of the
+distribution of these values. To quantify the precision of our measurements,
+we can use a \emph{confidence interval} for the mean
+value\cite{lilja2005measuring,DBLP_conf_oopsla_GeorgesBE07}. Another tools we
+need are the \emph{sample variance}, the \emph{standard deviation} and the \emph{coefficient of
+variation}. Formally, the \emph{(sample arithmetic) mean} is defined to be:
+
+\begin{equation}
+\bar{x}_A = \frac{1}{n}\sum^n_{i = 1}x_i
+\end{equation}
+
+Where \(x_i\) values the individual measurements. The \emph{sample variance}
+represent our calculated estimated of the actual variance. It is defined to
+be:
+
+\begin{equation}
+s^2 = \frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}
+\end{equation}
+
+Where the \(x_i\) are the \(n\) independent measurements and \(\bar{x}\) is
+the corresponding sample mean. From the previous equation, the standard
+deviation is defined as the positive square root of the variance:
+
+\begin{equation}
+s = \sqrt{s^2} = \sqrt{\frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}}
+\end{equation}
+
+The coefficient of variation (COV) is defined to be:
+
+\begin{equation}
+  COV = \frac{s}{\bar{x}}
+\end{equation}
+
+If we can approximate the distribution of random errors by a Gaussian
+distribution, we determine how well is our estimate of the true value respect
+to the actual true value using the properties of the distribution. We use
+confidence intervals to find a range of values that has a given probability
+of including the actual true value. For do that, we must consider two cases:
+
+\begin{enumerate}
+\item When the number of measurements is large \((n \ge 30)\).
+\item When the number of measurements is small \((n < 30)\).
+\end{enumerate}
+
+For the first case, we use the sample mean \((\bar{x})\) as the best
+approximation of the true value. If the \(n\) samples used to calculate
+\(\bar{x}\) are all independents with mean \(\mu\) y standard deviation
+\(\sigma\), the central limit theorem then assures us that, for large values
+of \(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed
+with mean \(\mu\) and standard deviation \(\sigma / \sqrt{n}\). We can
+quantify the precision of the measurements searching two values \(c_1\) and
+\(c_2\), such that the probability of the mean value being between that two
+values is \(1 - \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 -
+   \alpha\). \(c_1\) and \(c_2\) are chosen to form a symmetric interval around
+\bar{x} such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
+interval \([c_1, c_2]\) is called \emph{confidence interval} for \(\bar{x}\) and
+\(\alpha\) is called the \emph{significance level} and the value \((1 - \alpha)\) is
+called the \emph{confidence level}. From the central-limit theorem, we have:
+
+\begin{equation}
+c_1 = \bar{x} - z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
+\end{equation}
+\begin{equation}
+c_2 = \bar{x} + z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
+\end{equation}
+
+
+\section{{\bfseries\sffamily TODO} Experiments}
+\label{sec:org742e88b}
+
+
+\chapter{{\bfseries\sffamily TODO} Conclusions}
+\label{sec:org0bdbce7}
+
+
+\chapter{Material for courses}
+\label{sec:org6efd52b}
+
+\section{Introduction to multi-threading programming with Java (notes)}
+\label{sec:org21810ca}
 \textbf{Prerequisites to take the course}:
 \begin{itemize}
 \item Basic knowledge about Maven
@@ -33,8 +915,8 @@
 \item git
 \end{itemize}
 
-\section{Introduction}
-\label{sec:org7917e16}
+\subsection{Introduction}
+\label{sec:org45fb835}
 
 In the early 2000s, the multicore revolution began due to was difficulty
 built processor chips smaller and faster. Derived from this situation, we had
@@ -55,8 +937,8 @@ multiprocessors using shared memory with \texttt{Java}. We will cover some topic
 related to concurrent and parallel computing.
 
 
-\section{Processes and threads}
-\label{sec:org147bb4a}
+\subsection{Processes and threads}
+\label{sec:org984bdd8}
 
 What is the difference between a process and a thread? Both process and
 thread are independent sequences of execution. Loosely speaking, in practical
@@ -71,8 +953,8 @@ can perform multiple events like calls to internet services or call to other
 programs. Commonly, these events are performed in threads to avoid freeze the
 main thread and are called asynchronously.
 
-\section{Basics}
-\label{sec:org67ad031}
+\subsection{Basics}
+\label{sec:org5f04900}
 
 
 \textbf{Creating the base project}: Let's create a maven based project. In a terminal,
@@ -94,19 +976,19 @@ is change some parameters of our project to work with a recent java version.
 
 In the file \texttt{pom.xml}, change the target output and compiler version. Those
 values should be changed in the properties section as shown in code
-\ref{org0ca0b70}.
+\ref{org872645d}.
 
-\lstset{language=XML,label=org0ca0b70,caption={Changing content of file pom.xml},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=XML,label=org872645d,caption={Changing content of file pom.xml},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 <maven.compiler.source>17</maven.compiler.source>
 <maven.compiler.target>17</maven.compiler.target>
 \end{lstlisting}
 
 However, our application still not have defined a main class used to execute
-the program. To allow this, add the code shown in code \ref{org3dbb63b} to the \texttt{pom.xml},
+the program. To allow this, add the code shown in code \ref{orgbc0b10d} to the \texttt{pom.xml},
 in the plugins section.
 
-\lstset{language=XML,label=org3dbb63b,caption={Adding a plugin to execute directly from maven},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=XML,label=orgbc0b10d,caption={Adding a plugin to execute directly from maven},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 <plugin>
   <groupId>org.codehaus.mojo</groupId>
@@ -135,8 +1017,8 @@ mvn compile exec:java
 \end{lstlisting}
 
 
-\section{Creating and starting a Thread}
-\label{sec:org121ae5f}
+\subsection{Creating and starting a Thread}
+\label{sec:org852dc4e}
 
 In Java, to use threads in our applications, we can create an instance of the
 class \texttt{Thread} (\texttt{java.lang.Thread}) or make a derived subclass. Also we can
@@ -240,8 +1122,8 @@ printlns from zero to nine) and similarly, in the end, the output from the
 object \texttt{t}, but, in this, there is not a order in how the objects are
 called.
 
-\section{Thread managment}
-\label{sec:orgd27c42d}
+\subsection{Thread managment}
+\label{sec:org0b4ff1c}
 
 After seeing how to use threads in a basic way, now let us discuss some
 methods available to thread management. More documentation about these
@@ -258,9 +1140,9 @@ The methods that we refer are:
 \end{itemize}
 
 We will exemplify the use of the first four methods using the program shown
-in the code \ref{orgcbf0778}.
+in the code \ref{orgb0572ae}.
 
-\lstset{language=java,label=orgcbf0778,caption={Code example using methods for control threads.},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=java,label=orgb0572ae,caption={Code example using methods for control threads.},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 public class App {
     public static void main(String[] args) {
@@ -455,8 +1337,8 @@ main: Finally!
 \end{verbatim}
 
 
-\section{Executors}
-\label{sec:orgf508d5e}
+\subsection{Executors}
+\label{sec:orgc218cf6}
 
 Sometimes, work directly with threads could be a bit difficult and can
 introduce some errors or mistakes. To avoid this, the concurrent API of java
@@ -471,9 +1353,9 @@ class \texttt{Executors} (\texttt{java.util.concurrent.Executors}). This factory
 many static methods to create different instances. Variants of the
 instantiated class usually are parameterized according the number of threads
 or the number of cores available. An small example is shown in the code
-\ref{orgf3ccedf}.
+\ref{orge1a46c8}.
 
-\lstset{language=java,label=orgf3ccedf,caption={Using executors to manage threads and runnables.},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=java,label=orge1a46c8,caption={Using executors to manage threads and runnables.},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -506,7 +1388,7 @@ public class App {
 }
 \end{lstlisting}
 
-In the main method of the code \ref{orgf3ccedf}, we get the number of hardware
+In the main method of the code \ref{orge1a46c8}, we get the number of hardware
 threads available in our machine. Then, we declare an instance of
 ExecutorService with a pool of k threads. Thereafter, we launch a lambda
 function\footnote{The lambda function is a \texttt{Runnable}. We can get the same result if we
@@ -528,8 +1410,9 @@ Hello thread 5, how is going?
 Hello thread 3, how is going?
 \end{verbatim}
 
-\subsection{Callables and Futures}
-\label{sec:org1ff468c}
+\begin{enumerate}
+\item Callables and Futures
+\label{sec:orgc40b92a}
 
 Like Runnable, executors can work with other kinds of tasks. We called these
 tasks callables (\texttt{Callable} interface). Such interface is similar to \texttt{Runnable},
@@ -545,7 +1428,7 @@ computation result from the \texttt{Callable} object using the \texttt{Future} o
 until the \emph{callable} completes its execution. An example is below:
 
 
-\lstset{language=java,label=org02b1557,caption={Basic example of callables and futures.},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=java,label=org43fe0eb,caption={Basic example of callables and futures.},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -712,14 +1595,16 @@ It is not necessary call \texttt{parallelStream} from the \textbf{Stream} API be
 depending on the method called (\texttt{stream} or \texttt{parallelStream}), the order of the
 results may vary. This is due to stream (sequential) is pipelined in a
 single thread instead of use multiple threads.
+\end{enumerate}
 
 
-\section{Synchronized and locks}
-\label{sec:orgf4bdfcf}
+\subsection{Synchronized and locks}
+\label{sec:orgd550a00}
 
 
-\subsection{Synchronized}
-\label{sec:org50813be}
+\begin{enumerate}
+\item Synchronized
+\label{sec:orgb3cd1bd}
 
 When we implement a more complex multithreaded program, there are sections
 of code that are accessed by multiple threads. We need to pay attention when
@@ -813,8 +1698,8 @@ There are more uses to the keyword synchronized, but we do not discuss them
 in this tutorial.
 
 
-\subsection{Locks}
-\label{sec:orgf5eba2b}
+\item Locks
+\label{sec:org646183b}
 
 
 Another tool provide by Java to manage synchronization are the looks. With
@@ -933,9 +1818,10 @@ public class App {
     }
 }
 \end{lstlisting}
+\end{enumerate}
 
-\section{Atomic Variables}
-\label{sec:org4bf8fa4}
+\subsection{Atomic Variables}
+\label{sec:org555ecfa}
 
 Java provides many classes to perform atomic operations over multiple data
 types. Inside of these classes, the atomic operations are handled by
@@ -1005,8 +1891,8 @@ public class App {
 \end{lstlisting}
 
 
-\section{Synchronizers}
-\label{sec:orgb4e7d99}
+\subsection{Synchronizers}
+\label{sec:org30f5f8a}
 
 Five classes aid common special purpose synchronization idioms:
 
@@ -1023,7 +1909,7 @@ it, it will sleep for 5 seconds. In other case, it will print that could
 not acquire the semaphore.
 \end{description}
 
-\lstset{float=*,language=java,label= ,caption={First example of synchronizers: \texttt{Semaphore}},captionpos=b,firstnumber=1,numbers=left}
+\lstset{language=java,label= ,caption={First example of synchronizers: \texttt{Semaphore}},captionpos=b,firstnumber=1,numbers=left}
 \begin{lstlisting}
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -1479,8 +2365,8 @@ will be applied for next show.
 Here, a person is a thread, a play is a resource.
 \end{quote}
 
-\section{VarHandle}
-\label{sec:orgc0b140a}
+\subsection{VarHandle}
+\label{sec:org3296c75}
 
 \texttt{VarHandle} (\texttt{java.lang.invoke.VarHandle}) is a class that provides low-level
 mechanisms and APIs for method invocations and memory operations. The goal of
@@ -1496,8 +2382,8 @@ program source code, subject to constraint arising. The methods \texttt{fullFenc
 impose constraints.
 
 
-\section{References}
-\label{sec:org07c446a}
+\subsection{References}
+\label{sec:orge8efa05}
 
 \begin{itemize}
 \item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/invoke/VarHandle.html}
@@ -1514,4 +2400,10 @@ impose constraints.
 \item \url{https://stackoverflow.com/questions/10156191/real-life-examples-for-countdownlatch-and-cyclicbarrier/32416323\#32416323}
 \item \url{http://oliviertech.com/es/java/CountDownLatch-java-example/}
 \end{itemize}
+
+
+\chapter{Bibliography}
+\label{sec:orgb76d398}
+\bibliographystyle{plainurl}
+\bibliography{refs}
 \end{document}
