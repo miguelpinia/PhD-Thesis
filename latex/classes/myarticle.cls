@@ -20,7 +20,6 @@
 % Paquetes utilizados %
 %%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[a4paper]{article}
 \usepackage{amsmath,amssymb,amsthm,geometry,hyperref,paralist,svg,thmtools,tikz,tikz-cd}
 \usepackage{mathtools}
 \usepackage[capitalise,noabbrev]{cleveref}
