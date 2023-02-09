@@ -208,8 +208,8 @@
 {}% Indent amount
 {\small\bf\sffamily}% Theorem head font
 {\;}% Punctuation after theorem head
-{0.25em}% Space after theorem head
-{\small\sffamily\thmname{#1}\nobreakspace}% Theorem text (e.g. Theorem 2.1)
+{\newline}% Space after theorem head
+{\small\sffamily\thmname{#1}\thmnumber{ #2}\thmnote{ \bfseries{(#3)}}\nobreakspace}% Theorem text (e.g. Theorem 2.1)
 
 % Non-boxed/non-framed environments
 \newtheoremstyle{ocrenum}% % Theorem style name
@@ -220,10 +220,11 @@
 {\small\bf\sffamily\color{ocre}}% % Theorem head font
 {\;}% Punctuation after theorem head
 {0.25em}% Space after theorem head
-{\small\sffamily\color{ocre}\thmname{#1}\nobreakspace}% Theorem text
+{\small\sffamily\color{ocre}\thmname{#1}\thmnumber{ #2}\thmnote{ \bfseries{(#3)}}\nobreakspace}% Theorem text
 % (e.g. Theorem 2.1)
 
 \newtheoremstyle{break}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{newline}{}
+\newtheoremstyle{notes}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{newline}{}
 
 \definecolor{ocre}{RGB}{191,191,191}
 \newcounter{dummy}
@@ -235,11 +236,13 @@
 \theoremstyle{blacknumex}
 \newtheorem{exampleT}{Example}[chapter]
 \theoremstyle{blacknumbox}
+\newtheorem{definitionT}{Definition}[chapter]
+\newtheorem{descriptionT}{Description}[chapter]
 \newtheorem{vocabulary}{Vocabulary}[chapter]
-\newtheorem{definitionT}{Definición}[chapter]
 \newtheorem{corollaryT}[dummy]{Corollary}
 \newtheorem{remark}[dummy]{Remark}
 \newtheorem{note}[dummy]{Note}
+\newtheorem{noteT}{Note}
 \theoremstyle{ocrenum}
 \newtheorem{proposition}[dummy]{Proposition}
 
@@ -315,6 +318,7 @@ innerbottommargin=5pt]{cBox}
 \newenvironment{theorem}{\begin{tBox}\begin{theoremeT}}{\end{theoremeT}\end{tBox}}
 \newenvironment{exercise}{\begin{eBox}\begin{exerciseT}}{\hfill{\color{ocre}\tiny\ensuremath{\blacksquare}}\end{exerciseT}\end{eBox}}
 \newenvironment{definition}{\begin{dBox}\begin{definitionT}}{\end{definitionT}\end{dBox}}
+\newenvironment{description}{\begin{dBox}\begin{descriptionT}}{\end{descriptionT}\end{dBox}}
 \newenvironment{example}{\begin{exampleT}}{\hfill{\tiny\ensuremath{\blacksquare}}\end{exampleT}}
 \newenvironment{corollary}{\begin{cBox}\begin{corollaryT}}{\end{corollaryT}\end{cBox}}
 \newenvironment{mydescription}[1]{\begin{dBox}\textbf{#1}}{\end{dBox}\smartsmallskip}

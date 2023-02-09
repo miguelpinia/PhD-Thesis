@@ -97,6 +97,7 @@
 
 ** TODO Organization
 
+
 * TODO Concurrent Computing
 
   What is concurrent computing? This is a good question. We should first talk
@@ -147,6 +148,7 @@
 ** TODO Data-Structures
 
    - [ ] Queues with multiplicity
+
 
 * TODO Preliminaries
 
@@ -856,7 +858,7 @@
    by the same process without this being interrupted, so, this would display
    an overly-optimistic performance due to the lower cache miss rate.
 
-** TODO Experimental setup
+** TODO Statistics tools for experiments
 
    To evaluate our modular queue with all its variants, we need to determine a
    methodology to know their performance and the throughput of each
@@ -933,17 +935,18 @@
    For the first case, we use the sample mean \((\bar{x})\) as the best
    approximation of the true value. If the \(n\) samples used to calculate
    \(\bar{x}\) are all independents with mean \(\mu\) y standard deviation
-   \(\sigma\), the central limit theorem then assures us that, for large values
-   of \(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed
-   with mean \(\mu\) and standard deviation \(\sigma / \sqrt{n}\). We can
-   quantify the precision of the measurements searching two values \(c_1\) and
-   \(c_2\), such that the probability of the mean value being between that two
-   values is \(1 - \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 -
-   \alpha\). \(c_1\) and \(c_2\) are chosen to form a symmetric interval around
-   \(\bar{x}\) such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
-   interval \([c_1, c_2]\) is called /confidence interval/ for \(\bar{x}\) and
-   \(\alpha\) is called the /significance level/ and the value \((1 - \alpha)\) is
-   called the /confidence level/. From the central-limit theorem, we have:
+   \(s\), the central limit theorem then assures us that, for large values of
+   \(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed with
+   mean \(\mu\) and standard deviation \(s / \sqrt{n}\). We can quantify the
+   precision of the measurements searching two values \(c_1\) and \(c_2\), such
+   that the probability of the mean value being between that two values is \(1 -
+   \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 - \alpha\). \(c_1\) and
+   \(c_2\) are chosen to form a symmetric interval around \(\bar{x}\) such that
+   \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The interval \([c_1, c_2]\)
+   is called \textit{confidence interval} for \(\bar{x}\) and \(\alpha\) is
+   called the \textit{significance level} and the value \((1 - \alpha)\) is
+   called the \textit{confidence level}. From the central-limit theorem, we
+   have:
 
    \begin{equation}
    c_1 = \bar{x} - z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
@@ -951,6 +954,91 @@
    \begin{equation}
    c_2 = \bar{x} + z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
    \end{equation}
+
+   where \(\bar{x}\) is the sample mean, \(s\) is the sample standard deviation,
+   \(n\) is the number of measurements and \(z_{1 - \alpha/2}\) is the value of
+   a standard unit normal distribution with mean \(\mu = 0\) and variance
+   \(\s^2\), which obeys the following property: \(Pr[Z \le z_{1-\alpha/2}] =
+   1 - \alpha/2\), where the value \(z_{1 - \alpha/2}\) is typically obtained
+   from a pre-computed table.
+
+   In the second case, for a small number of measurements \((n < 30)\), the
+   sample variances \(s^2\) calculated for different groups of measurements can
+   vary significantly. The distribution of the transformed value \(z =
+   \frac{\bar{x} - x}{s/\sqrt{n}}\) follows the /Student's/ /t/-distribution
+   with n - 1 degrees of freedom. Then, the confidence interval for \(\bar{x}\)
+   when \(n < 30\) can be computed as:
+
+   \begin{equation}
+   c_1 = \bar{x} - t_{1-\alpha\2;n-1}\frac{s}{\sqrt{n}}
+   \end{equation}
+   \begin{equation}
+   c_2 = \bar{x} + t_{1-\alpha\2;n-1}\frac{s}{\sqrt{n}}
+   \end{equation}
+
+   where \(t_{1 - \alpha/2;n-1}\) defined such that a random variable \(T\) that
+   follows the /Student's t/-distribution with \(n - 1\), obeys: \(Pr[T < t_{1 -
+   \alpha/2;n - 1}] = 1 - \alpha/2\), where the value \(z_{1 - \alpha/2;n - 1}\)
+   is typically obtained from a pre-computed table.
+
+   The interesting thing about confidence intervals is that they tell us
+   something about how much noise there is in the measurements. However, we want
+   to use those measurements to make decisions, considering the performance of
+   one or more systems. To perform that, we need a technique for determine
+   whether any changes are due to random fluctuations in the measurements or
+   whether they are significant in a statistical sense. We can use the following
+   two techniques:
+
+   1. Comparing two alternatives
+   2. Analysis of variance (ANOVA)
+
+   The first technique is simple. The approach to comparing two alternatives is
+   to determine whether the confidence intervals for two groups of measurements
+   overlap. If the intervals do not overlap, we can conclude that there is no
+   evidence to suggest that there is not a statistically significant
+   difference. In another case, we cannot conclude that the differences seen in
+   the mean values are not due to random fluctuations. To determine whether
+   there is no statistically difference, we need calculate the confidence
+   interval for the difference of the means of the two alternatives. First
+   determine the sample mean \(\bar{x_1}\) and \(\bar{x_2}\) and the sample
+   standard deviation \(s_1\) and \(s_2\). Then, compute the difference of the
+   means as \(\bar{x} = \bar{x_1} - \bar{x_2}\). The standard deviation \(s_x\)
+   of the difference of the mean values is computed as:
+
+   \begin{equation}
+     s_x = \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}
+   \end{equation}
+
+   Then, the confidence interval for the difference of the means is then given
+   by:
+
+   \begin{equation}
+     c_1 = \bar{x} - z_{1 - \alpha/2}s_x
+   \end{equation}
+
+   \begin{equation}
+    c_2 = \bar{x} + z_{1 - \alpha/2}s_x
+   \end{equation}
+
+   The confidence interval calculated before is in the case when the number of
+   measurements is considerable on both systems, i.e., \(n_1 \ge 30\) and \(n_2
+   \ge 30\). When the number of measurements on at least one of the systems is
+   smaller than 30, we can no longer assume that the difference of the means is
+   under Gaussian distribution. In the last case, when the number of
+   measurements in both systems is small, i.e., \(n_1 < 30\) and \(n_2 < 30\),
+   we need to resort to the Student's /t/ distribution by replacing the value
+   \(z_{1 - \alpha/2}\) with \(t_{1 - \alpha/2;n_{df}}\), where \(n_{df}\)
+   represent the degrees of freedom, which it can approximate by integer number
+   nearest to:
+
+   \begin{equation}
+    n_{df} = \frac{(\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2})^2}{\frac{(s_1^2/n_1)^2}{n_1 - 1} + \frac{(s_2^2/n_2)^2}{n_2 - 1}}
+   \end{equation}
+
+
+
+
+
 
 
 ** TODO Experiments
@@ -1713,7 +1801,7 @@
    is a modular suite of Clojure.
 
 
-* Material for courses
+* Material for courses                                             :noexport:
 
 ** Introduction to multi-threading programming with Java (notes)
    :properties:

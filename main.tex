@@ -1,4 +1,4 @@
-% Created 2023-02-07 mar 17:08
+% Created 2023-02-09 jue 16:56
 % Intended LaTeX compiler: pdflatex
 \documentclass{latex/classes/thesis}
 \usepackage[utf8]{inputenc}
@@ -29,22 +29,23 @@
 
 
 \chapter{{\bfseries\sffamily TODO} Introduction}
-\label{sec:org42dc639}
+\label{sec:org9296363}
 
 \section{{\bfseries\sffamily TODO} Overview}
-\label{sec:orgd05ae45}
+\label{sec:orgc46fba4}
 
 \section{{\bfseries\sffamily TODO} Motivation}
-\label{sec:orgc61d50f}
+\label{sec:org0aab81a}
 
 \section{{\bfseries\sffamily TODO} Objectives and contributions}
-\label{sec:orge5ac9a4}
+\label{sec:orgc728e08}
 
 \section{{\bfseries\sffamily TODO} Organization}
-\label{sec:org717efa6}
+\label{sec:orgbfddf78}
+
 
 \chapter{{\bfseries\sffamily TODO} Concurrent Computing}
-\label{sec:org433370b}
+\label{sec:orgbcff4e0}
 
 What is concurrent computing? This is a good question. We should first talk
 about single-core and multi-core processors manufactured by the computer
@@ -65,7 +66,7 @@ permitting make computing more effectively using \emph{parallelism}, where the
 processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 \section{{\bfseries\sffamily TODO} Classic concurrent computing}
-\label{sec:org64e85ee}
+\label{sec:orgb234372}
 
 \begin{itemize}
 \item[{$\square$}] Basic Definitions
@@ -76,7 +77,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 
 \section{{\bfseries\sffamily TODO} Relaxed concurrent computing}
-\label{sec:orgd4decbd}
+\label{sec:orga1b41a9}
 
 \begin{itemize}
 \item[{$\square$}] Relaxing the problem
@@ -85,7 +86,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} Work-stealing}
-\label{sec:orge695e75}
+\label{sec:orgddeba33}
 
 \begin{itemize}
 \item[{$\square$}] How it works the work-stealing
@@ -95,20 +96,21 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} Data-Structures}
-\label{sec:org87cb114}
+\label{sec:orgcb7bc03}
 
 \begin{itemize}
 \item[{$\square$}] Queues with multiplicity
 \end{itemize}
 
+
 \chapter{{\bfseries\sffamily TODO} Preliminaries}
-\label{sec:org4973e48}
+\label{sec:org39ea788}
 
 \section{{\bfseries\sffamily TODO} Mathematical model}
-\label{sec:orgbcde4bf}
+\label{sec:org50047e8}
 
 \section{{\bfseries\sffamily TODO} Realistic model of computation}
-\label{sec:orge3cb8d8}
+\label{sec:org126982b}
 
 We consider a standard concurrent shared memory system with \(n \ge 2\)
 \emph{asynchronous} processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
@@ -132,7 +134,7 @@ write to a single shared memory space. Usually each processor core has a
 cache to operate with data from the shared memory. Often, this data is
 transferred through a memory bus, allowing connect the processors with the
 memory. The figure \ref{fig:arch} shows a simplified view of this model. In
-the sections: \hyperref[sec:org356909b]{Cache memory}, \hyperref[sec:orgc422088]{Memory bus} and \hyperref[sec:orgdfc917e]{Main memory}, we explain more in
+the sections: \hyperref[sec:org11b1c7a]{Cache memory}, \hyperref[sec:orgfbf6e7d]{Memory bus} and \hyperref[sec:orgedb0730]{Main memory}, we explain more in
 detail the meaning of each bullet of the list.
 
 \begin{figure}
@@ -145,7 +147,7 @@ detail the meaning of each bullet of the list.
 
 
 \subsection{Cache memory}
-\label{sec:org356909b}
+\label{sec:org11b1c7a}
 
 The cache memory is a special very high-speed memory that is very close to
 the processor and the processes can access it very fast. The caches are used
@@ -164,7 +166,7 @@ are close to be executed. In the third level, this cache is shared by many
 processors and is used as feeder for the L2 cache.
 
 \subsection{Memory bus}
-\label{sec:orgc422088}
+\label{sec:orgfbf6e7d}
 
 Is a computer bus that allows transfer data from the primary memory to the
 CPU and the cache memory. It is made up of two parts: the data bus and the
@@ -175,18 +177,18 @@ information.
 
 
 \subsection{Main memory}
-\label{sec:orgdfc917e}
+\label{sec:orgedb0730}
 
 Is the responsible of hold the data that CPU need to access frequently, such
 as instructions or data currently being processed. The CPU can access to
 this information faster than the access to secondary memory.
 
 \subsection{Consistency Memory Model and Cache Coherence}
-\label{sec:orgeda4069}
+\label{sec:org0d53db8}
 
 \begin{enumerate}
 \item Consistency memory model
-\label{sec:orgb5b8a7b}
+\label{sec:org3222940}
 
 Following the simplified view of the cache architecture, we want to have a
 correct shared memory. And what this means? The correctness of the shared
@@ -211,7 +213,7 @@ considered, because these models shows that most memory orderings in strong
 models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \item Cache coherence
-\label{sec:orgf21d97e}
+\label{sec:orgc32b493}
 
 Cache coherence protocols are used in response to solve a coherence problem
 in cache. For example, a coherence problem can arise if multiple cores have
@@ -228,7 +230,7 @@ data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 
 \subsection{Memory fences}
-\label{sec:org07f766d}
+\label{sec:orgf9a788d}
 
 A memory fence is a barrier instruction that causes a CPU or compiler to
 enforce a an ordering constraint on memory operations (loads and stores)
@@ -344,148 +346,148 @@ full memory fence instruction \texttt{MFENCE}. For other archict
 
 
 \section{{\bfseries\sffamily TODO} Data-Structures}
-\label{sec:org75fdb32}
+\label{sec:orgbba7fb6}
 
 \subsection{Queues}
-\label{sec:org414c73c}
+\label{sec:orga4e4920}
 
 \subsection{Stacks}
-\label{sec:org89ec2ca}
+\label{sec:org90918e8}
 
 
 \section{{\bfseries\sffamily TODO} Some Hardware Foundations}
-\label{sec:org3f925ee}
+\label{sec:org4f930e8}
 
 \subsection{Cache memory}
-\label{sec:orgfd8d3e6}
+\label{sec:orga39bab6}
 
 The cache memory
 
 \begin{enumerate}
 \item Multiple caches
-\label{sec:org679bdd9}
+\label{sec:orgd1b2364}
 
 
 \item Cache coherence protocols
-\label{sec:orgdb98898}
+\label{sec:orgb260d67}
 
 
 
 \begin{enumerate}
 \item MESI
-\label{sec:orgf5764b1}
+\label{sec:org92ff642}
 
 
 \item MOESI
-\label{sec:orgd8973b7}
+\label{sec:org7a14271}
 \end{enumerate}
 
 
 \item Store Buffers
-\label{sec:org17335d3}
+\label{sec:org6f7f72f}
 \end{enumerate}
 
 
 \subsection{Reordering (CPU or Compiler)}
-\label{sec:org7bbeaa5}
+\label{sec:orge8a8471}
 
 \subsection{Memory Barriers}
-\label{sec:orge0e257a}
+\label{sec:org8b81ffa}
 
 \begin{enumerate}
 \item X86 and TSO architectures
-\label{sec:orge956e40}
+\label{sec:orgded1bce}
 
 \item Memory Fences
-\label{sec:orgc5c7637}
+\label{sec:org2dc0fa1}
 \end{enumerate}
 
 \subsection{Read-Modify-Write Operations}
-\label{sec:orgd3049a6}
+\label{sec:org3225a83}
 
 \subsection{Bibliography}
-\label{sec:org6637d0b}
+\label{sec:org6a3fc09}
 
 \begin{itemize}
 \item \url{https://blog.the-pans.com/std-atomic-from-bottom-up/}
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} C++ Memory model}
-\label{sec:org6aaa68d}
+\label{sec:orgf8f47be}
 
 \subsection{Memory model basics}
-\label{sec:org9e88abd}
+\label{sec:org063b6c3}
 
 \begin{enumerate}
 \item Objects and memory locations
-\label{sec:orgc962e2e}
+\label{sec:orgacc7add}
 
 
 \item Objects, memory locations, and concurrency
-\label{sec:org8ec2aa1}
+\label{sec:org2768d68}
 
 
 \item Modification orders
-\label{sec:org5694c9a}
+\label{sec:orgcf40711}
 \end{enumerate}
 
 
 \subsection{Atomic operations and types in C++}
-\label{sec:orgaf839c9}
+\label{sec:org48c0f2b}
 
 
 \begin{enumerate}
 \item The standard atomic types
-\label{sec:orgd650de3}
+\label{sec:org0712d65}
 
 \item Operations on std::atomic\textsubscript{flag}
-\label{sec:orgd7bb424}
+\label{sec:orgcb15174}
 
 \item Operations on std::atomic<boolean>
-\label{sec:org9044568}
+\label{sec:org3ace7cb}
 
 \item Operations on std::atomic<T*>: pointer arithmetic
-\label{sec:orgea6b6b8}
+\label{sec:orgd80ea3a}
 
 \item Operations on standard atomic integral types
-\label{sec:org1af3c0a}
+\label{sec:orgae18f17}
 
 \item The std::atomic<> primary class template
-\label{sec:org20973d2}
+\label{sec:orgec19aca}
 
 \item Free functions for atomic operations
-\label{sec:org871838f}
+\label{sec:org76d4e95}
 \end{enumerate}
 
 \subsection{Synchronizing operations and enforcing ordering}
-\label{sec:org5135e33}
+\label{sec:orgb5bdb7a}
 
 \begin{enumerate}
 \item The synchronization relationship
-\label{sec:org0ea9afd}
+\label{sec:orgbd4a5f0}
 
 \item The happens-before relationship
-\label{sec:org414a712}
+\label{sec:org8c77583}
 
 \item Memory ordering for atomic operations
-\label{sec:org324216a}
+\label{sec:org36b1607}
 
 \item Release sequences and synchronizes-with
-\label{sec:org03036d4}
+\label{sec:orga4f9604}
 
 \item Fences
-\label{sec:orge14e0b1}
+\label{sec:org97e8668}
 
 \item Ordering non-atomic operations with atomics
-\label{sec:orgb97603a}
+\label{sec:org625621b}
 
 \item Ordering non-atomic operations
-\label{sec:orgd934a44}
+\label{sec:org5e1d7b1}
 \end{enumerate}
 
 
 \section{{\bfseries\sffamily TODO} Guidelines for designing data-structures for concurrency}
-\label{sec:org3d2597b}
+\label{sec:org5277f5c}
 
 \begin{itemize}
 \item Ensure that no thread can see a state where the invariants of the
@@ -507,7 +509,7 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \chapter{{\bfseries\sffamily TODO} Work Stealing}
-\label{sec:org99d3e31}
+\label{sec:org958b124}
 
 We analyze the algorithms for work-stealing described in the article Fully
 Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
@@ -524,16 +526,16 @@ similar semantic than the prior algorithms.
 
 
 \section{{\bfseries\sffamily TODO} Model}
-\label{sec:org47af23e}
+\label{sec:orgd74328f}
 
 \section{{\bfseries\sffamily TODO} Known algorithms}
-\label{sec:orgd81f6af}
+\label{sec:org462b159}
 
 \section{{\bfseries\sffamily TODO} Pseudocode for Work-Stealing with Weak Multiplicity}
-\label{sec:org26ea387}
+\label{sec:org32072c7}
 
 \section{{\bfseries\sffamily TODO} Memory management}
-\label{sec:org230d30d}
+\label{sec:org953511e}
 
 To implement efficiently the idempotent algorithms in an enviroment without
 garbage collection, it's necessary use some technique or metodology to
@@ -542,7 +544,7 @@ threads want to reclaim the memory of the object associated to the pointer.
 
 \begin{enumerate}
 \item Strategies to delete shared pointers
-\label{sec:orgc644d3d}
+\label{sec:org83f23d8}
 
 \begin{itemize}
 \item Add pointers to list to safety delete.
@@ -556,7 +558,7 @@ it exits.
 
 
 \item Hazard pointers
-\label{sec:org86c1a75}
+\label{sec:orgb80338a}
 
 The \emph{Hazard Pointers} is a technique to manage memory in languages where there
 are not a garbage collector. This technique was proposed by Maged
@@ -614,7 +616,7 @@ void func() {
 
 
 \item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
-\label{sec:org9d6caaa}
+\label{sec:org54a67f2}
 
 
 When a memory region is reclaimed, the programmer cannot know how that
@@ -634,7 +636,7 @@ created
 
 
 \section{{\bfseries\sffamily TODO} Memory management for work-stealing algorithms}
-\label{sec:org396f1b2}
+\label{sec:orgb928453}
 
 It is well known that C++ does not have a garbage collector like Java. Since
 the publish of the \href{https://en.cppreference.com/w/cpp/11}{Standard C++11}, new features for memory management were
@@ -653,7 +655,7 @@ avoid problems like the \href{https://www.stroustrup.com/isorc2010.pdf}{ABA prob
 
 
 \chapter{{\bfseries\sffamily TODO} Modular Basket Queues}
-\label{sec:org96bad19}
+\label{sec:org12078f1}
 
 A modular version of the basket queues of Hoffman, Shalev and Shavit is
 presented. It manipulates the head and tail using a novel object called
@@ -665,7 +667,7 @@ head and the tail using \emph{read-modify-write} instructions over a single shar
 register.
 
 \section{{\bfseries\sffamily TODO} Review LL/IC implementations}
-\label{sec:orga2dc273}
+\label{sec:org4c3b041}
 
 The specification of \texttt{LL/IC} satisfies the next properties, where the state of
 the object is an integer R, initialized to zero, and assuming that any
@@ -678,7 +680,7 @@ invoking process, then do \(R = R + 1\); in any case return \texttt{OK}.
 \end{description}
 
 \section{LL/IC Implementations}
-\label{sec:orgf8267eb}
+\label{sec:orgc1e8a92}
 
 \begin{description}
 \item[{CAS based implementation}] It uses a shared register \(R\) initialized to
@@ -705,7 +707,7 @@ performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
 \end{description}
 
 \section{{\bfseries\sffamily TODO} Basket implementations}
-\label{sec:org0da3780}
+\label{sec:org3b40373}
 
 \begin{description}
 \item[{K-Basket from FAI and SWAP}] In this first implementation, the processes
@@ -725,7 +727,7 @@ to \emph{locally linearizable} generic data structure implementations of
 \end{description}
 
 \section{{\bfseries\sffamily TODO} Update experiments}
-\label{sec:org02345df}
+\label{sec:org6ee1485}
 
 To update the experiments is necessary understand what are metrics that
 allows us compare the algorithms designed for LL/IC objects and Baskets. A
@@ -792,8 +794,8 @@ empty loop. The idea behind of this is prevent long runs of queue operations
 by the same process without this being interrupted, so, this would display
 an overly-optimistic performance due to the lower cache miss rate.
 
-\section{{\bfseries\sffamily TODO} Experimental setup}
-\label{sec:org2e99fa1}
+\section{{\bfseries\sffamily TODO} Statistics tools for experiments}
+\label{sec:orge5f002e}
 
 To evaluate our modular queue with all its variants, we need to determine a
 methodology to know their performance and the throughput of each
@@ -874,17 +876,18 @@ of including the actual true value. For do that, we must consider two cases:
 For the first case, we use the sample mean \((\bar{x})\) as the best
 approximation of the true value. If the \(n\) samples used to calculate
 \(\bar{x}\) are all independents with mean \(\mu\) y standard deviation
-\(\sigma\), the central limit theorem then assures us that, for large values
-of \(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed
-with mean \(\mu\) and standard deviation \(\sigma / \sqrt{n}\). We can
-quantify the precision of the measurements searching two values \(c_1\) and
-\(c_2\), such that the probability of the mean value being between that two
-values is \(1 - \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 -
-   \alpha\). \(c_1\) and \(c_2\) are chosen to form a symmetric interval around
-\(\bar{x}\) such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The
-interval \([c_1, c_2]\) is called \emph{confidence interval} for \(\bar{x}\) and
-\(\alpha\) is called the \emph{significance level} and the value \((1 - \alpha)\) is
-called the \emph{confidence level}. From the central-limit theorem, we have:
+\(s\), the central limit theorem then assures us that, for large values of
+\(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed with
+mean \(\mu\) and standard deviation \(s / \sqrt{n}\). We can quantify the
+precision of the measurements searching two values \(c_1\) and \(c_2\), such
+that the probability of the mean value being between that two values is \(1 -
+   \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 - \alpha\). \(c_1\) and
+\(c_2\) are chosen to form a symmetric interval around \(\bar{x}\) such that
+\(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The interval \([c_1, c_2]\)
+is called \textit{confidence interval} for \(\bar{x}\) and \(\alpha\) is
+called the \textit{significance level} and the value \((1 - \alpha)\) is
+called the \textit{confidence level}. From the central-limit theorem, we
+have:
 
 \begin{equation}
 c_1 = \bar{x} - z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
@@ -893,1517 +896,104 @@ c_1 = \bar{x} - z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
 c_2 = \bar{x} + z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
 \end{equation}
 
+where \(\bar{x}\) is the sample mean, \(s\) is the sample standard deviation,
+\(n\) is the number of measurements and \(z_{1 - \alpha/2}\) is the value of
+a standard unit normal distribution with mean \(\mu = 0\) and variance
+\(\s^2\), which obeys the following property: \(Pr[Z \le z_{1-\alpha/2}] =
+   1 - \alpha/2\), where the value \(z_{1 - \alpha/2}\) is typically obtained
+from a pre-computed table.
+
+In the second case, for a small number of measurements \((n < 30)\), the
+sample variances \(s^2\) calculated for different groups of measurements can
+vary significantly. The distribution of the transformed value \(z =
+   \frac{\bar{x} - x}{s/\sqrt{n}}\) follows the \emph{Student's} \emph{t}-distribution
+with n - 1 degrees of freedom. Then, the confidence interval for \(\bar{x}\)
+when \(n < 30\) can be computed as:
+
+\begin{equation}
+c_1 = \bar{x} - t_{1-\alpha\2;n-1}\frac{s}{\sqrt{n}}
+\end{equation}
+\begin{equation}
+c_2 = \bar{x} + t_{1-\alpha\2;n-1}\frac{s}{\sqrt{n}}
+\end{equation}
+
+where \(t_{1 - \alpha/2;n-1}\) defined such that a random variable \(T\) that
+follows the \emph{Student's t}-distribution with \(n - 1\), obeys: \(Pr[T < t_{1 -
+   \alpha/2;n - 1}] = 1 - \alpha/2\), where the value \(z_{1 - \alpha/2;n - 1}\)
+is typically obtained from a pre-computed table.
+
+The interesting thing about confidence intervals is that they tell us
+something about how much noise there is in the measurements. However, we want
+to use those measurements to make decisions, considering the performance of
+one or more systems. To perform that, we need a technique for determine
+whether any changes are due to random fluctuations in the measurements or
+whether they are significant in a statistical sense. We can use the following
+two techniques:
+
+\begin{enumerate}
+\item Comparing two alternatives
+\item Analysis of variance (ANOVA)
+\end{enumerate}
+
+The first technique is simple. The approach to comparing two alternatives is
+to determine whether the confidence intervals for two groups of measurements
+overlap. If the intervals do not overlap, we can conclude that there is no
+evidence to suggest that there is not a statistically significant
+difference. In another case, we cannot conclude that the differences seen in
+the mean values are not due to random fluctuations. To determine whether
+there is no statistically difference, we need calculate the confidence
+interval for the difference of the means of the two alternatives. First
+determine the sample mean \(\bar{x_1}\) and \(\bar{x_2}\) and the sample
+standard deviation \(s_1\) and \(s_2\). Then, compute the difference of the
+means as \(\bar{x} = \bar{x_1} - \bar{x_2}\). The standard deviation \(s_x\)
+of the difference of the mean values is computed as:
+
+\begin{equation}
+  s_x = \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}
+\end{equation}
+
+Then, the confidence interval for the difference of the means is then given
+by:
+
+\begin{equation}
+  c_1 = \bar{x} - z_{1 - \alpha/2}s_x
+\end{equation}
+
+\begin{equation}
+ c_2 = \bar{x} + z_{1 - \alpha/2}s_x
+\end{equation}
+
+The confidence interval calculated before is in the case when the number of
+measurements is considerable on both systems, i.e., \(n_1 \ge 30\) and \(n_2
+   \ge 30\). When the number of measurements on at least one of the systems is
+smaller than 30, we can no longer assume that the difference of the means is
+under Gaussian distribution. In the last case, when the number of
+measurements in both systems is small, i.e., \(n_1 < 30\) and \(n_2 < 30\),
+we need to resort to the Student's \emph{t} distribution by replacing the value
+\(z_{1 - \alpha/2}\) with \(t_{1 - \alpha/2;n_{df}}\), where \(n_{df}\)
+represent the degrees of freedom, which it can approximate by integer number
+nearest to:
+
+\begin{equation}
+ n_{df} = \frac{(\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2})^2}{\frac{(s_1^2/n_1)^2}{n_1 - 1} + \frac{(s_2^2/n_2)^2}{n_2 - 1}}
+\end{equation}
+
+
+
+
+
+
 
 \section{{\bfseries\sffamily TODO} Experiments}
-\label{sec:orgc267531}
+\label{sec:org703a2ee}
 
 
 \chapter{{\bfseries\sffamily TODO} Conclusions}
-\label{sec:orgb2c1c5a}
-
-
-\chapter{Material for courses}
-\label{sec:org39e22c9}
-
-\section{Introduction to multi-threading programming with Java (notes)}
-\label{sec:org843edb4}
-\textbf{Prerequisites to take the course}:
-\begin{itemize}
-\item Basic knowledge about Maven
-\item An editor like emacs or vi or use an IDE like Netbeans
-\item JDK 17 (open-jdk)
-\item git
-\end{itemize}
-
-\subsection{Introduction}
-\label{sec:org681edd2}
-
-In the early 2000s, the multicore revolution began due to was difficulty
-built processor chips smaller and faster. Derived from this situation, we had
-to change the form we developing software. The multicore chips cause that
-performs computing to be more effective by exploiting
-``parallelism''. However, the challenge is in how to exploit that
-parallelism. Those multicore chips (multiprocessors) usually use shared
-memory to communicate the processors between themselves. An important aspect
-when programming these multiprocessors is establishing coordination
-mechanisms to access shared memory, for example, how to synchronize the
-access to shared data to avoid problems while it is manipulated (writes and
-lectures). The above is challenging because modern systems are inherently
-asynchronous, and without synchronization mechanisms, unpredictable events
-can occur while shared data is modified concurrently.
-
-In this tutorial, we will focus on tools and techniques for programming
-multiprocessors using shared memory with \texttt{Java}. We will cover some topics
-related to concurrent and parallel computing.
-
-
-\subsection{Processes and threads}
-\label{sec:orgc1adbcf}
-
-What is the difference between a process and a thread? Both process and
-thread are independent sequences of execution. Loosely speaking, in practical
-terms, a process is an executing program. A thread is a lightweight process
-that can run over parallel with other threads and share resources as memory
-and disc with its parent process. Usually, threads run in the process space
-context.
-
-For example, we can run a program in java (like Netbeans), and the
-program in is known as the main process. During execution of program, it
-can perform multiple events like calls to internet services or call to other
-programs. Commonly, these events are performed in threads to avoid freeze the
-main thread and are called asynchronously.
-
-\subsection{Basics}
-\label{sec:org8d63095}
-
-
-\textbf{Creating the base project}: Let's create a maven based project. In a terminal,
-write:
-
-\lstset{language=bash,label= ,caption={Generating project with maven},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-cd ..
-mvn archetype:generate -DgroupId=mx.unam.concurrent \
-    -DartifactId=concurrent-example \
-    -DarchetypeArtifactId=maven-archetype-quickstart \
-    -DarchetypeVersion=1.4 -DinteractiveMode=false
-ls | grep concurrent-example
-\end{lstlisting}
-
-It creates a project with a main file called \texttt{App.java}. We will use that file
-to write all our code for multi-threaded applications. The first thing to do
-is change some parameters of our project to work with a recent java version.
-
-In the file \texttt{pom.xml}, change the target output and compiler version. Those
-values should be changed in the properties section as shown in code
-\ref{orgbd8ce7f}.
-
-\lstset{language=XML,label=orgbd8ce7f,caption={Changing content of file pom.xml},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-<maven.compiler.source>17</maven.compiler.source>
-<maven.compiler.target>17</maven.compiler.target>
-\end{lstlisting}
-
-However, our application still not have defined a main class used to execute
-the program. To allow this, add the code shown in code \ref{orgef3ec06} to the \texttt{pom.xml},
-in the plugins section.
-
-\lstset{language=XML,label=orgef3ec06,caption={Adding a plugin to execute directly from maven},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-<plugin>
-  <groupId>org.codehaus.mojo</groupId>
-  <artifactId>exec-maven-plugin</artifactId>
-  <version>1.2.1</version>
-  <executions>
-    <execution>
-      <goals>
-        <goal>java</goal>
-      </goals>
-    </execution>
-  </executions>
-  <configuration>
-    <mainClass>mx.unam.concurrent.App</mainClass>
-  </configuration>
-</plugin>
-\end{lstlisting}
-
-We can run our project with the following instruction:
-
-\lstset{language=bash,label= ,caption={Example of how to execute the project},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-pwd
-cd ../concurrent-example
-mvn compile exec:java
-\end{lstlisting}
-
-
-\subsection{Creating and starting a Thread}
-\label{sec:orgb6e78bc}
-
-In Java, to use threads in our applications, we can create an instance of the
-class \texttt{Thread} (\texttt{java.lang.Thread}) or make a derived subclass. Also we can
-provide an object that implements the \texttt{Runnable} interface
-(\texttt{java.lang.Runnable}). This interface defines a single method, \texttt{run}, meant to
-contain the code executed in the thread. Lets create a basic application
-where we define an instance of Thread and run it.
-
-\lstset{language=java,label= ,caption={Basic example of how to create threads},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-public class App {
-
-    public static void main(String[] args) {
-        MyThread1 obj1 = new MyThread1();
-        MyThread2 obj2 = new MyThread2();
-        Thread t = new Thread(new MyRunnable());
-
-        obj1.start();
-        obj2.start();
-        t.start();
-    }
-}
-
-class MyThread1 extends Thread {
-    @Override
-    public void run() {
-        System.out.println("Thread 1 is running");
-    }
-}
-
-class MyThread2 extends Thread {
-    @Override
-    public void run() {
-        System.out.println("Thread 2 is running");
-    }
-}
-
-class MyRunnable implements Runnable {
-    @Override
-    public void run() {
-        System.out.println("My runnable object is running");
-    }
-}
-\end{lstlisting}
-
-A more interesting example could be the following:
-
-\lstset{language=java,label= ,caption={Second example of how to create threads},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-package mx.unam.concurrent;
-
-public class App {
-
-    public static void main(String[] args) {
-        MyThread1 obj1 = new MyThread1();
-        MyThread2 obj2 = new MyThread2();
-        Thread t = new Thread(new MyRunnable());
-        obj1.start();
-        obj2.start();
-        t.start();
-    }
-}
-
-class MyThread1 extends Thread {
-    @Override
-    public void run() {
-        for (int i = 0; i < 10; i++) {
-            String output = String.format("Thread 1 is running. Iter: %d", i);
-            System.out.println(output);
-        }
-    }
-}
-
-class MyThread2 extends Thread {
-    @Override
-    public void run() {
-        for (int i = 0; i < 10; i++) {
-            String output = String.format("Thread 2 is running. Iter: %d", i);
-            System.out.println(output);
-        }
-    }
-}
-
-class MyRunnable implements Runnable {
-    @Override
-    public void run() {
-        for (int i = 0; i < 10; i++) {
-            String output = String
-                .format("My runnable object is running. Iter: %d", i);
-            System.out.println(output);
-        }
-    }
-}
-\end{lstlisting}
-
-A possible output for the previous code is the following. We can observe how
-the calls to the \texttt{println} method are interspersed. In a sequential execution,
-the output of the object \texttt{obj1} should be printed (the sequence of \texttt{printlns}
-from zero to nine) followed by the output of the \texttt{obj2} (the sequence of
-printlns from zero to nine) and similarly, in the end, the output from the
-object \texttt{t}, but, in this, there is not a order in how the objects are
-called.
-
-\subsection{Thread managment}
-\label{sec:org28d9727}
-
-After seeing how to use threads in a basic way, now let us discuss some
-methods available to thread management. More documentation about these
-methods is available on
-\url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Thread.html}.
-The methods that we refer are:
-
-\begin{itemize}
-\item start
-\item suspend
-\item stop
-\item sleep
-\item join
-\end{itemize}
-
-We will exemplify the use of the first four methods using the program shown
-in the code \ref{orgf8f645f}.
-
-\lstset{language=java,label=orgf8f645f,caption={Code example using methods for control threads.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-public class App {
-    public static void main(String[] args) {
-        MyThread t1 = new MyThread("First Thread");
-        MyThread t2 = new MyThread("Second Thread");
-        try {
-            Thread.sleep(500); // Sleeping for 500ms
-            t1.stop();
-            t2.stop();
-            Thread.sleep(500);
-        }
-        catch (InterruptedException e) {
-            System.out.format("Interrupted Exception: %s\n",
-                              e.getMessage());
-            e.printStackTrace();
-        }
-        System.out.println("Exiting the main thread");
-    }
-}
-class MyThread implements Runnable {
-    private boolean exit;
-    private String name;
-    Thread t;
-
-    public MyThread(String threadName) {
-        name = threadName;
-        t = new Thread(this, name);
-        System.out.format("New Thread: %s\n", t.toString());
-        exit = false;
-        t.start(); // Starting the thread
-    }
-
-    @Override
-    public void run() {
-        int i = 0;
-        while (!exit) {
-            System.out.format("%s: %d\n", name, i);
-            i++;
-            try {
-                Thread.sleep(100); // Sleeping for 100ms
-            }
-            catch (InterruptedException e) {
-                System.out.format("Interrupted Exception:  %s\n",
-                                  e.getMessage());
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void stop() {
-        exit = true;
-    }
-}
-\end{lstlisting}
-
-This program declares an inner class called \texttt{MyThread}, which implements the
-Runnable interface. The class constructor takes as a parameter a string,
-which represents the name for the instance. Inside of the constructor, the
-instance declares a thread and starts it with the method \texttt{start()}. This
-method will invoke the method \texttt{run}. In this method, it will print the name of
-the instance with the value of a counter. The counter will increase it every
-100 milliseconds. The class \texttt{MyThread} also have a method \texttt{stop}, where we
-indicating when the method \texttt{run} should stop.
-
-Additionally, the \texttt{App} class will contain the main method. In this method, it
-will declare two instances of class \texttt{MyThread} with distinct names. Then, the
-main thread will do the following:
-
-\begin{itemize}
-\item sleeps by 500 milliseconds
-\item calls the method \texttt{stop} of the two instances
-\item and then, it sleeps for another 500 milliseconds.
-\end{itemize}
-
-A possible output for the execution of the previous code is the following:
-
-\begin{verbatim}
-New Thread: Thread[First Thread,5,main]
-New Thread: Thread[Second Thread,5,main]
-First Thread: 0
-Second Thread: 0
-Second Thread: 1
-First Thread: 1
-Second Thread: 2
-First Thread: 2
-First Thread: 3
-Second Thread: 3
-Second Thread: 4
-First Thread: 4
-Exiting the main thread
-\end{verbatim}
-
-The \texttt{join()} method allows one thread to wait until another thread completes
-its execution. From Oracle's documentation:
-
-\begin{quote}
-If \texttt{t} is a \texttt{Thread} object whose thread is currently executing, \texttt{t.join()}
-causes the current thread pauses execution until \texttt{t}'s thread terminates.
-\end{quote}
-
-Let's look at a more elaborate example:
-
-\lstset{language=java,label= ,caption={Example using \texttt{join()} method.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-public class App {
-
-    static void threadMessage(String message) {
-        String threadName = Thread.currentThread().getName();
-        System.out.format("%s: %s%n", threadName, message);
-    }
-
-    private static class MessageLoop
-        implements Runnable {
-        public void run() {
-            String importantInfo[] = {
-                "Some content",
-                "Another String",
-                "Doing nothing",
-                "I'm close to finishing"
-            };
-            try {
-                for (int i = 0; i < importantInfo.length; i++) {
-                    Thread.sleep(4000);
-                    threadMessage(importantInfo[i]);
-                }
-            } catch (InterruptedException e) {
-                threadMessage("I wasn't done!");
-            }
-        }
-    }
-
-    public static void main(String args[])
-        throws InterruptedException {
-
-        long patience = 1000 * 60 * 60;
-        if (args.length > 0) {
-            try {
-                patience = Long.parseLong(args[0]) * 1000;
-            } catch (NumberFormatException e) {
-                System.err.println("Argument must be an integer.");
-                System.exit(1);
-            }
-        }
-
-        threadMessage("Starting MessageLoop thread");
-        long startTime = System.currentTimeMillis();
-        Thread t = new Thread(new MessageLoop());
-        t.start();
-
-        threadMessage("Waiting for MessageLoop thread to finish");
-        while (t.isAlive()) {
-            threadMessage("Still waiting...");
-            t.join(1000);
-            if (((System.currentTimeMillis() - startTime) > patience)
-                && t.isAlive()) {
-                threadMessage("Tired of waiting!");
-                t.interrupt();
-                t.join();
-            }
-        }
-        threadMessage("Finally!");
-    }
-}
-\end{lstlisting}
-
-A possible output may be the following:
-
-\begin{verbatim}
-main: Starting MessageLoop thread
-main: Waiting for MessageLoop thread to finish
-main: Still waiting...
-main: Still waiting...
-main: Still waiting...
-main: Still waiting...
-Thread-0: Some content
-main: Still waiting...
-main: Still waiting...
-main: Still waiting...
-main: Still waiting...
-Thread-0: Another String
-main: Still waiting...
-main: Still waiting...
-main: Still waiting...
-main: Still waiting...
-Thread-0: Doing nothing
-main: Still waiting...
-main: Still waiting...
-main: Still waiting...
-main: Still waiting...
-Thread-0: I'm close to finishing
-main: Finally!
-\end{verbatim}
-
-
-\subsection{Executors}
-\label{sec:org47b0dff}
-
-Sometimes, work directly with threads could be a bit difficult and can
-introduce some errors or mistakes. To avoid this, the concurrent API of java
-provides a class called \texttt{ExecutorService}
-(\texttt{java.util.conccurent.ExecutorService}). This class is capable of execute
-asynchronous tasks and manage a pool of threads. Thus, we don't have to
-create threads by hand. Also, the threads in the pool can be reused
-throughout the life-cycle of our application.
-
-The basic way to create an instance of \texttt{ExecutorService} is through the factory
-class \texttt{Executors} (\texttt{java.util.concurrent.Executors}). This factory class provides
-many static methods to create different instances. Variants of the
-instantiated class usually are parameterized according the number of threads
-or the number of cores available. An small example is shown in the code
-\ref{org3dd1c43}.
-
-\lstset{language=java,label=org3dd1c43,caption={Using executors to manage threads and runnables.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-
-public class App {
-
-    private static void doLongWork(String name) {
-        String message = String.format("Hello %s, how is going?", name);
-        System.out.println(message);
-        try {
-            Thread.sleep(1001);
-        }
-        catch (InterruptedException e) {
-            System.out.println("Error " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors
-            .newFixedThreadPool(numProcessors);
-        for (int i = 0; i < numProcessors; i++) {
-            final int name = i;
-            executor.execute(() -> doLongWork(String.format("thread %d",
-                                                            name)));
-        }
-        executor.shutdown();
-    }
-}
-\end{lstlisting}
-
-In the main method of the code \ref{org3dd1c43}, we get the number of hardware
-threads available in our machine. Then, we declare an instance of
-ExecutorService with a pool of k threads. Thereafter, we launch a lambda
-function\footnote{The lambda function is a \texttt{Runnable}. We can get the same result if we
-declare a class that implements the interface and instantiate it. The instance
-is passed as argument to the method \texttt{execute}.} calling a method that it does some long work. For each core,
-we run the lambda function. At the end of the program, we have to stop
-explicitly the ExecutorService, if we did not do that, the service will keep
-listening for new tasks and never stops. Finally, we get a result like shown
-below:
-
-\begin{verbatim}
-Hello thread 0, how is going?
-Hello thread 1, how is going?
-Hello thread 7, how is going?
-Hello thread 6, how is going?
-Hello thread 2, how is going?
-Hello thread 4, how is going?
-Hello thread 5, how is going?
-Hello thread 3, how is going?
-\end{verbatim}
-
-\begin{enumerate}
-\item Callables and Futures
-\label{sec:org7e10aa2}
-
-Like Runnable, executors can work with other kinds of tasks. We called these
-tasks callables (\texttt{Callable} interface). Such interface is similar to \texttt{Runnable},
-but instead of returning void after calling its \texttt{run} method, it returns a
-value. These objects are parameters for the method \texttt{submit} of the
-executorService. This method does not wait until the task completes. The
-executor service cannot return the result of the callable objecty. In that
-case, the executor returns an object of type \texttt{Future}. We can retrieve the
-computation result from the \texttt{Callable} object using the \texttt{Future} objects. The
-\emph{futures} have a method called \texttt{isDone()}, with this method we can check if the
-\emph{future} has already finished its execution. Another method available for
-\emph{futures} is \texttt{get()}. Calling this method blocks the current threads and waits
-until the \emph{callable} completes its execution. An example is below:
-
-
-\lstset{language=java,label=org1c632e8,caption={Basic example of callables and futures.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-public class App {
-    public static void main(String args[]) throws ExecutionException {
-        Callable<Integer> task = () -> {
-            try {
-                TimeUnit.SECONDS.sleep(2);
-                return 42;
-            }
-            catch (InterruptedException e) {
-                System.out.println("Error " + e.getMessage());
-                e.printStackTrace();
-            }
-            return -1;
-        };
-
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        try {
-            Future<Integer> future = executor.submit(task);
-            System.out.printf("Future done? %b\n", future.isDone());
-            Integer result = future.get();
-            System.out.printf("Future done? %b\n", future.isDone());
-            System.out.printf("Result: %d\n", result);
-            executor.shutdown();
-        }
-        catch (InterruptedException | ExecutionException e) {
-            System.out.printf("Error %s\n", e.getMessage());
-            e.printStackTrace();
-            executor.shutdown();
-        }
-    }
-}
-\end{lstlisting}
-
-\begin{verbatim}
-Future done? false
-Future done? true
-Result: 42
-\end{verbatim}
-
-
-
-Calls to \texttt{future.get()} will block the current thread and wait until the
-computation finish. But, sometimes this call can runs forever and making the
-program unresponsive. To counterattack this type of scenarios, you can add a
-timeout to avoid endless executions. An example below:
-
-\lstset{language=java,label= ,caption={Adding timeouts to avoid endless executions.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-public class App {
-    public static void main(String args[]) throws ExecutionException {
-        Callable<Integer> task = () -> {
-            try {
-                TimeUnit.SECONDS.sleep(4);
-                return 42;
-            }
-            catch (InterruptedException e) {
-                System.out.println("Error " + e.getMessage());
-                e.printStackTrace();
-            }
-            return -1;
-        };
-
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        try {
-            Future<Integer> future = executor.submit(task);
-            System.out.printf("Future done? %b\n", future.isDone());
-            Integer result = future.get(1, TimeUnit.SECONDS);
-            System.out.printf("Future done? %b\n", future.isDone());
-            System.out.printf("Result: %d\n", result);
-            executor.shutdown();
-        }
-        catch (InterruptedException | ExecutionException
-               | TimeoutException e) {
-            System.out.printf("Error %s\n", e.getLocalizedMessage());
-            e.printStackTrace();
-            executor.shutdown();
-        }
-    }
-}
-\end{lstlisting}
-
-
-The last method we will cover of ExecutorService (there are a plenty more
-but we will not cover them) is \texttt{invokeAll}. \texttt{InvokeAll} allows batch submitting
-of multiple \emph{callables}. This method accepts a collection of \emph{callables} and
-returns a list of \emph{futures}.
-
-\lstset{language=java,label= ,caption={Running tasks in batch},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-public class App {
-    public static void main(String args[]) throws ExecutionException {
-        try {
-            ExecutorService executor = Executors.newFixedThreadPool(1);
-
-            List<Callable<String>> callables = Arrays
-                .asList(
-                        () -> {
-                            TimeUnit.SECONDS.sleep(2);
-                            return "task 1";
-                        },
-                        () -> {
-                            TimeUnit.SECONDS.sleep(2);
-                            return "task 2";
-                        },
-                        () -> {
-                            TimeUnit.SECONDS.sleep(2);
-                            return "task 3";
-                        });
-
-            executor.invokeAll(callables)
-                .stream()
-                .map(future -> {
-                        try {
-                            return future.get();
-                        } catch (Exception e) {
-                            throw new IllegalStateException(e);
-                        }
-                    })
-                .forEach(System.out::println);
-            executor.shutdown();
-        }
-        catch (InterruptedException e) {
-            System.out.println("Error " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-}
-\end{lstlisting}
-
-We can get better results if we increment the number of available threads
-for the executorService. By example, using the previous instruction and
-setting it as the fixed value:
-
-\lstset{language=java,label= ,caption={Getting the total of hardware threads available in the machine.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-int numProcessors = Runtime.getRuntime().availableProcessors();
-ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-\end{lstlisting}
-
-It is not necessary call \texttt{parallelStream} from the \textbf{Stream} API because the
-\texttt{executorService} assign each task to an available thread in its pool. But,
-depending on the method called (\texttt{stream} or \texttt{parallelStream}), the order of the
-results may vary. This is due to stream (sequential) is pipelined in a
-single thread instead of use multiple threads.
-\end{enumerate}
-
-
-\subsection{Synchronized and locks}
-\label{sec:org0a0238b}
-
-
-\begin{enumerate}
-\item Synchronized
-\label{sec:org16e62ad}
-
-When we implement a more complex multithreaded program, there are sections
-of code that are accessed by multiple threads. We need to pay attention when
-accessing to shared mutable variable concurrently. By example, lets think in
-a counter used by multiple threads concurrently. A first approach could be
-the following:
-
-\lstset{language=java,label= ,caption={Concurrent counter without synchronization},captionpos=b,numbers=none}
-\begin{lstlisting}
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.IntStream;
-
-public class App {
-    public static void main(String[] args) {
-        Counter c = new Counter();
-        c.test();
-    }
-}
-
-class Counter {
-    int count = 0;
-    void increment() {
-        count = count + 1;
-    }
-    public void test() {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        IntStream.range(0, 10000)
-            .forEach(i -> executor.submit(this::increment));
-        executor.shutdown();
-        System.out.println(count);
-    }
-}
-\end{lstlisting}
-
-We can see that the value obtained is inconsistent with the value
-expected. This happen due a race condition.  To avoid this problem, java
-provides a simple mechanism to provide thread synchronization, this through
-the keyword \texttt{synchronized}. Internally, Java uses a monitor lock to manage
-synchronization. Let see an example:
-
-\lstset{language=java,label= ,caption={Using the keyword \texttt{synchronized} to provide basic synchronization.},captionpos=b,numbers=none}
-\begin{lstlisting}
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
-
-public class App {
-
-    public static void main(String[] args) throws InterruptedException {
-        Counter c = new Counter();
-        c.test();
-    }
-}
-class Counter {
-    int count = 0;
-    synchronized void increment() {
-        count = count + 1;
-    }
-    public void test() throws InterruptedException {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors
-            .newFixedThreadPool(numProcessors);
-        IntStream.range(0, 10000)
-            .forEach(i -> executor.submit(this::increment));
-
-        stop(executor);
-        System.out.println(count);
-    }
-
-    public static void stop(ExecutorService executor) {
-        try {
-            executor.shutdown();
-            // give it time to finish
-            executor.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (!executor.isTerminated()) {
-                System.out.println("Termination interrupted");
-            }
-            executor.shutdown();
-        }
-    }
-}
-\end{lstlisting}
-
-There are more uses to the keyword synchronized, but we do not discuss them
-in this tutorial.
-
-
-\item Locks
-\label{sec:org061499b}
-
-
-Another tool provide by Java to manage synchronization are the looks. With
-them, we can set lock mechanisms in an explicit way. Locks support many
-methods for finer grained synchronization control. Java provides many types
-of locks, by  example:
-\begin{itemize}
-\item \texttt{ReentrantLock},
-\item \texttt{ReentrantReadWriteLock} or
-\item \texttt{StampedLock}.
-\end{itemize}
-
-Locks that implement the interface \texttt{java.util.concurrent.locks.Lock}, use the
-methods \texttt{lock()} and \texttt{unlock()} to provide locking explicitly. Another important
-operation provided by this interface is tryLock(), used to try get the lock
-without pausing the current thread. \texttt{ReentrantLock} is a class that implements
-the \texttt{Lock} interface.
-
-Let see an example:
-
-\lstset{language=java,label= ,caption={\texttt{ReentrantLock} example.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
-public class App {
-
-    public static void main(String[] args) throws InterruptedException {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors
-            .newFixedThreadPool(numProcessors);
-        ReentrantLock lock = new ReentrantLock();
-        executor.submit(() -> {
-                lock.lock();
-                try {
-                    TimeUnit.SECONDS.sleep(4);
-                    System.out.println("wake up");
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                } finally {
-                    lock.unlock();
-                }
-            });
-        executor.submit(() -> {
-                System.out.printf("Locked: %b\n", lock.isLocked());
-                System.out.printf("Held by me: %b\n",
-                                   lock.isHeldByCurrentThread());
-                boolean locked = lock.tryLock();
-                System.out.printf("Lock aquired: %b\n", locked);
-            });
-        executor.shutdown();
-    }
-}
-\end{lstlisting}
-
-The class \texttt{ReentrantReadWriteLock} is another lock class that implements the
-interface \texttt{ReadWriteLock}.  The idea behind is to have a pair of locks for
-read-and-write access. Usually, it is safe to read mutable shared variables
-while nobody is writing over them. Thus, the read-lock can be held by many
-threads while no thread holds the write-lock. Using this lock, we can
-improve performance and throughput when reads are more frequent than
-writes. An example is below:
-
-\lstset{language=java,label= ,caption={\texttt{ReentrantReadWriteLock} example.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.Map;
-import java.util.HashMap;
-
-public class App {
-
-    public static void main(String[] args) throws InterruptedException {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.
-            newFixedThreadPool(numProcessors);
-        Map<String, String> map = new HashMap<>();
-        ReadWriteLock lock = new ReentrantReadWriteLock();
-        executor.submit(() -> {
-                lock.writeLock().lock();
-                try {
-                    System.out.println("Putting information into the map");
-                    TimeUnit.SECONDS.sleep(4);
-                    map.put("foo", "bar");
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                } finally {
-                    lock.writeLock().unlock();
-                }
-            });
-
-        Runnable readTask = () -> {
-            lock.readLock().lock();
-            try {
-                String threadName = Thread.currentThread().getName();
-                System.out.printf("Name %s, value: %s\n",
-                                  threadName, map.get("foo"));
-                TimeUnit.SECONDS.sleep(1);
-            } catch(InterruptedException ex) {
-                ex.printStackTrace();
-            } finally {
-                lock.readLock().unlock();
-            }
-        };
-
-        executor.submit(readTask);
-        executor.submit(readTask);
-
-        executor.shutdown();
-    }
-}
-\end{lstlisting}
-\end{enumerate}
-
-\subsection{Atomic Variables}
-\label{sec:orga962e1b}
-
-Java provides many classes to perform atomic operations over multiple data
-types. Inside of these classes, the atomic operations are handled by
-compare-and-swap or swap (getAndSet) instructions, which are atomic
-instructions directly supported by most modern CPUs. These classes lives in
-the package \texttt{java.util.concurrent.atomic} and some examples are:
-
-\begin{itemize}
-\item AtomicInteger
-\item AtomicLong
-\item AtomicReference
-\item AtomicStampedReference
-\item AtomicIntegerArray
-\end{itemize}
-
-The specification for the atomic accesses performed by these classes is
-described in the documentation of \texttt{java.lang.invoke.VarHandle} (for java
-9+). Some methods that they share are:
-
-\begin{itemize}
-\item compareAndExchange
-\item compareAndSet
-\item getAndIncrement
-\item getAndSet
-\end{itemize}
-
-Let's see an example of how use the atomic variables:
-
-\lstset{language=java,label= ,caption={Example of usage for \texttt{AtomicInteger}.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
-
-public class App {
-
-    public static void stop(ExecutorService executor) {
-        try {
-            executor.shutdown();
-            // give it time to finish
-            executor.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (!executor.isTerminated()) {
-                System.out.println("Termination interrupted");
-            }
-            executor.shutdown();
-        }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors
-            .newFixedThreadPool(numProcessors);
-        AtomicInteger atomicInt = new AtomicInteger(0);
-
-        IntStream.range(0, 10000)
-            .forEach(i -> executor.submit(atomicInt::incrementAndGet));
-
-        stop(executor);
-        System.out.println("Value is: " + atomicInt.get());
-    }
-}
-\end{lstlisting}
-
-
-\subsection{Synchronizers}
-\label{sec:org46181c9}
-
-Five classes aid common special purpose synchronization idioms:
-
-\begin{description}
-\item[{Semaphore}] This class is capable of maintaining whole set of
-permits. Useful in scenarios where we need to limit the amount of
-concurrent access to certain parts of the application. In the next example,
-we define a semaphore limiting the number of concurrent accesses to the
-total of available processors divided by 2 and trying execute all tasks
-(the number the tasks is the number of available processors). The semaphore
-limits the concurrent access only to the number defined previously. Each
-task will try acquire the semaphore (trying by one second) and if it got
-it, it will sleep for 5 seconds. In other case, it will print that could
-not acquire the semaphore.
-\end{description}
-
-\lstset{language=java,label= ,caption={First example of synchronizers: \texttt{Semaphore}},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
-
-public class App {
-    public static void main(String[] args) throws InterruptedException {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors
-            .newFixedThreadPool(numProcessors);
-        Semaphore semaphore = new Semaphore(numProcessors / 2);
-        Runnable longRunningTask = () -> {
-            boolean permit = false;
-            try {
-                permit = semaphore.tryAcquire(1, TimeUnit.SECONDS);
-                if (permit) {
-                    System.out.println("Semaphore acquired");
-                    sleep(5);
-                } else {
-                    System.out.println("Could not acquire semaphore");
-                }
-            }
-            catch (InterruptedException e) {
-                System.out.println("Error " + e.getMessage());
-                e.printStackTrace();
-            } finally {
-                if (permit) {
-                    semaphore.release();
-                }
-            }
-        };
-        IntStream.range(0, numProcessors)
-            .forEach(i -> executor.submit(longRunningTask));
-        stop(executor);
-    }
-    public static void stop(ExecutorService executor) {
-        try {
-            executor.shutdown();
-            // give it time to finish
-            executor.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (!executor.isTerminated()) {
-                System.out.println("Termination interrupted");
-            }
-            executor.shutdown();
-        }
-    }
-    public static void sleep(int seconds) {
-        try {
-            TimeUnit.SECONDS.sleep(seconds);
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-}
-\end{lstlisting}
-
-
-\begin{description}
-\item[{CountDownLatch}] This class is a synchronization aid that allows one or
-more threads to wait until a set of operations being performed in other
-threads completes. From the java documentation, we have:
-
-\begin{quote}
-A \texttt{CountDownLatch} is initialized with a given \emph{count}. The await method
-blocks until the current count reaches zero due to invocations of the
-\texttt{countDown()} method, after which all waiting threads are released and any
-subsequent invocations of await return immediately. This is a one-shot
-phenomenon - count cannot be reset. If you need a version that resets the
-count, consider using a CyclicBarrier.
-\end{quote}
-\end{description}
-
-
-\lstset{language=java,label= ,caption={\texttt{CountDownLatch} example.},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
-
-public class App {
-
-    public static void main(String[] argv){
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        ExecutorService consumerExecutors = Executors.newFixedThreadPool(numProcessors);
-        List<Message> queue = Collections.synchronizedList(new LinkedList<Message>());
-        CountDownLatch doneSignal = new CountDownLatch(1);
-        CountDownLatch doneProducingSignal = new CountDownLatch(1);
-        CountDownLatch doneConsumingSignal = new CountDownLatch(numProcessors);
-        IntStream.range(0, numProcessors)
-            .forEach(i -> {
-                    String name = String.format("%d", i);
-                    consumerExecutors.execute(new Consumer(name, queue,
-                                                           doneProducingSignal,
-                                                           doneConsumingSignal));
-                });
-        queue.add(new Message( "1", 15000, doneSignal));
-        queue.add(new Message( "2", 15000, new CountDownLatch(1)));
-        doneProducingSignal.countDown();
-        boolean doneProcessing = false;
-        try {
-            doneProcessing = doneSignal.await(3, TimeUnit.SECONDS);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
-        if ( doneProcessing ){
-            System.out.println( "Processing is done.");
-        } else {
-            System.out.println( "Processing is still running.");
-        }
-
-        System.out.println( "Shutting down the consumerExecutors");
-        doneProducingSignal.countDown();
-        try {
-            doneConsumingSignal.await();
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
-        consumerExecutors.shutdown();
-        System.out.println( "Done");
-    }
-}
-
-class Consumer implements Runnable {
-    private String id;
-    private List<Message> queue;
-    private CountDownLatch doneProducing;
-    private CountDownLatch doneConsuming;
-
-    Consumer(String id, List<Message> queue,
-             CountDownLatch doneProducing,
-             CountDownLatch doneConsuming){
-        this.id = id;
-        this.queue = queue;
-        this.doneProducing = doneProducing;
-        this.doneConsuming = doneConsuming;
-    }
-
-    @Override
-    public void run() {
-        while(doneProducing.getCount() != 0 || !queue.isEmpty()){
-            Message m = null;
-            synchronized(queue){
-                if(!queue.isEmpty()) m = queue.remove(0);
-            }
-            if(m != null) consume(m);
-        }
-        System.out.printf("Consumer %s done\n", id);
-        doneConsuming.countDown();
-    }
-    public void consume(Message m ){
-        System.out.printf("Consumer %s consuming message %s\n",
-                          id, m.getId());
-        try {
-            Thread.sleep(m.getTime());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.printf("Consumer %s done consumming msssage %s\n",
-                          id, m.getId());
-        m.getLatch().countDown();
-    }
-}
-
-class Message {
-    private String id;
-    private int time;
-    private CountDownLatch latch;
-    Message(String id, int time, CountDownLatch latch){
-        this.id = id;
-        this.time = time;
-        this.latch = latch;
-    }
-    public String getId() {
-        return id;
-    }
-    public int getTime() {
-        return time;
-    }
-    public CountDownLatch getLatch() {
-        return latch;
-    }
-}
-
-\end{lstlisting}
-
-
-\begin{description}
-\item[{CyclicBarrier}] This class is a synchronization aid that allows a set of
-threads to all wait for each other to reach a common barrier
-point. \texttt{CyclicBarriers} are useful in programs involving a fixed sized party
-of threads that must occasionally wait for each other. The \texttt{barrier} is
-called \texttt{cyclic} because it can reused after the waiting threads are
-released. An example of use of this class is for using a barrier in a
-parallel decomposition design:
-
-\lstset{language=java,label= ,caption={CyclicBarrier example},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.IntStream;
-
-public class App {
-    public static void main(String[] args) {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        CyclicBarrier cyclicBarrier = new CyclicBarrier(numProcessors,
-                                                        new CyclicTask());
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        System.out.println("Spawning Threads");
-        IntStream.range(0, numProcessors)
-            .forEach(i -> {
-                    String name = String.format("Thread-%d", i);
-                    executor.execute(new WorkerThread(cyclicBarrier, name));
-                });
-        System.out.println("Spawning Finished");
-        stop(executor);
-    }
-
-    public static void stop(ExecutorService executor) {
-        try {
-            executor.shutdown();
-            // give it time to finish
-            executor.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (!executor.isTerminated()) {
-                System.out.println("Termination interrupted");
-            }
-            executor.shutdown();
-        }
-    }
-}
-
-class WorkerThread implements Runnable {
-    private CyclicBarrier cyclicBarrier;
-    private String name;
-
-    public WorkerThread(CyclicBarrier cyclicBarrier, String name) {
-        this.name = name;
-        this.cyclicBarrier = cyclicBarrier;
-    }
-
-    public void run() {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            System.out.printf("%s: Doing Step 1 Work on %s\n",
-                              getFormattedDate(sdf), name);
-            sleep(getRandomWaitTime());
-            System.out.printf("%s: Doing Step 1 more work on %s\n",
-                              getFormattedDate(sdf), name);
-            sleep(getRandomWaitTime());
-            System.out.printf("%s: Finished Step 1 work on %s\n",
-                              getFormattedDate(sdf), name);
-            // Await returns for the other threads
-            int count = cyclicBarrier.await();
-            System.out.printf("%s: Cyclic Barrier count on %s is %d\n",
-                              getFormattedDate(sdf), name, count);
-            // If all threads have arrived 2 lines above, reset the barrier
-            if(count == 0) {
-                cyclicBarrier.reset();
-            }
-            System.out.printf("%s: Doing Step 2 Batch of Work on %s\n",
-                              getFormattedDate(sdf), name);
-            sleep(getRandomWaitTime());
-            System.out.printf("%s: Doing Some more Step 2 Batch of work on %s\n",
-                              getFormattedDate(sdf), name);
-            sleep(getRandomWaitTime());
-            System.out.printf("%s: Finished Step 2 Batch of work on %s\n",
-                              getFormattedDate(sdf), name);
-            count = cyclicBarrier.await();
-            String template = "%s: Cyclic Barrier count end of " +
-                "Step 2 Batch of work on %s is %d\n";
-            System.out.printf(template, getFormattedDate(sdf), name, count);
-        } catch(InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
-        }
-    }
-    public static void sleep(int milliseconds) {
-        try {
-            TimeUnit.MILLISECONDS.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-    private String getFormattedDate(SimpleDateFormat sdf) {
-        return sdf.format(new Date());
-    }
-    private int getRandomWaitTime() {
-        return (int) ((Math.random() + 1) * 1000);
-    }
-}
-class CyclicTask implements Runnable {
-    private int count = 1;
-
-    @Override
-    public void run() {
-        System.out.printf("Cyclic Barrier Finished %d\n", count++);
-    }
-}
-\end{lstlisting}
-
-\item[{Phaser}] This class is similar to \texttt{CyclicBarrier} and \texttt{CountDownLatch} in
-functionality but supporting more flexible usage. This class allows
-register tasks at any time and it permits un-registering also. Like a
-\texttt{CyclicBarrier}, a \texttt{Phaser} may be repeatedly awaited for tasks synchronization
-over the distinct phases. Method \texttt{arriveAndAwaitAdvance()} has effect
-analogous to \texttt{CyclicBarrier.await}. With this tool also is possible
-monitoring its state and determine if it terminate. Let's see an example:
-\end{description}
-
-
-\lstset{language=java,label= ,caption={\texttt{Phaser} example},captionpos=b,firstnumber=1,numbers=left}
-\begin{lstlisting}
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Phaser;
-import java.util.stream.IntStream;
-
-public class App {
-    public static void main(String[] args) {
-        int numProcessors = Runtime.getRuntime().availableProcessors();
-        Phaser phaser = new Phaser();
-        ExecutorService executor = Executors.newFixedThreadPool(numProcessors);
-        System.out.println("Spawning Threads");
-        phaser.register(); // registering main thread
-        IntStream.range(0, numProcessors)
-            .forEach(i -> {
-                    String name = String.format("Thread-%d", i);
-                    executor.execute(new WorkerThread(phaser, name));
-                });
-        System.out.println("Spawning Finished");
-        phaser.arriveAndDeregister();
-        stop(executor);
-    }
-    public static void stop(ExecutorService executor) {
-        try {
-            executor.shutdown();
-            // give it time to finish
-            executor.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        } finally {
-            if (!executor.isTerminated()) {
-                System.out.println("Termination interrupted");
-            }
-            executor.shutdown();
-        }
-    }
-}
-class WorkerThread implements Runnable {
-    private Phaser phaser;
-    private String name;
-    public WorkerThread(Phaser phaser, String name) {
-        this.name = name;
-        this.phaser = phaser;
-        this.phaser.register();
-    }
-    public void run() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        System.out.printf("%s:[%s] Doing Step 1 Work\n",
-                          getFormattedDate(sdf), name);
-        sleep(getRandomWaitTime());
-        System.out.printf("%s:[%s] Doing Step 1 more work\n",
-                          getFormattedDate(sdf), name);
-        sleep(getRandomWaitTime());
-        System.out.printf("%s:[%s] Finished Step 1 work\n",
-                          getFormattedDate(sdf), name);
-        phaser.arriveAndAwaitAdvance();
-        System.out.printf("%s:[%s] Past the barrier.\n",
-                          getFormattedDate(sdf), name);
-        int phase = phaser.getPhase();
-        // here we had a reset with CyclicBarrier
-        System.out.printf("%s:[%s] Phaser count on %d\n",
-                          getFormattedDate(sdf), name, phase);
-        System.out.printf("%s:[%s] Doing Step 2 Batch of Work\n",
-                          getFormattedDate(sdf), name);
-        sleep(getRandomWaitTime());
-        System.out.printf("%s:[%s] Doing Some more Step 2 Batch of work\n",
-                          getFormattedDate(sdf), name);
-        sleep(getRandomWaitTime());
-        System.out.printf("%s:[%s] Finished Step 2 Batch of work\n",
-                          getFormattedDate(sdf), name);
-        phaser.arriveAndAwaitAdvance();
-        phase = phaser.getPhase();
-        System.out.printf("%s:[%s] Phaser finish on: %d\n",
-                          getFormattedDate(sdf), name, phase);
-    }
-    public static void sleep(int milliseconds) {
-        try {
-            TimeUnit.MILLISECONDS.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-    private String getFormattedDate(SimpleDateFormat sdf) {
-        return sdf.format(new Date());
-    }
-    private int getRandomWaitTime() {
-        return (int) ((Math.random() + 1) * 1000);
-    }
-}
-\end{lstlisting}
-
-\begin{description}
-\item[{Exchanger}] A synchronization point at which threads can pair and swap
-elements within pairs. Each thread presents some object on entry to the
-\texttt{exchange} method, matches with a partner thread, and receives its partner's
-object on return. An \texttt{Exchanger} may be viewed as a bidirectional form of a
-\texttt{SynchronousQueue}. \texttt{Exchangers} may be useful in applications such as genetic
-algorithms and pipeline designs.
-\end{description}
-
-Just to finish this section, an interesting comment taken from stackoverflow
-about real-life examples for use CountDownLatch, Semaphores, Mutex and
-CyclicBarriers is the following:
-
-\begin{quote}
-In a hypothetical theater:
-
-\begin{itemize}
-\item It is called \textbf{Mutex} if only one person is allowed to watch the play.
-\item It is called \textbf{Semaphore} if N number of people are allowed to watch the
-play. If anybody leaves the Theater during the play then other person can
-be allowed to watch the play.
-\item It is called \textbf{CountDownLatch} if no one is allowed to enter until every
-person vacates the theater. Here each person has free will to leave the
-theater.
-\item It is called \textbf{CyclicBarrier} if the play will not start until every person
-enters the theater. Here a showman can not start the show until all the
-persons enter and grab the seat. Once the play is finished the same barrier
-will be applied for next show.
-\end{itemize}
-
-Here, a person is a thread, a play is a resource.
-\end{quote}
-
-\subsection{VarHandle}
-\label{sec:org9832ad1}
-
-\texttt{VarHandle} (\texttt{java.lang.invoke.VarHandle}) is a class that provides low-level
-mechanisms and APIs for method invocations and memory operations. The goal of
-this class is replace the operations in \texttt{sun.misc.Unsafe}, used in Java version
-less than 9 but with a safe equivalent. It provides access to variables under
-various access modes, including plain read/write access, volatile read/write
-access and compare-and-set. Additionally, it provides a set of static methods
-referred to as memory fence methods for fine-grained control of memory
-ordering. The specification of language permits other threads observe
-operations as if they were executed in orders different than are apparent in
-program source code, subject to constraint arising. The methods \texttt{fullFence},
-\texttt{acquireFence}, \texttt{releaseFence}, \texttt{loadLoadFence} and \texttt{storeStoreFence}, can be used to
-impose constraints.
-
-
-\subsection{References}
-\label{sec:orga0fba88}
-
-\begin{itemize}
-\item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/invoke/VarHandle.html}
-\item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CyclicBarrier.html}
-\item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Executors.html}
-\item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ExecutorService.html}
-\item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Executors.html}
-\item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Phaser.html}
-\item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Semaphore.html}
-\item \url{https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/CountDownLatch.html}
-\item \url{https://winterbe.com/posts/2015/04/07/java8-concurrency-tutorial-thread-executor-examples/}
-\item \url{https://winterbe.com/posts/2015/04/30/java8-concurrency-tutorial-synchronized-locks-examples/}
-\item \url{https://winterbe.com/posts/2015/05/22/java8-concurrency-tutorial-atomic-concurrent-map-examples/}
-\item \url{https://stackoverflow.com/questions/10156191/real-life-examples-for-countdownlatch-and-cyclicbarrier/32416323\#32416323}
-\item \url{http://oliviertech.com/es/java/CountDownLatch-java-example/}
-\end{itemize}
+\label{sec:org8584026}
 
 
 \chapter{Bibliography}
-\label{sec:orgb553875}
+\label{sec:orgcfc92f0}
 \bibliographystyle{plainurl}
 \bibliography{refs}
 \end{document}
