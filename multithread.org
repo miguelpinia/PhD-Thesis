@@ -1,0 +1,389 @@
+# Local IspellDict: es
+#+OPTIONS: toc:nil reveal_width:1920 reveal_height:1080
+#+REVEAL_THEME: black
+#+REVEAL_VERSION: 4
+#+REVEAL_INIT_OPTIONS: slideNumber:nil
+#+REVEAL_EXTRA_CSS: ./style.css
+
+
+:REVEAL_PROPERTIES:
+#+REVEAL_ROOT: https://cdn.jsdelivr.net/npm/reveal.js
+#+REVEAL_REVEAL_JS_VERSION: 4
+:END:
+
+#+Title: Programación multihilo con Java
+#+Author: Miguel Piña
+
+* ¿Por qué requerimos programación multihilo?
+
+
+  - Cambio de /single-processors/ a /multi-processors/
+  - Aprovechar esta nueva tecnología
+  - Realizar cómputo paralelo/concurrente/distribuido
+
+* Procesos e hilos
+
+  A menudo escuchamos que nuestros programas se encuentran en ejecución a través
+  de procesos e hilos. Ambos son secuencias independientes de ejecución. En
+  términos prácticos:
+
+  - Un proceso es un programa en ejecución.
+  - Un hilo es un proceso ligero que puede ejecutarse en paralelo junto a otros
+    hilos, compartiendo recursos como memoria y disco con un proceso padre.
+
+** ¿Qué necesitamos para programar con hilos en este tutorial?
+
+   - Un lenguaje de programación que soporte hilos (*Java*).
+   - Conocer que herramientas nos provee el lenguaje para manipular los hilos.
+   - Herramientas adicionales de compilación (*Maven* - Opcional).
+   - Un editor de texto (*emacs*).
+   - Una terminal (*emacs*, *terminator*).
+   - Git.
+
+* Generando un proyecto en Java
+
+  Vamos a generar nuestro proyecto utilizando *Maven*. En una terminal,
+  escribimos:
+
+    #+begin_src bash
+      cd ..
+      mvn archetype:generate -DgroupId=mx.unam.concurrent \
+          -DartifactId=concurrent-example \
+          -DarchetypeArtifactId=maven-archetype-quickstart \
+          -DarchetypeVersion=1.4 -DinteractiveMode=false
+      ls | grep concurrent-example
+    #+end_src
+
+** Cambiando la versión de Java
+
+   Vamos a modificar el archivo =pom.xml=, cambiando la versión del compilador de
+   la siguiente forma:
+
+   #+begin_src xml
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+   #+end_src
+
+
+** Estableciendo una clase principal
+
+   Adicional a lo anterior, tenemos que definir una /main class/ para nuestro
+   proyecto. Para esto, añadimos el siguiente código en la sección de plugins:
+
+       #+begin_src xml
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>mx.unam.concurrent.App</mainClass>
+        </configuration>
+      </plugin>
+    #+end_src
+
+** Compilando nuestro proyecto
+
+   Con lo anterior, ya tenemos un proyecto completo listo para compilarse y
+   ejecutarse. Para probar que funciona, ejecutaremos las siguientes
+   instrucciones en una terminal:
+
+   #+begin_src bash
+     pwd
+     cd ../concurrent-example
+     mvn compile exec:java
+   #+end_src
+
+* Manejo de hilos
+
+  A partir de este momento, iremos revisando diversos ejemplos de las
+  herramientas que nos provee =Java= para la programación con hilos. Para
+  facilitar la revisión de estos conceptos, haremos lo siguiente:
+
+  - Clonaremos el siguiente repositorio en nuestra máquina local:
+
+    https://github.com/miguelpinia/concurrent-course.git
+
+  - Iremos realizando checkouts conforme vayamos viendo los ejemplos, algo como
+    lo siguiente:
+
+    #+begin_src sh
+      git checkout 01-create-threads
+    #+end_src
+
+    Todo el código estará dentro del archivo =App.java=
+
+** Creando hilos
+
+   Los primeros conceptos que revisaremos serán:
+
+   - Distinguir entre Runnable (java.lang.Runnable) y Thread (java.lang.Thread)
+   - ¿Cómo inicializamos y ejecutamos hilos?
+
+   Vayamos a la rama de git *01.0-create-threads*.
+
+   #+begin_src shell
+     git checkout 01-create-threads
+   #+end_src
+
+** Creando hilos
+
+   Vamos a revisar un ejemplo un poco más interesante, cambiémonos a la rama
+   *01-create-threads*.
+
+   #+begin_src shell
+     git checkout 01-create-threads
+   #+end_src
+
+
+** Manipulando hilos
+
+   Los hilos proveen algunos método para manipularlos, entre los que se
+   encuentran:
+
+   - =start=
+   - =suspend=
+   - =stop=
+   - =sleep=
+   - =join=
+
+   Vamos a revisar el funcionamiento de los primeros cuatro viendo el ejemplo
+   que se encuentra en la rama *02-thread-methods*:
+
+   #+begin_src shell
+     git checkout 02-thread-methods
+   #+end_src
+
+** Join
+
+   En cómputo paralelo, existe un modelo para configurar y ejecutar programas
+   conocido como fork-join. Este método consiste en dividir el trabajo de un
+   programa en sub-partes y unirlas al final del trabajo. En java, dentro de la
+   clase Thread, el método =join()=, permite a un thread esperar hasta que otro
+   complete su ejecución. Veamos un ejemplo:
+
+   #+begin_src shell
+     git checkout 03-join-thread
+   #+end_src
+
+
+* Executors
+
+  Manejar una cantidad grande de hilos puede ser algo difícil. Para evitar una
+  manipulación manual que pueda ser propensa a errores, =Java= provee una serie de
+  clases e interfaces denominadas =Executors=. Estas clases son capaces de
+  permitir la ejecución asíncrona de tareas y el manejo de /thread pools/. De este
+  modo no tenemos que inicializar hilos a mano, así como el thread pool puede
+  ser reutilizado durante la ejecución del programa. Veamos un ejemplo:
+
+  #+begin_src shell
+    git checkout 04-executors
+  #+end_src
+
+** Callables y Futures
+
+   - Además de Runnable, executors pueden trabajar con otros tipos de tareas.
+   - Objetos que implementan la interfaz =Callable= y regresan un valor.
+   - Los executors ejecutan tareas asíncronas, no podemos esperar a que regresen
+     el valor.
+   - Utilizamos objetos de tipo =Future=, para obtener los resultados de la
+     computación hecha por los callables.
+   - Future provee los métodos =isDone()= y =get()=.  Este último bloquea el thread
+     actual hasta que se complete la ejecución.
+
+   #+begin_src shell
+     git checkout 05-callables-and-futures
+   #+end_src
+
+** Timeouts
+
+   - Llamadas a =future.get()= van a bloquear el thread actual y esperar hasta que
+     el cómputo termine.
+   - Sin embargo, estos cómputos se pueden quedar bloqueados por mucho tiempo y
+     dejar el programa sin respuesta.
+   - Para evitar estos escenarios, podemos añadir un =timeout= para evitar
+     ejecuciones sin fin.
+
+     #+begin_src shell
+     git checkout 06-timeout-futures
+     #+end_src
+
+
+** Ejecutando múltiples callables
+
+   - Podemos ejecutar múltiples callables a través de =ExecutorService.invokeAll=.
+
+   #+begin_src shell
+     git checkout 07-batch-execution
+   #+end_src
+
+* Sincronización
+
+  Revisaremos las herramientas básicas para el manejo de sincronización que
+  provee Java. Estas herramientas son las siguientes:
+
+  - Bloques =synchronized=.
+  - Candados.
+  - Primitivas de sincronización.
+
+** Motivación
+
+   Consideremos un pequeño programa que se encargue de incrementar un contador
+   utilizando todos los hilos disponibles en la computadora. Veamos que pasa si
+   no utilizamos algún tipo de sincronización al momento de ir incrementando el
+   contador.
+
+   #+begin_src shell
+     git checkout 08-no-synchronization
+   #+end_src
+
+** Bloques Synchronized
+
+   Podemos observar que el resultado final de la ejecución nos da un valor
+   inconsistente con el valor que nosotros esperamos. Para evitar esto, java
+   provee un mecanismo simple de sincronización a través de la palabra reservada
+   =synchronized=.
+
+   #+begin_src shell
+     git checkout 09-synchronized-keyword
+   #+end_src
+
+
+** Candados
+
+   Además de la palabra synchronized, java provee candados, los cuáles podemos
+   establecer mecanismos finos de sincronización. A través de los métodos =lock()=
+   y =unlock()= (además de =tryLock()=), podemos definir secciones críticas. Los
+   candados que provee =Java= son:
+
+   - ReentrantLock
+   - ReentrantRead WriteLock
+   - StampedLock
+
+   Estos candados viven en el paquete =java.util.concurrent.locks=
+
+   #+begin_src shell
+     git checkout 10-lock-reentrantlock
+     git checkout 11-lock-reentrantreadwritelock
+   #+end_src
+
+** Variables atómicas
+
+   Java provee varias clases para ejecutar operaciones atómicas sobre múltiples
+   tipos de datos. Dentro de esas clases, estas operaciones suelen ser
+   ejecutadas a través de operaciones basadas en primitivas de sincronización
+   como =compare&set=, =test&set= y =fetch&increment=. Entre las clases atómicas
+   tenemos:
+
+   - =AtomicBoolean=
+   - =AtomicInteger=
+   - =AtomicLong=
+   - =AtomicIntegerArray=
+   - =AtomicLongArray=
+   - =AtomicReference=
+   - =AtomicReferenceArray=
+   - =AtomicStampedReference=
+
+   Estas clases viven en el paquete =java.util.concurrent.atomic=. Veamos el
+   ejemplo del contador, pero utilizando operaciones atómicas:
+
+   #+begin_src shell
+     git checkout 12-atomicinteger
+   #+end_src
+
+* Sincronizadores
+
+  Clases para ayudar con tareas de sincronización y coordinación de
+  hilos. Mostraremos las siguientes:
+
+  - =Semaphore=
+  - =CountDownLatch=
+  - =CyclicBarrier=
+  - =Phaser=
+
+** Semaphore
+
+   Clase utilizada para restringir el acceso de los hilos a ciertos recursos. Es
+   inicializada con un número de permisos. Ofrece los siguientes métodos:
+
+   - acquire :: Método que bloquea si es necesario hasta que algún permiso este
+     disponible y lo toma.
+   - release :: Añade un permiso, potencialmente liberando un =acquirer=
+     bloqueante.
+
+   En el ejemplo, definimos un semáforo con un total de permisos como el total
+   de hilos entre dos. Cada hilo intentará obtener el semáforo y si lo obtiene
+   dormirá por 5 segundos, en otro caso, imprimirá que no lo obtuvo.
+
+   #+begin_src shell
+     git checkout 13-semaphores
+   #+end_src
+
+** CountDownLatch
+
+   Una ayuda de sincronización que permite que uno o más hilos esperen hasta que
+   se complete un conjunto de operaciones que se están realizando en otros
+   hilos.
+
+   Esta clase es inicializada con un contador dado. El método =await()= bloquea los
+   hilos hasta que el contador actual alcance cero debido a las llamadas de
+   =countDown()=. Después de eso, todos los hilos que esperaban son liberados y
+   cualquier invocación subsecuente de =await()= regresará inmediatamente. Este es
+   un fenómeno de una sola vez.
+
+   En el ejemplo, creamos una versión simple del problema de
+   productor-consumidor. Tendremos tantos consumidores como hilos disponibles y
+   enviaremos dos mensajes. Bloquearemos el hilo principal al: terminar de
+   producir los mensajes y al terminar de procesarlos.
+
+   #+begin_src shell
+     git checkout 14-countdownlatch
+   #+end_src
+
+** CyclicBarrier
+
+   Similar a la clase anterior, permite que un conjunto de hilos se esperen en
+   un punto común de barrera. Esta clase es útil para programas en lo que hay un
+   conjunto fijo de hilos que ocasionalmente deben esperar por los demás. A
+   diferencia de la clase =CountDownLatch=, el =barrier= puede ser reutilizado.
+
+   En el ejemplo para esta clase, utilizaremos el =barrier= para simular un poco
+   de trabajo en paralelo con puntos de espera.
+
+   #+begin_src shell
+     git checkout 15-cyclicbarrier
+   #+end_src
+
+** Phaser
+
+   Similar a =CyclicBarrier= y =CountDownLatch= en funcionalidad pero soportando un
+   uso más flexible. Esta clase permite registrar tareas en cualquier momento y
+   también de-registrarlas. Un =Phaser= puede estar esperando por tareas en
+   distintas fases.
+
+   #+begin_src shell
+     git checkout 16-phaser
+   #+end_src
+
+
+* VarHandle
+
+  Es una clase que provee mecanismos de bajo nivel y API para invocaciones de
+  métodos y operaciones de memoria. La meta de esta clase es reemplazar las
+  operaciones de =sun.misc.Unsafe=, la cuál era una clase para realizar estas
+  operaciones en versiones de Java menores a la 9. Provee las siguientes
+  operaciones:
+
+  - Acceso a variables a través de múltiples modos como:
+    - Lecturas simples de lectura y escritura
+    - Accesos volátiles de lectura y escritura
+    - Lectura y escritura a través de primitivas de sincronización como
+      =compare&set=.
+  - Provee distintos =fences= para añadir restricciones y evitar reordenar
+    operaciones por parte del compilador/intérprete.
