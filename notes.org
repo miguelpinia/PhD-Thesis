@@ -744,7 +744,7 @@
    head and the tail using /read-modify-write/ instructions over a single shared
    register.
 
-** TODO Review LL/IC implementations
+** TODO LL/IC Implementations
 
    The specification of =LL/IC= satisfies the next properties, where the state of
    the object is an integer R, initialized to zero, and assuming that any
@@ -753,8 +753,6 @@
    - LL() :: Returns the current value in \(R\).
    - IC() :: If \(R\) has not been incremented since the last LL of the
      invoking process, then do \(R = R + 1\); in any case return =OK=.
-
-** LL/IC Implementations
 
    - CAS based implementation :: It uses a shared register \(R\) initialized to
      zero. =LL= first reads \(R\) and stores the value in a persistent variable
@@ -778,6 +776,7 @@
      performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
      =OK=.
 
+
 ** TODO Basket implementations
 
    - K-Basket from FAI and SWAP :: In this first implementation, the processes
@@ -794,6 +793,7 @@
      for the same location, CAS is needed. This implementation is reminiscent
      to /locally linearizable/ generic data structure implementations of
      [[cite:&DBLP_conf_concur_HaasHHKLPSSV16]].
+
 
 ** TODO Update experiments
 
@@ -857,6 +857,7 @@
    empty loop. The idea behind of this is prevent long runs of queue operations
    by the same process without this being interrupted, so, this would display
    an overly-optimistic performance due to the lower cache miss rate.
+
 
 ** TODO Statistics tools for experiments
 
@@ -1035,13 +1036,191 @@
     n_{df} = \frac{(\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2})^2}{\frac{(s_1^2/n_1)^2}{n_1 - 1} + \frac{(s_2^2/n_2)^2}{n_2 - 1}}
    \end{equation}
 
+   In the case of the *Analysis of Variance (ANOVA)*, which is a general technique
+   for observe the variation in a collection of measurements into meaningful
+   components. To perform this analysis, it is necessary assume that the errors
+   in the measurements for the distinct alternatives are independent and under
+   normal distribution and the variance for the measurement errors is the same
+   for all alternatives. The variation observed is divided into:
 
+   1. The variation observed /within/ each system, which is assumed caused by the
+      measurement error.
+   2. The variation /between/ alternatives.
 
+   If the variation between the alternatives is larger than the variation within
+   each alternatives, then it can be concluded that there is a statistically
+   significant difference between the alternatives. To evaluate ANOVA, we must
+   organize the measurements as it is shown in the table:
 
+   |--------------+------------------+------------------+--------+------------------+--------+------------------+------------------|
+   | Measurements | 1                | 2                | \hdots | j                | \hdots | k                | Overall mean     |
+   |--------------+------------------+------------------+--------+------------------+--------+------------------+------------------|
+   | 1            | y_{11+}          | y_{12}           | \hdots | y_{1j}           | \hdots | y_{1k}           |                  |
+   | 2            | y_{21}           | y_{22}           | \hdots | y_{2j}           | \hdots | y_{2k}           |                  |
+   | \vdots       | \vdots           | \ddots           | \hdots |                  |        |                  |                  |
+   | i            | y_{i1}           | y_{i2}           | \ddots | y_{ij}           | \vdots | y_{ik}           |                  |
+   | \vdots       | \vdots           | \vdots           | \vdots | \ddots           |        |                  |                  |
+   | n            | y_{n1}           | y_{n2}           | \hdots | y_{nj}           | \hdots | y_{nl}           |                  |
+   |--------------+------------------+------------------+--------+------------------+--------+------------------+------------------|
+   | Column means | \(\bar{y}_{.1}\) | \(\bar{y}_{.2}\) | \hdots | \(\bar{y}_{.j}\) | \hdots | \(\bar{y}_{.k}\) | \(\bar{y}_{..}\) |
+   |--------------+------------------+------------------+--------+------------------+--------+------------------+------------------|
 
+   The column means are defined as:
+
+   \begin{equation}
+     \bar{y}_{.j} = \frac{\sum^n_{i = 1}y_{ij}}{n}
+   \end{equation}
+
+   and the overall mean is defined as:
+
+   \begin{equation}
+     \bar{y}_{..} = \frac{\sum^k_{j = 1}\sum^n_{i = 1}y_{ij}}{n\cdot{}k}
+   \end{equation}
+
+   We can compute
 
 
 ** TODO Experiments
+
+*** LL/IC Experiments
+
+   We designed the experiments to know the performance of the LL/IC algorithm
+   using the variants explained before. We test the following algorithms:
+
+   - =Fetch and Increment= as reference.
+   - LL/IC classic.
+   - LL/IC CAS based.
+   - LL/IC SQRT.
+
+   We implement these algorithms in C++20 (the current revision of the C++
+   standard). To test them, we use a machine with 32 cores and 64 threads (AMD
+   threadripper 3970X) with 64 GB of RAM. We compiled the program using CMake
+   (3.22) as a compilation tool and using GCC 12.1 as a compiler. We used =-O3= as
+   our optimization level without any special optimization flag. To avoid a
+   /changing context/[fn:5] between threads during the evaluation of our
+   experiments, we set up a CPU /affinity/ per thread. Affinity means that instead
+   of executing the thread freely on any core, we associate a software thread
+   with a hardware thread. Thus, all the thread work will be executed in a
+   single core or a pre-defined group of cores.
+
+   To evaluate the performance of prior algorithms, we perform the following
+   experiment: we employ an initially-empty LL/IC object (according to the
+   variant, the initial state could be just an atomic integer initialized to
+   zero or an array with all its entries initialized to zero), which perform a
+   series of calls to the LL method followed by a call to the IC method. Between
+   both calls, the threads perform a random amount of "fake work" to avoid long
+   run scenarios
+   [[cite:&DBLP_conf_ppopp_YangM16;cite:&DBLP_conf_podc_MichaelS96]]. This fake work
+   is just an empty spin. We use the following benchmark to evaluate the
+   performance of the LL/IC objects: in each iteration, each thread performs a
+   call to the LL method of a shared object, followed by some random work,
+   finishing with a call to the IC method of the shared object. The benchmark
+   executes \(10^7\) pairs partitioned evenly among all the threads.
+
+      #+begin_src cpp
+     int LLICCAS::LL()
+     {
+         return R.load();
+     }
+
+
+     void LLICCAS::IC(int expected)
+     {
+         if (R.load() == expected) {
+             R.compare_exchange_strong(expected, expected + 1);
+         }
+     }
+   #+end_src
+
+   | Method | Data state     | transition | comment                            |
+   |--------+----------------+------------+------------------------------------|
+   | LL     | R in Invalid   | Exclusive  |                                    |
+   |        |                | Shared     | Get Data from another cache or mem |
+   |        | R in Shared    | Shared     |                                    |
+   |        | R in Exclusive | Exclusive  |                                    |
+   | IC     | R in Invalid   | Modified   | Invalidate other's cache           |
+   |        | R in Shared    | Modified   | Invalidate other's cache           |
+   |        | R in Modified  | Modified   | write into its cache               |
+
+
+   #+begin_src cpp
+     M[n];
+
+     int LLICRWNC::LL() {
+         int max_p = 0;
+         int tmp;
+         for(int i = 0; i < num_processes; i++) {
+             tmp = M[i].load(); // Only if
+             if (tmp >= max_p) max_p = tmp;
+         }
+         return max_p;
+     }
+
+     void LLICRWNC::IC(int max_p, int process) {
+         int maximum = 0;
+         int tmp;
+         for(int i = 0; i < num_processes; i++) {
+             tmp = M[i].load();
+             if (tmp > maximum) maximum = tmp;
+         }
+         if (maximum == max_p) {
+             M[process].store(max_p + 1);
+         }
+     }
+   #+end_src
+
+   In this case, for the LL method, when executes M[i].load(), it will begin a
+   coherence request in case of its state will be invalid. Like the values in
+   the array are integers of 8 bytes, then 8 integers are placed together. Thus,
+   when a thread modify a the *i'th* value in the array, it will modify all its
+   neighbors in the cache line, causing a invalidation
+
+
+
+   To explain the experiment results, we
+   will understand what is happening during a concurrency execution. To do this,
+   we will start by explaining some details about the cache coherence protocols
+   and how it works. The reason of this, it is because we want to know why some
+   results might be contradictory. For example, the use of simple load/stores in
+   some scenarios might seen slow respect to the use of atomic operations like
+   Fetch and Increment.
+
+   The current experiments try to measuring the latency of the distinct variants
+   of the LL/IC objects. To have a metric that allow us compare the performance
+   of the distinct variants, we will measure
+
+   1. Perform a fixed number of operations for the LL/IC objects and compare the
+      execution time of each one. The comparison of each alternative should be
+      using ANOVA.
+   2. Set a fixed time to perform operation inside of that
+
+*** How to run code
+
+    #+begin_src bash
+      cmake -S . -B build
+      make -C build
+      make -C build test
+    #+end_src
+
+
+** TODO Explanation
+
+
+
+
+*** Comparación entre RW con padding
+
+    El algoritmo con mejor rendimiento es la versión con padding de 16 bytes. La
+    versión de padding de 32 bytes sólo llega a ganarle a la versión CAS cuando
+    el número de procesadores es grande.
+
+    Tanto el padding usando toda la linea de caché, cómo usando dos líneas
+    tienen el peor desempeño. Esto debido a que cada vez que se invoca un store
+    sobre el arreglo M, al ser este atómico, el procesador inválida las linea de
+    caché de los demás tan pronto intenta escribir. Esto impacta en directamente
+    en los ciclos utilizados por LL e IC, causando stalls para aquellas lineas
+    de cache compartidas.
+
 
 
 * TODO Conclusions
@@ -2876,6 +3055,7 @@
       }
     #+end_src
 
+
     #+RESULTS:
     : Semaphore acquired
     : Semaphore acquired
@@ -3275,6 +3455,7 @@
 
     =VarHandle= (=java.lang.invoke.VarHandle=) is a class that provides low-level
     mechanisms and APIs for method invocations and memory operations. The goal of
+
     this class is replace the operations in =sun.misc.Unsafe=, used in Java version
     less than 9 but with a safe equivalent. It provides access to variables under
     various access modes, including plain read/write access, volatile read/write
@@ -3934,6 +4115,7 @@ TITLE	FIRST AUTHOR	YEAR	CITED BY
 
 * Footnotes
 
+
 [fn:1] A benchmark program is any program that is used to measure the
 performance of a computer system. Certain programs are sometimes defined as a
 standard reference that can be used for comparing performance results.
@@ -3945,13 +4127,13 @@ surveys.
 [fn:4] The lambda function is a =Runnable=. We can get the same result if we
 declare a class that implements the interface and instantiate it. The instance
 is passed as argument to the method =execute=.
+[fn:5] By /changing context/, we refer to
 
 
 
 * Bibliography
   \bibliographystyle{plainurl}
   \bibliography{refs}
-
 
 * Local variables                                                  :noexport:
 # Local variables:

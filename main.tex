@@ -1,4 +1,4 @@
-% Created 2023-02-09 jue 16:56
+% Created 2023-04-04 mar 11:11
 % Intended LaTeX compiler: pdflatex
 \documentclass{latex/classes/thesis}
 \usepackage[utf8]{inputenc}
@@ -29,23 +29,23 @@
 
 
 \chapter{{\bfseries\sffamily TODO} Introduction}
-\label{sec:org9296363}
+\label{sec:orgcb5adb0}
 
 \section{{\bfseries\sffamily TODO} Overview}
-\label{sec:orgc46fba4}
+\label{sec:orge30a896}
 
 \section{{\bfseries\sffamily TODO} Motivation}
-\label{sec:org0aab81a}
+\label{sec:orge43aec8}
 
 \section{{\bfseries\sffamily TODO} Objectives and contributions}
-\label{sec:orgc728e08}
+\label{sec:org5d03641}
 
 \section{{\bfseries\sffamily TODO} Organization}
-\label{sec:orgbfddf78}
+\label{sec:org9e66e91}
 
 
 \chapter{{\bfseries\sffamily TODO} Concurrent Computing}
-\label{sec:orgbcff4e0}
+\label{sec:orgf4db7e0}
 
 What is concurrent computing? This is a good question. We should first talk
 about single-core and multi-core processors manufactured by the computer
@@ -66,7 +66,7 @@ permitting make computing more effectively using \emph{parallelism}, where the
 processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 \section{{\bfseries\sffamily TODO} Classic concurrent computing}
-\label{sec:orgb234372}
+\label{sec:org8eab583}
 
 \begin{itemize}
 \item[{$\square$}] Basic Definitions
@@ -77,7 +77,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 
 \section{{\bfseries\sffamily TODO} Relaxed concurrent computing}
-\label{sec:orga1b41a9}
+\label{sec:org02d805d}
 
 \begin{itemize}
 \item[{$\square$}] Relaxing the problem
@@ -86,7 +86,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} Work-stealing}
-\label{sec:orgddeba33}
+\label{sec:org42121cc}
 
 \begin{itemize}
 \item[{$\square$}] How it works the work-stealing
@@ -96,7 +96,7 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} Data-Structures}
-\label{sec:orgcb7bc03}
+\label{sec:org1560a9f}
 
 \begin{itemize}
 \item[{$\square$}] Queues with multiplicity
@@ -104,13 +104,13 @@ processors work together on a single task \cite{DBLP_books_daglib_0020056}.
 
 
 \chapter{{\bfseries\sffamily TODO} Preliminaries}
-\label{sec:org39ea788}
+\label{sec:org0431166}
 
 \section{{\bfseries\sffamily TODO} Mathematical model}
-\label{sec:org50047e8}
+\label{sec:org671299f}
 
 \section{{\bfseries\sffamily TODO} Realistic model of computation}
-\label{sec:org126982b}
+\label{sec:org7494683}
 
 We consider a standard concurrent shared memory system with \(n \ge 2\)
 \emph{asynchronous} processes, \(p_0, \ldots, p_{n-1}\), which may crash at any time
@@ -134,7 +134,7 @@ write to a single shared memory space. Usually each processor core has a
 cache to operate with data from the shared memory. Often, this data is
 transferred through a memory bus, allowing connect the processors with the
 memory. The figure \ref{fig:arch} shows a simplified view of this model. In
-the sections: \hyperref[sec:org11b1c7a]{Cache memory}, \hyperref[sec:orgfbf6e7d]{Memory bus} and \hyperref[sec:orgedb0730]{Main memory}, we explain more in
+the sections: \hyperref[sec:org4f1ae3f]{Cache memory}, \hyperref[sec:org67270de]{Memory bus} and \hyperref[sec:org3314b85]{Main memory}, we explain more in
 detail the meaning of each bullet of the list.
 
 \begin{figure}
@@ -147,7 +147,7 @@ detail the meaning of each bullet of the list.
 
 
 \subsection{Cache memory}
-\label{sec:org11b1c7a}
+\label{sec:org4f1ae3f}
 
 The cache memory is a special very high-speed memory that is very close to
 the processor and the processes can access it very fast. The caches are used
@@ -166,7 +166,7 @@ are close to be executed. In the third level, this cache is shared by many
 processors and is used as feeder for the L2 cache.
 
 \subsection{Memory bus}
-\label{sec:orgfbf6e7d}
+\label{sec:org67270de}
 
 Is a computer bus that allows transfer data from the primary memory to the
 CPU and the cache memory. It is made up of two parts: the data bus and the
@@ -177,18 +177,18 @@ information.
 
 
 \subsection{Main memory}
-\label{sec:orgedb0730}
+\label{sec:org3314b85}
 
 Is the responsible of hold the data that CPU need to access frequently, such
 as instructions or data currently being processed. The CPU can access to
 this information faster than the access to secondary memory.
 
 \subsection{Consistency Memory Model and Cache Coherence}
-\label{sec:org0d53db8}
+\label{sec:org7c75147}
 
 \begin{enumerate}
 \item Consistency memory model
-\label{sec:org3222940}
+\label{sec:org5476049}
 
 Following the simplified view of the cache architecture, we want to have a
 correct shared memory. And what this means? The correctness of the shared
@@ -213,7 +213,7 @@ considered, because these models shows that most memory orderings in strong
 models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \item Cache coherence
-\label{sec:orgc32b493}
+\label{sec:org5c9c5ee}
 
 Cache coherence protocols are used in response to solve a coherence problem
 in cache. For example, a coherence problem can arise if multiple cores have
@@ -230,7 +230,7 @@ data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 
 \subsection{Memory fences}
-\label{sec:orgf9a788d}
+\label{sec:orgcf455a3}
 
 A memory fence is a barrier instruction that causes a CPU or compiler to
 enforce a an ordering constraint on memory operations (loads and stores)
@@ -346,148 +346,148 @@ full memory fence instruction \texttt{MFENCE}. For other archict
 
 
 \section{{\bfseries\sffamily TODO} Data-Structures}
-\label{sec:orgbba7fb6}
+\label{sec:orga272715}
 
 \subsection{Queues}
-\label{sec:orga4e4920}
+\label{sec:org7bb721b}
 
 \subsection{Stacks}
-\label{sec:org90918e8}
+\label{sec:org2a080b8}
 
 
 \section{{\bfseries\sffamily TODO} Some Hardware Foundations}
-\label{sec:org4f930e8}
+\label{sec:orgd2268c9}
 
 \subsection{Cache memory}
-\label{sec:orga39bab6}
+\label{sec:org34f4c0a}
 
 The cache memory
 
 \begin{enumerate}
 \item Multiple caches
-\label{sec:orgd1b2364}
+\label{sec:org02364b7}
 
 
 \item Cache coherence protocols
-\label{sec:orgb260d67}
+\label{sec:org3b50851}
 
 
 
 \begin{enumerate}
 \item MESI
-\label{sec:org92ff642}
+\label{sec:orgf940c04}
 
 
 \item MOESI
-\label{sec:org7a14271}
+\label{sec:orgb2f4fe3}
 \end{enumerate}
 
 
 \item Store Buffers
-\label{sec:org6f7f72f}
+\label{sec:orgbdc3115}
 \end{enumerate}
 
 
 \subsection{Reordering (CPU or Compiler)}
-\label{sec:orge8a8471}
+\label{sec:org98d1b82}
 
 \subsection{Memory Barriers}
-\label{sec:org8b81ffa}
+\label{sec:orgdebd0e5}
 
 \begin{enumerate}
 \item X86 and TSO architectures
-\label{sec:orgded1bce}
+\label{sec:orgb170e58}
 
 \item Memory Fences
-\label{sec:org2dc0fa1}
+\label{sec:org565fbe5}
 \end{enumerate}
 
 \subsection{Read-Modify-Write Operations}
-\label{sec:org3225a83}
+\label{sec:orgfc71265}
 
 \subsection{Bibliography}
-\label{sec:org6a3fc09}
+\label{sec:orgfb886e2}
 
 \begin{itemize}
 \item \url{https://blog.the-pans.com/std-atomic-from-bottom-up/}
 \end{itemize}
 
 \section{{\bfseries\sffamily TODO} C++ Memory model}
-\label{sec:orgf8f47be}
+\label{sec:org6ce2eef}
 
 \subsection{Memory model basics}
-\label{sec:org063b6c3}
+\label{sec:orgd7b56ea}
 
 \begin{enumerate}
 \item Objects and memory locations
-\label{sec:orgacc7add}
+\label{sec:orgde06649}
 
 
 \item Objects, memory locations, and concurrency
-\label{sec:org2768d68}
+\label{sec:org6ac561a}
 
 
 \item Modification orders
-\label{sec:orgcf40711}
+\label{sec:org8886ab4}
 \end{enumerate}
 
 
 \subsection{Atomic operations and types in C++}
-\label{sec:org48c0f2b}
+\label{sec:org4f446af}
 
 
 \begin{enumerate}
 \item The standard atomic types
-\label{sec:org0712d65}
+\label{sec:org2e813b5}
 
 \item Operations on std::atomic\textsubscript{flag}
-\label{sec:orgcb15174}
+\label{sec:org6ed34c5}
 
 \item Operations on std::atomic<boolean>
-\label{sec:org3ace7cb}
+\label{sec:orgb925b80}
 
 \item Operations on std::atomic<T*>: pointer arithmetic
-\label{sec:orgd80ea3a}
+\label{sec:orgd5ed502}
 
 \item Operations on standard atomic integral types
-\label{sec:orgae18f17}
+\label{sec:org58d9d65}
 
 \item The std::atomic<> primary class template
-\label{sec:orgec19aca}
+\label{sec:orge300818}
 
 \item Free functions for atomic operations
-\label{sec:org76d4e95}
+\label{sec:orgdebadc9}
 \end{enumerate}
 
 \subsection{Synchronizing operations and enforcing ordering}
-\label{sec:orgb5bdb7a}
+\label{sec:org7f549f4}
 
 \begin{enumerate}
 \item The synchronization relationship
-\label{sec:orgbd4a5f0}
+\label{sec:orge70bc05}
 
 \item The happens-before relationship
-\label{sec:org8c77583}
+\label{sec:org2df9e23}
 
 \item Memory ordering for atomic operations
-\label{sec:org36b1607}
+\label{sec:orge369927}
 
 \item Release sequences and synchronizes-with
-\label{sec:orga4f9604}
+\label{sec:org6bc0fed}
 
 \item Fences
-\label{sec:org97e8668}
+\label{sec:org5f7a068}
 
 \item Ordering non-atomic operations with atomics
-\label{sec:org625621b}
+\label{sec:org7f972df}
 
 \item Ordering non-atomic operations
-\label{sec:org5e1d7b1}
+\label{sec:orgb957b6e}
 \end{enumerate}
 
 
 \section{{\bfseries\sffamily TODO} Guidelines for designing data-structures for concurrency}
-\label{sec:org5277f5c}
+\label{sec:org17ae801}
 
 \begin{itemize}
 \item Ensure that no thread can see a state where the invariants of the
@@ -509,7 +509,7 @@ restricting the scope of locks and avoiding nested locks where possible.
 
 
 \chapter{{\bfseries\sffamily TODO} Work Stealing}
-\label{sec:org958b124}
+\label{sec:orgf88fed7}
 
 We analyze the algorithms for work-stealing described in the article Fully
 Read/Write Fence Free Work-Stealing With Multiplicity, also the algorithm
@@ -526,16 +526,16 @@ similar semantic than the prior algorithms.
 
 
 \section{{\bfseries\sffamily TODO} Model}
-\label{sec:orgd74328f}
+\label{sec:org8bca324}
 
 \section{{\bfseries\sffamily TODO} Known algorithms}
-\label{sec:org462b159}
+\label{sec:org18bca8f}
 
 \section{{\bfseries\sffamily TODO} Pseudocode for Work-Stealing with Weak Multiplicity}
-\label{sec:org32072c7}
+\label{sec:orge7708fe}
 
 \section{{\bfseries\sffamily TODO} Memory management}
-\label{sec:org953511e}
+\label{sec:org7e8ba73}
 
 To implement efficiently the idempotent algorithms in an enviroment without
 garbage collection, it's necessary use some technique or metodology to
@@ -544,7 +544,7 @@ threads want to reclaim the memory of the object associated to the pointer.
 
 \begin{enumerate}
 \item Strategies to delete shared pointers
-\label{sec:org83f23d8}
+\label{sec:orgaa2bb8f}
 
 \begin{itemize}
 \item Add pointers to list to safety delete.
@@ -558,7 +558,7 @@ it exits.
 
 
 \item Hazard pointers
-\label{sec:orgb80338a}
+\label{sec:org7a7c06e}
 
 The \emph{Hazard Pointers} is a technique to manage memory in languages where there
 are not a garbage collector. This technique was proposed by Maged
@@ -616,7 +616,7 @@ void func() {
 
 
 \item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
-\label{sec:org54a67f2}
+\label{sec:orgcd582d7}
 
 
 When a memory region is reclaimed, the programmer cannot know how that
@@ -636,7 +636,7 @@ created
 
 
 \section{{\bfseries\sffamily TODO} Memory management for work-stealing algorithms}
-\label{sec:orgb928453}
+\label{sec:orgfe30d57}
 
 It is well known that C++ does not have a garbage collector like Java. Since
 the publish of the \href{https://en.cppreference.com/w/cpp/11}{Standard C++11}, new features for memory management were
@@ -655,7 +655,7 @@ avoid problems like the \href{https://www.stroustrup.com/isorc2010.pdf}{ABA prob
 
 
 \chapter{{\bfseries\sffamily TODO} Modular Basket Queues}
-\label{sec:org12078f1}
+\label{sec:org2a01a09}
 
 A modular version of the basket queues of Hoffman, Shalev and Shavit is
 presented. It manipulates the head and tail using a novel object called
@@ -666,8 +666,8 @@ inherent bottleneck in previous queue implementations that manipulate the
 head and the tail using \emph{read-modify-write} instructions over a single shared
 register.
 
-\section{{\bfseries\sffamily TODO} Review LL/IC implementations}
-\label{sec:org4c3b041}
+\section{{\bfseries\sffamily TODO} LL/IC Implementations}
+\label{sec:org3e443e0}
 
 The specification of \texttt{LL/IC} satisfies the next properties, where the state of
 the object is an integer R, initialized to zero, and assuming that any
@@ -677,12 +677,7 @@ process invokes IC only if it has invoked LL before:
 \item[{LL()}] Returns the current value in \(R\).
 \item[{IC()}] If \(R\) has not been incremented since the last LL of the
 invoking process, then do \(R = R + 1\); in any case return \texttt{OK}.
-\end{description}
 
-\section{LL/IC Implementations}
-\label{sec:orgc1e8a92}
-
-\begin{description}
 \item[{CAS based implementation}] It uses a shared register \(R\) initialized to
 zero. \texttt{LL} first reads \(R\) and stores the value in a persistent variable
 \(r_p\) of \(p\), and then returns \(r_p\). \texttt{IC} first reads \(R\) and if
@@ -706,8 +701,9 @@ performs \(CAS(M[indmax_p], max_p, max_p + 1)\); in any case, it returns
 \texttt{OK}.
 \end{description}
 
+
 \section{{\bfseries\sffamily TODO} Basket implementations}
-\label{sec:org3b40373}
+\label{sec:orga19be7e}
 
 \begin{description}
 \item[{K-Basket from FAI and SWAP}] In this first implementation, the processes
@@ -726,8 +722,9 @@ to \emph{locally linearizable} generic data structure implementations of
 \cite{DBLP_conf_concur_HaasHHKLPSSV16}.
 \end{description}
 
+
 \section{{\bfseries\sffamily TODO} Update experiments}
-\label{sec:org6ee1485}
+\label{sec:orgdf363fd}
 
 To update the experiments is necessary understand what are metrics that
 allows us compare the algorithms designed for LL/IC objects and Baskets. A
@@ -794,8 +791,9 @@ empty loop. The idea behind of this is prevent long runs of queue operations
 by the same process without this being interrupted, so, this would display
 an overly-optimistic performance due to the lower cache miss rate.
 
+
 \section{{\bfseries\sffamily TODO} Statistics tools for experiments}
-\label{sec:orge5f002e}
+\label{sec:orge23cedf}
 
 To evaluate our modular queue with all its variants, we need to determine a
 methodology to know their performance and the throughput of each
@@ -978,22 +976,221 @@ nearest to:
  n_{df} = \frac{(\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2})^2}{\frac{(s_1^2/n_1)^2}{n_1 - 1} + \frac{(s_2^2/n_2)^2}{n_2 - 1}}
 \end{equation}
 
+In the case of the \textbf{Analysis of Variance (ANOVA)}, which is a general technique
+for observe the variation in a collection of measurements into meaningful
+components. To perform this analysis, it is necessary assume that the errors
+in the measurements for the distinct alternatives are independent and under
+normal distribution and the variance for the measurement errors is the same
+for all alternatives. The variation observed is divided into:
 
+\begin{enumerate}
+\item The variation observed \emph{within} each system, which is assumed caused by the
+measurement error.
+\item The variation \emph{between} alternatives.
+\end{enumerate}
 
+If the variation between the alternatives is larger than the variation within
+each alternatives, then it can be concluded that there is a statistically
+significant difference between the alternatives. To evaluate ANOVA, we must
+organize the measurements as it is shown in the table:
 
+\begin{center}
+\begin{tabular}{llllllll}
+\hline
+Measurements & 1 & 2 & \hdots & j & \hdots & k & Overall mean\\
+\hline
+1 & y\textsubscript{11+} & y\textsubscript{12} & \hdots & y\textsubscript{1j} & \hdots & y\textsubscript{1k} & \\
+2 & y\textsubscript{21} & y\textsubscript{22} & \hdots & y\textsubscript{2j} & \hdots & y\textsubscript{2k} & \\
+\vdots & \vdots & \ddots & \hdots &  &  &  & \\
+i & y\textsubscript{i1} & y\textsubscript{i2} & \ddots & y\textsubscript{ij} & \vdots & y\textsubscript{ik} & \\
+\vdots & \vdots & \vdots & \vdots & \ddots &  &  & \\
+n & y\textsubscript{n1} & y\textsubscript{n2} & \hdots & y\textsubscript{nj} & \hdots & y\textsubscript{nl} & \\
+\hline
+Column means & \(\bar{y}_{.1}\) & \(\bar{y}_{.2}\) & \hdots & \(\bar{y}_{.j}\) & \hdots & \(\bar{y}_{.k}\) & \(\bar{y}_{..}\)\\
+\hline
+\end{tabular}
+\end{center}
 
+The column means are defined as:
+
+\begin{equation}
+  \bar{y}_{.j} = \frac{\sum^n_{i = 1}y_{ij}}{n}
+\end{equation}
+
+and the overall mean is defined as:
+
+\begin{equation}
+  \bar{y}_{..} = \frac{\sum^k_{j = 1}\sum^n_{i = 1}y_{ij}}{n\cdot{}k}
+\end{equation}
+
+We can compute
 
 
 \section{{\bfseries\sffamily TODO} Experiments}
-\label{sec:org703a2ee}
+\label{sec:orge8c797b}
+
+\subsection{LL/IC Experiments}
+\label{sec:orgd7a182f}
+
+We designed the experiments to know the performance of the LL/IC algorithm
+using the variants explained before. We test the following algorithms:
+
+\begin{itemize}
+\item \texttt{Fetch and Increment} as reference.
+\item LL/IC classic.
+\item LL/IC CAS based.
+\item LL/IC SQRT.
+\end{itemize}
+
+We implement these algorithms in C++20 (the current revision of the C++
+standard). To test them, we use a machine with 32 cores and 64 threads (AMD
+threadripper 3970X) with 64 GB of RAM. We compiled the program using CMake
+(3.22) as a compilation tool and using GCC 12.1 as a compiler. We used \texttt{-O3} as
+our optimization level without any special optimization flag. To avoid a
+\emph{changing context}\footnote{By \emph{changing context}, we refer to} between threads during the evaluation of our
+experiments, we set up a CPU \emph{affinity} per thread. Affinity means that instead
+of executing the thread freely on any core, we associate a software thread
+with a hardware thread. Thus, all the thread work will be executed in a
+single core or a pre-defined group of cores.
+
+To evaluate the performance of prior algorithms, we perform the following
+experiment: we employ an initially-empty LL/IC object (according to the
+variant, the initial state could be just an atomic integer initialized to
+zero or an array with all its entries initialized to zero), which perform a
+series of calls to the LL method followed by a call to the IC method. Between
+both calls, the threads perform a random amount of "fake work" to avoid long
+run scenarios
+\cite{DBLP_conf_ppopp_YangM16,DBLP_conf_podc_MichaelS96}. This fake work
+is just an empty spin. We use the following benchmark to evaluate the
+performance of the LL/IC objects: in each iteration, each thread performs a
+call to the LL method of a shared object, followed by some random work,
+finishing with a call to the IC method of the shared object. The benchmark
+executes \(10^7\) pairs partitioned evenly among all the threads.
+
+\lstset{language=cpp,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+int LLICCAS::LL()
+{
+    return R.load();
+}
+
+
+void LLICCAS::IC(int expected)
+{
+    if (R.load() == expected) {
+        R.compare_exchange_strong(expected, expected + 1);
+    }
+}
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{llll}
+Method & Data state & transition & comment\\
+\hline
+LL & R in Invalid & Exclusive & \\
+ &  & Shared & Get Data from another cache or mem\\
+ & R in Shared & Shared & \\
+ & R in Exclusive & Exclusive & \\
+IC & R in Invalid & Modified & Invalidate other's cache\\
+ & R in Shared & Modified & Invalidate other's cache\\
+ & R in Modified & Modified & write into its cache\\
+\end{tabular}
+\end{center}
+
+
+\lstset{language=cpp,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+M[n];
+
+int LLICRWNC::LL() {
+    int max_p = 0;
+    int tmp;
+    for(int i = 0; i < num_processes; i++) {
+        tmp = M[i].load(); // Only if
+        if (tmp >= max_p) max_p = tmp;
+    }
+    return max_p;
+}
+
+void LLICRWNC::IC(int max_p, int process) {
+    int maximum = 0;
+    int tmp;
+    for(int i = 0; i < num_processes; i++) {
+        tmp = M[i].load();
+        if (tmp > maximum) maximum = tmp;
+    }
+    if (maximum == max_p) {
+        M[process].store(max_p + 1);
+    }
+}
+\end{lstlisting}
+
+In this case, for the LL method, when executes M[i].load(), it will begin a
+coherence request in case of its state will be invalid. Like the values in
+the array are integers of 8 bytes, then 8 integers are placed together. Thus,
+when a thread modify a the \textbf{i'th} value in the array, it will modify all its
+neighbors in the cache line, causing a invalidation
+
+
+
+To explain the experiment results, we
+will understand what is happening during a concurrency execution. To do this,
+we will start by explaining some details about the cache coherence protocols
+and how it works. The reason of this, it is because we want to know why some
+results might be contradictory. For example, the use of simple load/stores in
+some scenarios might seen slow respect to the use of atomic operations like
+Fetch and Increment.
+
+The current experiments try to measuring the latency of the distinct variants
+of the LL/IC objects. To have a metric that allow us compare the performance
+of the distinct variants, we will measure
+
+\begin{enumerate}
+\item Perform a fixed number of operations for the LL/IC objects and compare the
+execution time of each one. The comparison of each alternative should be
+using ANOVA.
+\item Set a fixed time to perform operation inside of that
+\end{enumerate}
+
+\subsection{How to run code}
+\label{sec:org63d35a1}
+
+\lstset{language=bash,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+cmake -S . -B build
+make -C build
+make -C build test
+\end{lstlisting}
+
+
+\section{{\bfseries\sffamily TODO} Explanation}
+\label{sec:orgd13e362}
+
+
+
+
+\subsection{Comparación entre RW con padding}
+\label{sec:org8dba67a}
+
+El algoritmo con mejor rendimiento es la versión con padding de 16 bytes. La
+versión de padding de 32 bytes sólo llega a ganarle a la versión CAS cuando
+el número de procesadores es grande.
+
+Tanto el padding usando toda la linea de caché, cómo usando dos líneas
+tienen el peor desempeño. Esto debido a que cada vez que se invoca un store
+sobre el arreglo M, al ser este atómico, el procesador inválida las linea de
+caché de los demás tan pronto intenta escribir. Esto impacta en directamente
+en los ciclos utilizados por LL e IC, causando stalls para aquellas lineas
+de cache compartidas.
+
 
 
 \chapter{{\bfseries\sffamily TODO} Conclusions}
-\label{sec:org8584026}
+\label{sec:org8c29418}
 
 
 \chapter{Bibliography}
-\label{sec:orgcfc92f0}
+\label{sec:org621ae4f}
 \bibliographystyle{plainurl}
 \bibliography{refs}
 \end{document}
