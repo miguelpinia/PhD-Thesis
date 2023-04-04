@@ -318,7 +318,7 @@ innerbottommargin=5pt]{cBox}
 \newenvironment{theorem}{\begin{tBox}\begin{theoremeT}}{\end{theoremeT}\end{tBox}}
 \newenvironment{exercise}{\begin{eBox}\begin{exerciseT}}{\hfill{\color{ocre}\tiny\ensuremath{\blacksquare}}\end{exerciseT}\end{eBox}}
 \newenvironment{definition}{\begin{dBox}\begin{definitionT}}{\end{definitionT}\end{dBox}}
-\newenvironment{description}{\begin{dBox}\begin{descriptionT}}{\end{descriptionT}\end{dBox}}
+\newenvironment{desc}{\begin{dBox}\begin{descriptionT}}{\end{descriptionT}\end{dBox}}
 \newenvironment{example}{\begin{exampleT}}{\hfill{\tiny\ensuremath{\blacksquare}}\end{exampleT}}
 \newenvironment{corollary}{\begin{cBox}\begin{corollaryT}}{\end{corollaryT}\end{cBox}}
 \newenvironment{mydescription}[1]{\begin{dBox}\textbf{#1}}{\end{dBox}\smartsmallskip}

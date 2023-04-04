@@ -971,10 +971,10 @@
    when \(n < 30\) can be computed as:
 
    \begin{equation}
-   c_1 = \bar{x} - t_{1-\alpha\2;n-1}\frac{s}{\sqrt{n}}
+   c_1 = \bar{x} - t_{1-\alpha/2;n-1}\frac{s}{\sqrt{n}}
    \end{equation}
    \begin{equation}
-   c_2 = \bar{x} + t_{1-\alpha\2;n-1}\frac{s}{\sqrt{n}}
+   c_2 = \bar{x} + t_{1-\alpha/2;n-1}\frac{s}{\sqrt{n}}
    \end{equation}
 
    where \(t_{1 - \alpha/2;n-1}\) defined such that a random variable \(T\) that
@@ -1062,7 +1062,7 @@
    | \(\vdots\)   | \(\vdots\)       | \(\vdots\)       | \(\vdots\) | \(\ddots\)       |            |                  |                  |
    | \(n\)        | \(y_{n1}\)       | \(y_{n2}\)       | \(\hdots\) | \(y_{nj}\)       | \(\hdots\) | \(y_{nl}\)       |                  |
    |--------------+------------------+------------------+------------+------------------+------------+------------------+------------------|
-   | Column means | \(\bar{y}_{.1}\) | \(\bar{y}_{.2}\) | \hdots     | \(\bar{y}_{.j}\) | \hdots     | \(\bar{y}_{.k}\) | \(\bar{y}_{..}\) |
+   | Column means | \(\bar{y}_{.1}\) | \(\bar{y}_{.2}\) | \(\hdots\) | \(\bar{y}_{.j}\) | \(\hdots\)  | \(\bar{y}_{.k}\) | \(\bar{y}_{..}\) |
    |--------------+------------------+------------------+------------+------------------+------------+------------------+------------------|
 
    The column means are defined as:
