@@ -959,7 +959,7 @@
    where \(\bar{x}\) is the sample mean, \(s\) is the sample standard deviation,
    \(n\) is the number of measurements and \(z_{1 - \alpha/2}\) is the value of
    a standard unit normal distribution with mean \(\mu = 0\) and variance
-   \(\s^2\), which obeys the following property: \(Pr[Z \le z_{1-\alpha/2}] =
+   \(s^2\), which obeys the following property: \(Pr[Z \le z_{1-\alpha/2}] =
    1 - \alpha/2\), where the value \(z_{1 - \alpha/2}\) is typically obtained
    from a pre-computed table.
 
@@ -1052,18 +1052,18 @@
    significant difference between the alternatives. To evaluate ANOVA, we must
    organize the measurements as it is shown in the table:
 
-   |--------------+------------------+------------------+--------+------------------+--------+------------------+------------------|
-   | Measurements | 1                | 2                | \hdots | j                | \hdots | k                | Overall mean     |
-   |--------------+------------------+------------------+--------+------------------+--------+------------------+------------------|
-   | 1            | y_{11+}          | y_{12}           | \hdots | y_{1j}           | \hdots | y_{1k}           |                  |
-   | 2            | y_{21}           | y_{22}           | \hdots | y_{2j}           | \hdots | y_{2k}           |                  |
-   | \vdots       | \vdots           | \ddots           | \hdots |                  |        |                  |                  |
-   | i            | y_{i1}           | y_{i2}           | \ddots | y_{ij}           | \vdots | y_{ik}           |                  |
-   | \vdots       | \vdots           | \vdots           | \vdots | \ddots           |        |                  |                  |
-   | n            | y_{n1}           | y_{n2}           | \hdots | y_{nj}           | \hdots | y_{nl}           |                  |
-   |--------------+------------------+------------------+--------+------------------+--------+------------------+------------------|
-   | Column means | \(\bar{y}_{.1}\) | \(\bar{y}_{.2}\) | \hdots | \(\bar{y}_{.j}\) | \hdots | \(\bar{y}_{.k}\) | \(\bar{y}_{..}\) |
-   |--------------+------------------+------------------+--------+------------------+--------+------------------+------------------|
+   |--------------+------------------+------------------+------------+------------------+------------+------------------+------------------|
+   | Measurements | 1                | 2                | \(\hdots\) | \(j\)            | \(\hdots\) | \(k\)            | Overall mean     |
+   |--------------+------------------+------------------+------------+------------------+------------+------------------+------------------|
+   | 1            | \(y_{11}\)       | \(y_{12}\)       | \(\hdots\) | \(y_{1j}\)       | \(\hdots\) | \(y_{1k}\)       |                  |
+   | 2            | \(y_{21}\)       | \(y_{22}\)       | \(\hdots\) | \(y_{2j}\)       | \(\hdots\) | \(y_{2k}\)       |                  |
+   | \(\vdots\)   | \(\vdots\)       | \(\ddots\)       | \(\hdots\) |                  |            |                  |                  |
+   | \(i\)        | \(y_{i1}\)       | \(y_{i2}\)       | \(\ddots\) | \(y_{ij}\)       | \(\vdots\) | \(y_{ik}\)       |                  |
+   | \(\vdots\)   | \(\vdots\)       | \(\vdots\)       | \(\vdots\) | \(\ddots\)       |            |                  |                  |
+   | \(n\)        | \(y_{n1}\)       | \(y_{n2}\)       | \(\hdots\) | \(y_{nj}\)       | \(\hdots\) | \(y_{nl}\)       |                  |
+   |--------------+------------------+------------------+------------+------------------+------------+------------------+------------------|
+   | Column means | \(\bar{y}_{.1}\) | \(\bar{y}_{.2}\) | \hdots     | \(\bar{y}_{.j}\) | \hdots     | \(\bar{y}_{.k}\) | \(\bar{y}_{..}\) |
+   |--------------+------------------+------------------+------------+------------------+------------+------------------+------------------|
 
    The column means are defined as:
 
@@ -1117,7 +1117,7 @@
    finishing with a call to the IC method of the shared object. The benchmark
    executes \(10^7\) pairs partitioned evenly among all the threads.
 
-      #+begin_src cpp
+      #+begin_src c++
      int LLICCAS::LL()
      {
          return R.load();
@@ -1143,7 +1143,7 @@
    |        | R in Modified  | Modified   | write into its cache               |
 
 
-   #+begin_src cpp
+   #+begin_src c++
      M[n];
 
      int LLICRWNC::LL() {
