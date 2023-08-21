@@ -1,22 +1,23 @@
-\chapter{\label{chapter:2_state_of_art}State Of The Art}
+\chapter{\label{chapter:2_State_of_art}State of the Art}
 
-After the finish of the second world war and until the 90's, almost
-all the computation was done on single-core processors and the
-Operating systems simulated concurrency using schedulers and other
-techniques. In 2001, IBM produced the first multi-core
-processor\cite{ibmIBM100Power}, it allows two processors to work
-together at very high bandwidth (for the epoch) with large on-chip
-memories and high-speed buses. Since then, the number of cores in each
-processor has been increasing. We must also consider Moore's law;
-loosely speaking, this law tells us that each year more and more
-transistors are placed into the same space (i.e., electronic
-components and circuits are reduced in size), but their speed cannot
-be increased without overheating. Consequently, the industry moves to
-``multi-core'' architectures. In this type of architecture, multiple
-processors communicate through shared memory (hardware caches, RAM),
-permitting make computing more effectively using \textit{parallelism},
-where the processors work together over a single
-task\cite{DBLP_books_daglib_0020056}.
+From the end of World War II until the 1990s, most computing was conducted on single-core processors. Operating systems utilized schedulers and other techniques to simulate concurrency. In 2001, the first multi-core processor was created by IBM~\cite{ibmIBM100Power}. This innovation enables two processors to collaborate and operate at high bandwidths (for its time), benefiting from significant on-chip memories and high-speed buses. Over time, processors have been equipped with more cores. It's essential to remember Moore's law, which suggests that the number of transistors in the same space continues to increase yearly. However, this results in smaller electronic components and circuits, which cannot be made faster without overheating. As a result, many industries are adopting ``multi-core'' architectures. In this setup, several processors communicate through shared memory, using hardware caches and RAM. This allows for more effective computing by utilizing parallelism, where the processors work together on a single task~\cite{DBLP_books_daglib_0020056}.
+
+Implementing multiprocessors has brought about a significant shift in our software development approach. We can run multiple tasks in parallel in these multiprocessors; even, we can build more sophisticated tasks that use multiprocessors in parallel, executing several sub-tasks. We must exploit this parallelism to boost our efficiency. Usually, we can use techniques from parallel, distributed, or concurrent computing, which are related but distinct fields. Programming for multiprocessors can be complex due to the inherent asynchronicity of modern computer systems. This project centers on concurrent computing and explores the shift from traditional to more flexible approaches (relaxed concurrent computing). It takes a theoretical approach but with practical applications in mind.
+
+\section{\label{section:classic-concurrent}Classic Concurrent Computing}
+
+In the past, sequential computing was the standard method for performing computations before the emergency of concurrent computing. Based on the contributions of  Turing~\cite{DBLP_journals_x_Turing37} and Von Neumann~\cite{DBLP_journals_annals_Neumann93}, sequential computing involves executing instructions one after the other using a processor. This can be represented by the concept of \textit{objects} being modified by a \textit{process} through \textit{atomic operations}. The relationship between operations and objects can be defined in terms of \textit{preconditions} and \textit{postconditions}, which define the state of an object before and after applying the operation (since now, we will refer ``\textit{operation}'' as ``\textit{method}'' as in the context of \textit{Object-Oriented Programming}). This is similar to an API documentation\footnote{(Application Program Interface)}, which usually explains the object's state before invoking a method of the object and the result of calling the operation, which can be a particular value or throw an exception. This style of documentation is known as ``\textit{sequential specification}''.
+
+However, expressing the relationship between objects and methods fails when several processes share such objects. The problem is that if many processes can invoke an object's operation concurrently, what invocation is first? What is the state after the execution of these overlapping invocations? Make sense to talk about operation order?
+
+In concurrent systems, three consistency models are usually utilized as a correctness condition: \textit{Serializability}, \textit{Sequential Consistency}, and \textit{Linearizability}. The concept of Serializability was initially explained by Papadimitriou~\cite{DBLP_journals_jacm_Papadimitriou79b}. On the other hand, Sequential Consistency was introduced by Lamport~\cite{lamport1979how}. Lastly, Linearizability was introduced by Herlihy and Wing~\cite{DBLP_journals_toplas_HerlihyW90DBLP_journals_toplas_HerlihyW90}.
+Serializability in concurrent computing guarantees the correctness and isolation of transactions in a multi-user database or concurrent system. It ensures that when executing a set of transactions concurrently, the final result is equivalent to executing them one after another without overlap, mimicking a serial execution order. This helps maintain consistency and prevents errors in the system. 
+Sequential Consistency mandates that the shared variable operations in a concurrent system appear to be executed sequentially, consistent with program order. On the other hand, Linearizability is a stricter condition that guarantees Sequential Consistency and ensures that the global order of operations includes a specific point in time (i.e., linearization point) for each operation. This ensures that each operation appears to take effect atomically at some point between its invocation and response. Linearizability refines the concept of Sequential Consistency by imposing a stricter requirement on the sequence of methods. This ensures that the system's observed behavior aligns with a valid sequential execution of the methods. Therefore, while Sequential Consistency allows for multiple valid orders of operations as long as they respect program order, Linearizability enforces a stricter condition by requiring operations to appear as if they occurred instantaneously at some specific point between invocation and response. Both models are nonblocking, a.k.a. \textit{lock-free}~\cite{DBLP_journals_toplas_HerlihyW90DBLP_journals_toplas_HerlihyW90}. This ensures that their progress condition guarantees that \textit{some} method invocation finishes in a finite number of steps. Another progress condition well-known is \textit{wait-free}~\cite{DBLP_journals_toplas_Herlihy91}. This progress condition is stronger than lock-free, where \textit{every} method invocation finishes its execution in a finite number of steps. When using lock-free methods, the system as a whole will make progress, but it does not guarantee that any specific thread will make progress. This is because lock freedom ensures \textit{minimal progress}. On the other hand, wait-freedom ensures the \textit{maximal progress}: any process that continues to take steps will make progress.
+
+
+\section{\label{section:relaxed-concurrent}Relaxed Concurrent Computing}
+\section{\label{section:work-stealing}Work-Stealing}
+\section{\label{section:data-structures}Data-Structures}
 
 
 %%% Local Variables:
