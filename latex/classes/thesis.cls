@@ -59,10 +59,16 @@
 % Draft, borrar cuando se entregue la versión final. %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% \usepackage{draftwatermark}
-% \SetWatermarkText{\textsc{Borrador}}
-% \SetWatermarkScale{4}
-% \SetWatermarkColor[gray]{0.95}
+\usepackage{ifdraft, blindtext}
+\ifoptiondraft{%
+    \usepackage{draftwatermark}
+    \SetWatermarkText{\textsc{Borrador}}
+    \SetWatermarkScale{4}
+    \SetWatermarkColor[gray]{0.95}
+    \setkeys{Gin}{draft=false}
+}{%
+    % nothing to be done here
+}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Configuraciones de paquetes %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
