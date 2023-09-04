@@ -7,13 +7,13 @@
 % Definición de la clase para la tesis %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\ProvidesClass{latex/classes/thesis}[2018/11/30 v1 thesis class]
+\ProvidesClass{latex/classes/thesis}[2023/08/16 v2 thesis class]
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
 \ProcessOptions\relax
 \ifx\pdfoutput\undefined
-   \LoadClass[dvips,letterpaper,11pt]{book}
+   \LoadClass[dvips,letterpaper,12pt]{book}
 \else
-   \LoadClass[letterpaper,11pt]{book}
+   \LoadClass[letterpaper,12pt]{book}
 \fi
 
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -38,7 +38,8 @@
 \usepackage{titlesec}
 \usepackage{quotchap}
 \usepackage{hyperref}
-\usepackage{listings,chngcntr}
+\usepackage[final]{listings}
+\usepackage{chngcntr}
 \usepackage{booktabs}
 \usepackage{hyphenat}
 \usepackage{subcaption}
@@ -62,13 +63,15 @@
 \usepackage{ifdraft, blindtext}
 \ifoptiondraft{%
     \usepackage{draftwatermark}
-    \SetWatermarkText{\textsc{Borrador}}
+    \SetWatermarkText{\textsc{Draft}}
     \SetWatermarkScale{4}
     \SetWatermarkColor[gray]{0.95}
     \setkeys{Gin}{draft=false}
 }{%
     % nothing to be done here
 }
+
+\usepackage[normalem]{ulem}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Configuraciones de paquetes %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
