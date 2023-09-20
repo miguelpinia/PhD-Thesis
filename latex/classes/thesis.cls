@@ -102,8 +102,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \hypersetup{
     colorlinks = false,
-    hidelinks
+    hidelinks,
+    final
 }
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Actualiza los margenes de la izquierda y la derecha. %
