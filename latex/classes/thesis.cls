@@ -54,6 +54,7 @@
 \usepackage{tabularx}
 \usepackage{xspace}
 \usepackage{courier}
+\usepackage{soul}
 \usetikzlibrary{matrix}
 \usetikzlibrary{arrows,automata,positioning,matrix}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

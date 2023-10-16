@@ -1,6 +1,46 @@
 \chapter{\label{chapter:preliminaries}Preliminaries and Methodology}
 
-\section{\label{sec:mathematical-model}Mathematical Model of Computation}
+\section{\label{sec:computation-model}Computation Model}
+
+We consider a standard concurrent shared memory system with \(n \ge 2\) \textit{asynchronous} processes, \(p_0, \ldots, p_{n-}\), which may \textit{crash} at any time during execution. The \textit{index} of process \(p_i\) is \(i\). Processes communicate with each other by invoking \textit{atomic} instructions of base objects: either simple \emph{Read}/\emph{Write}, or more powerful \emph{Read-Modify-Write}, such as \emph{Swap} or \emph{Compare\&Swap}.
+
+An \emph{algorithm} for a high-level concurrent object \(T\) (e.g. a queue or a stack) is a distributed algorithm \(\mathcal{A}\) consisting of local state machines \(A_1,\ldots, A_n\). Local machine \(A_i\) specifies which instruction of base objects execute in order to return a response when it invokes a (high-level) operation of \(T\); each of these instructions is a \emph{step}.
+
+An \emph{execution} of \(\mathcal{A}\) is a (possibly infinite) sequence of steps, namely, instructions of base objects, plus invocations and responses of (high-level) operations of the concurrent object \(T\) with the following properties:
+
+\begin{enumerate}
+    \item Each process first invokes an operation, and only when it has a corresponding response it can invoke another operation, i.e., executions are well-formed, and
+    \item For any invocation to an operation \(op\) of a process \(p_i\), denoted as \(inv_i(op)\), the steps of \(p_i\) between that invocation and its correspondent response (if there is one), denoted \(res_i(op)\), are the steps specified by \(A_i\) when \(p_i\) invokes \(op\).
+\end{enumerate}
+
+An operation in an execution is \emph{complete} if both its invocation and response appear in the execution. An operation is \emph{pending} if only its invocation appears in the execution. It is assumed that after a process completes an operation, it non-deterministically picks the operation it executes next. An execution \(E\) is an \emph{extension} of an execution \(F\), if \(E\) is a prefix of \(F\), namely, \(E = F\cdot F'\) for some \(F'\).
+
+For any finite execution \(E\) and any process \(p_i\), \(E|p_i\) denotes the sequence of invocations and responses of \(p_i\) in \(E\). Two finite executions \(E\) and \(F\) are equivalent if \(E|p_i = F|p_i\) \(\forall p_i\). For any execution \(E\), \(comp(E)\) denotes the execution obtained by removing from \(E\) all steps and invocations of pending operations.
+
+\hl{A process is \emph{correct} in an infinite execution if it takes infinitely many steps.} An implementation is lock-free if in every infinite execution, infinitely many operations are complete~\cite{DBLP_journals_toplas_HerlihyW90}. An implementation is \emph{wait-free} if, in every infinite execution, every correct process completes infinitely many operations~\cite {DBLP_journals_toplas_Herlihy91}. Thus, a wait-free implementation is lock-free but not necessarily vice-versa. \emph{Bounded wait-freedom}~\cite{DBLP_conf_spaa_Herlihy91} additionally requires that there is a bound on the number of steps needed to terminate. The \emph{step complexity} is the maximum number of steps a process needs to execute to return. The step complexity of an algorithm is the maximum among the step complexity of its operations.
+
+In the \emph{Read-After-Write} synchronization pattern, a process first writes in a shared variable and then reads another shared variable, maybe executing other instructions in between. For example, this mechanism is widely used in the classic Lamport's bakery mutual exclusion algorithm (see for example,~\cite {DBLP_books_daglib_0020056}). The correctness of the mechanism requires that the write and read instructions of a process are executed in a specific order, although there is no data dependence relation between them.
+
+An algorithm, or one of its operations, is \emph{fence-free} if it does not require any specific ordering among its steps beyond what is implied by data dependence (e.g. the value written by a \emph{Write} instruction depends on the value read by a previous \emph{Read} instruction). Note that a fence-free algorithm does not use \emph{Read-After-Write} synchronization patterns. In our algorithms, we use notation \(\{O_1.inst_1, \ldots, O_x.inst_x\}\) to denote that the instructions \(O_1.inst_1, \ldots, O_x.inst_x\) can be executed in any order. Observe that memory fences (also called memory barriers) are not required to correctly implement a fence-free algorithm in a concrete language or multi-core architecture since any reordering of non-data-dependent instructions does not affect the correctness of the algorithm.
+
+\emph{Linearizability}~\cite{DBLP_journals_toplas_HerlihyW90} is the standard correctness condition for concurrent objects. Intuitively, an execution is linearizable if its (high-level) operations can be ordered sequentially, without reordering non-overlapping operations, so that their responses satisfy the specification of the implemented object.
+
+A \emph{sequential specification} of a concurrent object \(T\) is a statute machine specified through a transition function \(\delta\). Given a state \(q\) and an invocation \(inv_i(op)\) of process \(p_i\), \(\delta(q, inv_i(op))\) returns the tuple \((q', res_i(op))\) (or a set of tuples if the machine is \emph{non-deterministic}) indicating that the machine moves to state \(q'\) and the response to \(op\) is \(res_i(op)\). The sequences of invocation-responses tuples \(\langle inv_i(op): res_i(op)\rangle\) produced by the state machine are its \emph{sequential executions}. For the sake of clarity, a tuple \(\langle inv_i(op): res_i(op)\rangle\) is simply denoted \(op\). Also, the subscripts of invocations and responses are omitted.
+
+Given an execution \(E\), we write \(op <_E op'\) if and only if \(res(op)\) precedes \(inv(op')\) in \(E\). Two operations are \emph{concurrent} denoted \(op||_E op' \), if neither \(op <_e op'\) nor \(op' <_E op\). The execution is sequential \(<_E\) is a total order.
+
+\begin{definition}[Linearizability~\cite{DBLP_journals_toplas_HerlihyW90}]
+Let be \(\mathcal{A}\) an algorithm for a concurrent object \(T\). A finite execution \(E\) of \(\mathcal{A}\) is \emph{linearizable with respect to \(T\)}, or just \emph{linearizable} if \(T\) is clear from the context, if there is a sequential execution \(S\) of \(T\) and \(E\) can be extended to an execution \(E'\) by appending zero or more responses such that:
+
+\begin{enumerate}
+    \item \(comp(E')\) and \(S\) are equivalent and
+    \item for every two complete operations \(op\) and \(op'\) in \(E\), if \(op <_E op'\) then \(op <_S op'\).
+\end{enumerate}
+
+We say that \(\mathcal{A}\) \emph{is linearizable with respect to} \(T\) or just \emph{linearizable} if \(T\) is clear from the context if each of its executions is linearizable.
+\end{definition}
+
+
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
 \subsection{Cache memory}
