@@ -4,12 +4,12 @@
 
 We consider a standard concurrent shared memory system with \(n \ge 2\) \textit{asynchronous} processes, \(p_0, \ldots, p_{n-}\), which may \textit{crash} at any time during execution. The \textit{index} of process \(p_i\) is \(i\). Processes communicate with each other by invoking \textit{atomic} instructions of base objects: either simple \emph{Read}/\emph{Write}, or more powerful \emph{Read-Modify-Write}, such as \emph{Swap} or \emph{Compare\&Swap}.
 
-An \emph{algorithm} for a high-level concurrent object \(T\) (e.g. a queue or a stack) is a distributed algorithm \(\mathcal{A}\) consisting of local state machines \(A_1,\ldots, A_n\). Local machine \(A_i\) specifies which instruction of base objects execute in order to return a response when it invokes a (high-level) operation of \(T\); each of these instructions is a \emph{step}.
+An \emph{algorithm} for a high-level concurrent object \(T\) (e.g., a queue or a stack) is a distributed algorithm \(\mathcal{A}\) consisting of local state machines \(A_1,\ldots, A_n\). Local machine \(A_i\) specifies which instruction of base objects execute to return a response when it invokes a (high-level) operation of \(T\); each of these instructions is a \emph{step}.
 
 An \emph{execution} of \(\mathcal{A}\) is a (possibly infinite) sequence of steps, namely, instructions of base objects, plus invocations and responses of (high-level) operations of the concurrent object \(T\) with the following properties:
 
 \begin{enumerate}
-    \item Each process first invokes an operation, and only when it has a corresponding response it can invoke another operation, i.e., executions are well-formed, and
+    \item Each process first invokes an operation, and only when it has a corresponding response can it invoke another operation, i.e., executions are well-formed and
     \item For any invocation to an operation \(op\) of a process \(p_i\), denoted as \(inv_i(op)\), the steps of \(p_i\) between that invocation and its correspondent response (if there is one), denoted \(res_i(op)\), are the steps specified by \(A_i\) when \(p_i\) invokes \(op\).
 \end{enumerate}
 
@@ -40,6 +40,23 @@ Let be \(\mathcal{A}\) an algorithm for a concurrent object \(T\). A finite exec
 We say that \(\mathcal{A}\) \emph{is linearizable with respect to} \(T\) or just \emph{linearizable} if \(T\) is clear from the context if each of its executions is linearizable.
 \end{definition}
 
+Roughly speaking, while linearizability requires a total order of the operations, \emph{set-linearizability}~\cite{DBLP_journals_jacm_CastanedaRR18, DBLP_conf_podc_Neiger94} is an extension of linearizability that allows several operations to be linearized at the same linearization point. 
+
+A \emph{set-sequential specification} of a concurrent object, differs from a sequential execution in that \(\delta\) receives as input the current state \(q\) of the machine and set \(Inv = \{inv_{id_1}(op_1), \ldots, inv_{id_t}(op_t)\}\) of operation invocations, and \(\delta(q, Inv)\) returns \((q', Res)\), where \(q'\) is the next state and \(Res = \{res_{id_1}(op_1), \ldots, res_{id_t}(op_t)\}\) are the responses to the invocations in \(Inv\) and each \(id_i\) denotes the index of the invoking/responding process. Intuitively , all operations \(op_1, \ldots, op_t\) are performed concurrently and move the machine from state \(q\) to \(q'\). The sequence of sets \(Inv\), \(Res\) is a \emph{concurrency class} of the machine. The state machine's sequences of concurrency classes are its \emph{set-sequential executions}. In our set-sequential specifications, invocations will be subscripted with the index of the invoking process only when there is more than one invocation in a concurrency class. Observe that a set-sequential specification in which all concurrency classes have a single element corresponds to a sequential specification.
+
+Give a set-sequential execution S of a set-sequential object, the partial order \(<_S\) on the operations of \(S\) is defined as above: \(op <_S op'\) if and only if \(res(op)\) precedes \(inv(op')\) in \(S\), namely, the concurrency class of \(op\) appears before of the concurrency class of \(op'\).
+
+
+\begin{definition}[Set-linearizability~\cite{DBLP_journals_jacm_CastanedaRR18, DBLP_conf_podc_Neiger94}]
+    Let be \(\mathcal{A}\) an implementation of a concurrent object \(T\). A finite execution \(E\) of \(\mathcal{A}\) is \emph{set-linearizable with respect to} \(T\), or just \emph{set-linearizable} if \(T\) is clear from the context, if there is a set-sequential execution \(S\) of \(T\) and \(E\) can be extended to an execution \(E'\) by appending zero or more responses such that:
+
+    \begin{enumerate}
+        \item \(comp(E')\) and \(S\) are equivalent,
+        \item for every two completed operations \(op\) and \(op'\) in \(E\), if \(op <_E op'\) then \(op <_S op'\).
+    \end{enumerate}
+
+    We say that \(\mathcal{A}\) is \emph{set-linearizable with respect to} \(T\), or just \emph{set-linearizable} if \(T\) is clear from the context if each of its executions is set-linearizable.
+\end{definition}
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 

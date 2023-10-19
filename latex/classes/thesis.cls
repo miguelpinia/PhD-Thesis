@@ -299,11 +299,11 @@
           linecolor=ocre,
           innerleftmargin=0.5cm,
           innerrightmargin=5pt,
-          innertopmargin=0pt,
+          innertopmargin=12pt,
           leftmargin=0cm,
           rightmargin=0cm,
-          linewidth=4pt,
-          innerbottommargin=0pt]{dBox}
+          linewidth=3pt,
+          innerbottommargin=12pt]{dBox}
 
 % Corollary box
 \newmdenv[skipabove=7pt,
