@@ -60,11 +60,7 @@ Give a set-sequential execution S of a set-sequential object, the partial order 
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
-In addition to the mathematical computation model, it is important to
-know some hardware foundations to explain why it is necessary use some
-tools as (for example, \emph{fences}) to perform concurrent computing
-correctly. In this section, we will discuss about the following
-topics:
+It is important to understand the hardware foundations behind concurrent computing, in addition to the mathematical computation model. This understanding helps explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. This section will cover the following topics:
 
 \begin{itemize}
 \item Cache Memory
@@ -78,50 +74,22 @@ topics:
 \subsection{Cache memory}
 \label{sec:org49cf4b1}
 
-The cache memory is a special, high-speed memory close to
-the processor, and the processes can access it very fast. The caches are used
-to reduce average latencies to access storage structures
-\cite{DBLP_series_synthesis_2020Nagarajan}. In recent multicore chips, the
-cache memory is divided into three levels: two private levels (L1 and L2) for
-each processor and a third level (L3) shared by the cores. The
-purpose of the first two levels is to provide fast access to data and
-instructions for the processors.
-
-Each processor uses the first level of cache to get the data and
-instructions to execute them; usually, the access to this level of
-cache is high-speed concerning access to other levels. The second
-level is often more extensive and stores data and instructions close
-to being executed. In the third level, this cache is shared by many
-processors and is used as a feeder for the L2 cache.
+The cache memory, a special high-speed memory located close to the processor, allows for fast access by processes. Caches are utilized to decrease the average latency when accessing storage structures~\cite{DBLP_series_synthesis_2020Nagarajan}. Multi-core chips in recent times have adopted a three-tiered cache memory system. The first two levels, L1 and L2, are private to each processor, while the third level, L3, is shared by all the cores. The main objective of L1 and L2 is to enable fast access to data and instructions for the processors.
+In a computer system, each processor utilizes the first level of cache to fetch the required data and instructions for executing them. Typically, the access to this level of cache is faster than that of other levels. The second level of cache is generally larger in size and stores data and instructions that are about to be executed. The third level of cache is shared by multiple processors and serves as a source for the L2 cache.
 
 \subsection{Memory bus}
 \label{sec:orgda21942}
 
-It is a computer bus that allows the transfer of data from the primary memory to the
-CPU and the cache memory. It comprises two parts: the data bus and the
-address bus. The data bus is in charge of transferring information between the
-primary memory and the correspondent chipset.
-The address bus is used to retrieve information about the location of stored
-information.
-
+A computer bus facilitates the transfer of data from the primary memory to the CPU and cache memory. There are two parts to this bus: the data bus and the address bus. The data bus transfers information between the primary memory and the corresponding chipset. On the other hand, the address bus is used to retrieve information about the location of stored data.
 
 \subsection{Main memory}
 \label{sec:orgf1a7f27}
 
-It is responsible for holding the data the CPU needs to access frequently, such
-as instructions or currently processing data. The CPU can access
-this information faster than the access to secondary memory.
+It holds frequently accessed data for the CPU, such as instructions or processing data, and allows faster access than secondary memory.
 
-\subsection{Consistency Memory Model and Cache Coherence}
-\label{sec:orge62077c}
+\subsection{Consistency Memory Model}
 
-\begin{enumerate}
-\item Consistency memory model
-\label{sec:org5f315b5}
-
-Following the simplified view of the cache architecture, we want to have a
-correct shared memory. And what this means? The correctness of the shared
-memory can be separated into two sub-issues: \emph{consistency} and \emph{correctness}.
+When considering the simplified view of cache architecture, it is important to ensure that shared memory is correct. This requires addressing two key issues: \emph{consistency} and \emph{correctness}.
 
 The consistency (definitions) provides rules about loads and stores (memory
 reads and writes) and how they act upon memory. These definitions must consider the behavior of those operations on memory through access to
@@ -139,6 +107,15 @@ hold the results of committed stores before writing results to the caches.
 In addition to the prior memory model, "relaxed" or "weak" memory models are
 considered because these models show that most memory orderings in strong
 models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
+
+\subsection{Consistency Memory Model and Cache Coherence}
+\label{sec:orge62077c}
+
+\begin{enumerate}
+\item Consistency memory model
+\label{sec:org5f315b5}
+
+
 
 \item Cache coherence
 \label{sec:org01ed92c}
