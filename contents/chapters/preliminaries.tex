@@ -40,7 +40,7 @@ Let be \(\mathcal{A}\) an algorithm for a concurrent object \(T\). A finite exec
 We say that \(\mathcal{A}\) \emph{is linearizable with respect to} \(T\) or just \emph{linearizable} if \(T\) is clear from the context if each of its executions is linearizable.
 \end{definition}
 
-Roughly speaking, while linearizability requires a total order of the operations, \emph{set-linearizability}~\cite{DBLP_journals_jacm_CastanedaRR18, DBLP_conf_podc_Neiger94} is an extension of linearizability that allows several operations to be linearized at the same linearization point. 
+Roughly speaking, while linearizability requires a total order of the operations, \emph{set-linearizability}~\cite{DBLP_journals_jacm_CastanedaRR18, DBLP_conf_podc_Neiger94} is an extension of linearizability that allows several operations to be linearized at the same linearization point.
 
 A \emph{set-sequential specification} of a concurrent object, differs from a sequential execution in that \(\delta\) receives as input the current state \(q\) of the machine and set \(Inv = \{inv_{id_1}(op_1), \ldots, inv_{id_t}(op_t)\}\) of operation invocations, and \(\delta(q, Inv)\) returns \((q', Res)\), where \(q'\) is the next state and \(Res = \{res_{id_1}(op_1), \ldots, res_{id_t}(op_t)\}\) are the responses to the invocations in \(Inv\) and each \(id_i\) denotes the index of the invoking/responding process. Intuitively , all operations \(op_1, \ldots, op_t\) are performed concurrently and move the machine from state \(q\) to \(q'\). The sequence of sets \(Inv\), \(Res\) is a \emph{concurrency class} of the machine. The state machine's sequences of concurrency classes are its \emph{set-sequential executions}. In our set-sequential specifications, invocations will be subscripted with the index of the invoking process only when there is more than one invocation in a concurrency class. Observe that a set-sequential specification in which all concurrency classes have a single element corresponds to a sequential specification.
 
@@ -60,6 +60,21 @@ Give a set-sequential execution S of a set-sequential object, the partial order 
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
+In addition to the mathematical computation model, it is important to
+know some hardware foundations to explain why it is necessary use some
+tools as (for example, \emph{fences}) to perform concurrent computing
+correctly. In this section, we will discuss about the following
+topics:
+
+\begin{itemize}
+\item Cache Memory
+\item Memory Buses
+\item Main Memory
+\item Consistency Memory Models and Cache coherence
+\item Memory Fences
+\item Memory Management
+\end{itemize}
+
 \subsection{Cache memory}
 \label{sec:org49cf4b1}
 
@@ -72,10 +87,11 @@ each processor and a third level (L3) shared by the cores. The
 purpose of the first two levels is to provide fast access to data and
 instructions for the processors.
 
-Each processor uses the first level of cache to get the data and instructions
-to execute them; usually, the access to this level of cache is high-speed
-concerning access to other levels. The second level is often more
-extensive and stores data and instructions close to being executed. In the third level, this cache is shared by many
+Each processor uses the first level of cache to get the data and
+instructions to execute them; usually, the access to this level of
+cache is high-speed concerning access to other levels. The second
+level is often more extensive and stores data and instructions close
+to being executed. In the third level, this cache is shared by many
 processors and is used as a feeder for the L2 cache.
 
 \subsection{Memory bus}
@@ -93,7 +109,7 @@ information.
 \label{sec:orgf1a7f27}
 
 It is responsible for holding the data the CPU needs to access frequently, such
-as instructions or currently processing data. The CPU can access 
+as instructions or currently processing data. The CPU can access
 this information faster than the access to secondary memory.
 
 \subsection{Consistency Memory Model and Cache Coherence}
@@ -331,7 +347,7 @@ void func() {
 When a memory region is reclaimed, the programmer cannot know how that
 region of memory will be reused or whether it is reused. We need a
 way of developing a (general) solution to prevent the sorts of races
-when a memory region is reclaimed by many threads asynchronously. We can 
+when a memory region is reclaimed by many threads asynchronously. We can
 do this by delaying reclamation.
 Thinking in terms of pending operations on a concurrent data structure, a
 sufficient condition is that \emph{memory is only reclaimed when it is impossible
@@ -399,7 +415,7 @@ calls is partitioned evenly among all threads.
 \subsection{Update experiments}
 \label{sec:org5027fac}
 
-To update the experiments, we must understand what metrics 
+To update the experiments, we must understand what metrics
 allow us to compare the algorithms designed for LL/IC objects and Baskets. A
 common way to evaluate experimental results is the use of measurements to
 understand the performance or the throughput of the experiments;
