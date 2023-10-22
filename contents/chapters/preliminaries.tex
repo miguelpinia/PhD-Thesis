@@ -60,7 +60,7 @@ Give a set-sequential execution S of a set-sequential object, the partial order 
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
-It is important to understand the hardware foundations behind concurrent computing, in addition to the mathematical computation model. This understanding helps explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. This section will cover the following topics:
+It is important to understand the hardware foundations behind concurrent computing and the mathematical computation model. This understanding helps explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. This section will cover the following topics:
 
 \begin{itemize}
 \item Cache Memory
@@ -92,21 +92,9 @@ It holds frequently accessed data for the CPU, such as instructions or processin
 When considering the simplified view of cache architecture, it is important to ensure that shared memory is correct. This requires addressing two key issues: \emph{consistency} and \emph{correctness}.
 
 The consistency (definitions) provides rules about loads and stores (memory
-reads and writes) and how they act upon memory. These definitions must consider the behavior of those operations on memory through access to
-multiple threads or even a single thread. The consistency models define
-correct shared memory behavior regarding loads and stores without
-reference to caches, or coherence \cite{DBLP_series_synthesis_2020Nagarajan}.
-Shared memory correctness is specified by a memory consistency model (or
-memory model). This defines the allowed behavior of multithreaded programs
-executing with shared memory.
+reads and writes) and how they act upon memory. These definitions must consider the behavior of those operations on memory through access to multiple threads or even a single thread. The consistency models define correct shared memory behavior regarding loads and stores without reference to caches or coherence \cite{DBLP_series_synthesis_2020Nagarajan}. Shared memory correctness is specified by a memory consistency model (or memory model). This defines the allowed behavior of multithreaded programs executing with shared memory.
 
-The most intuitive and strongest memory model is the \emph{Sequential Consistency}
-(SC). Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order}
-(TSO), motivated by the desire to use \emph{first-in-first-out} write buffers to
-hold the results of committed stores before writing results to the caches.
-In addition to the prior memory model, "relaxed" or "weak" memory models are
-considered because these models show that most memory orderings in strong
-models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
+The most intuitive and strongest memory model is the \emph{Sequential Consistency} (SC). Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order} (TSO), motivated by the desire to use \emph{first-in-first-out} write buffers to hold the results of committed stores before writing results to the caches. In addition to the prior memory model, "relaxed" or "weak" memory models are considered because these models show that most memory orderings in strong models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \subsection{Consistency Memory Model and Cache Coherence}
 \label{sec:orge62077c}
@@ -120,16 +108,7 @@ models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 \item Cache coherence
 \label{sec:org01ed92c}
 
-Cache coherence protocols are used in response to solve a coherence problem
-in cache. For example, a coherence problem can arise if multiple cores have
-access to multiple copies of a datum, each in a core, and at least one
-is a write access. The cache coherence protocols prevent access to
-stale (incoherent) data; this can be done using a set of rules
-implemented by the distributed set of cores within a system. These
-protocols use the common MOESI coherence states: modified (M), owned (O),
-exclusive (E), shared (S), and invalid (I). The protocol acts like a state
-machine, moving from one state to another based on the conditions of the
-data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
+Cache coherence protocols are used in response to solve a coherence problem in cache. For example, a coherence problem can arise if multiple cores have access to multiple copies of a datum, each in a core, and at least one is a write access. The cache coherence protocols prevent access to stale (incoherent) data; this can be done using a set of rules implemented by the distributed set of cores within a system. These protocols use the common MOESI coherence states: modified (M), owned (O), exclusive (E), shared (S), and invalid (I). The protocol acts like a state machine, moving from one state to another based on the conditions of the data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 \end{enumerate}
 
 
@@ -137,16 +116,11 @@ data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 \subsection{Memory fences}
 \label{sec:org8a96e19}
 
-A memory fence is a barrier instruction that causes a CPU or compiler to
-enforce an ordering constraint on memory operations (loads and stores)
-issued before and after the barrier instruction.
+A memory fence is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction.
 
-These instructions are necessary because most modern CPUs or compilers
-employ performance optimizations, changing the order of the instructions on
-one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs.
+These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs.
 
-For example, consider the following multi-thread program with 2
-threads, each one concurrently running in one core:
+For example, consider the following multi-thread program with two threads, each one concurrently running in one core:
 
 Thread 1, core 1
 \begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
@@ -160,10 +134,7 @@ y = 30;
 z = 1;
 \end{lstlisting}
 
-In this case, we might expect that the \texttt{print(y)} always print the number 30,
-Nevertheless, the compiler or the CPU could change the order of the
-instructions for thread 2, giving, as a result, an execution where the value
-for \texttt{y} is undefined, and the instructions could be interleaved as follows:
+In this case, we might expect that the \texttt{print(y)} always print the number 30, nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving, as a result, an execution where the value for \texttt{y} is undefined, and the instructions could be interleaved as follows:
 
 \begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
 z = 1; // Thread 2
@@ -172,10 +143,7 @@ print(y); // Thread 1
 y = 30; // Thread 2
 \end{lstlisting}
 
-This execution is sequentially consistent but is an out-of-order
-execution producing an undefined result. With the use of memory barriers, we
-can ensure that instructions don't be reordered. For example, our code could
-be rewritten as follows:
+This execution is sequentially consistent but is an out-of-order execution producing an undefined result. With the use of memory barriers, we can ensure that instructions don't be reordered. For example, our code could be rewritten as follows:
 
 Thread 1, core 1.
 \begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
@@ -196,8 +164,7 @@ Languages such as \texttt{Java} or \texttt{C++} provide instructions to establis
 and ordering constraints between threads without an atomic operation. These
 instructions have semantics well-defined for
 
-In the case of Java, we have static methods of the class VarHandle
-(\texttt{java.lang.invoke.VarHandle}) Those are referred to as memory fence methods that help provide fine-grained control of memory ordering. These statics
+In the case of Java, we have static methods of the class VarHandle\footnote{\texttt{java.lang.invoke.VarHandle}}. Those are memory fence methods that help provide fine-grained control of memory ordering. These statics
 methods are \cite{varHandleJdk92017}:
 
 \begin{description}
@@ -265,7 +232,7 @@ it exits.
 \item Hazard pointers
 \label{sec:org3992578}
 
-The \emph{Hazard Pointers} is a technique to manage memory in languages without garbage collectors. Maged proposed this technique
+The \emph{Hazard Pointers} is a technique to manage language memory without garbage collectors. Maged proposed this technique
 Michael \cite{DBLP_journals_tpds_Michael04}. They are so-called because
 deleting a pointer that might be referenced by other thread(s) is
 dangerous. If another thread keeps holding references to that pointer and
