@@ -60,67 +60,31 @@ Give a set-sequential execution S of a set-sequential object, the partial order 
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
-It is important to understand the hardware foundations behind concurrent computing and the mathematical computation model. This understanding helps explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. This section will cover the following topics:
+In addition to the mathematical computation model, understanding the hardware foundations behind concurrent computing is important. This understanding helps explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. In this section, we will discuss the high-level working of concurrent programs on computer hardware. Our focus will be on memory interactions at different levels. We will cover the following topics in detail: Cache memory, memory bus, main memory, consistency memory model, cache coherence
 
-\begin{itemize}
-\item Cache Memory
-\item Memory Buses
-\item Main Memory
-\item Consistency Memory Models and Cache coherence
-\item Memory Fences
-\item Memory Management
-\end{itemize}
+\begin{description}
+    \item[Cache Memory] The cache memory, a special high-speed memory close to the processor, allows fast process access. Caches decrease the average latency when accessing storage structures~\cite{DBLP_series_synthesis_2020Nagarajan}. Multi-core chips in recent times have adopted a three-tiered cache memory system. The first two levels, L1 and L2, are private to each processor, while the third level, L3, is shared by all the cores. The main objective of L1 and L2 is to enable fast access to data and instructions for the processors. Each processor utilizes the first cache level in a computer system to fetch the required data and execute instructions. Typically, the access to this level of cache is faster than that of other levels. The second level of cache is generally larger and stores data and instructions about to be executed. Multiple processors share the third cache level and serve as a source for the L2 cache.
+    \item[Memory Bus] A computer bus transfers data from the primary memory to the CPU and cache memory. This bus has two parts: the data bus and the address bus. The data bus transfers information between the primary memory and the corresponding chipset. On the other hand, the address bus is used to retrieve information about the location of stored data.
+    \item[Main Memory] It holds frequently accessed data for the CPU, such as instructions or processing data, and allows faster access than secondary memory.
+    \item[Consistency Memory Model] When considering the simplified view of cache architecture, it is important to ensure that shared memory is correct. This requires addressing two key issues: \emph{consistency} and \emph{correctness}. 
+    
+    The consistency (definitions) provides rules about loads and stores (memory reads and writes) and how they act upon memory. These definitions must consider the behavior of those operations on memory through access to multiple threads or even a single thread. The consistency models define correct shared memory behavior regarding loads and stores without reference to caches or coherence \cite{DBLP_series_synthesis_2020Nagarajan}. Shared memory correctness is specified by a memory consistency model (or memory model). This defines the allowed behavior of multithreaded programs executing with shared memory.
+    
+    The most intuitive and strongest memory model is the \emph{Sequential Consistency} (SC). Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order} (TSO), motivated by the desire to use \emph{first-in-first-out} write buffers to hold the results of committed stores before writing results to the caches. In addition to the prior memory model, "relaxed" or "weak" memory models are considered because these models show that most memory orderings in strong models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
-\subsection{Cache memory}
-\label{sec:org49cf4b1}
+    \item[Cache Coherence] Cache coherence protocols are used in response to solve a coherence problem in cache. For example, a coherence problem can arise if multiple cores have access to multiple copies of a datum, each in a core, and at least one is a write access. The cache coherence protocols prevent access to stale (incoherent) data; this can be done using a set of rules implemented by the distributed set of cores within a system. These protocols use the common MOESI coherence states: modified (M), owned (O), exclusive (E), shared (S), and invalid (I). The protocol acts like a state machine, moving from one state to another based on the conditions of the data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 
-The cache memory, a special high-speed memory located close to the processor, allows fast process access. Caches decrease the average latency when accessing storage structures~\cite{DBLP_series_synthesis_2020Nagarajan}. Multi-core chips in recent times have adopted a three-tiered cache memory system. The first two levels, L1 and L2, are private to each processor, while the third level, L3, is shared by all the cores. The main objective of L1 and L2 is to enable fast access to data and instructions for the processors.
-Each processor utilizes the first cache level in a computer system to fetch the required data and execute instructions. Typically, the access to this level of cache is faster than that of other levels. The second level of cache is generally larger and stores data and instructions about to be executed. Multiple processors share the third cache level and serve as a source for the L2 cache.
+    \item[Memory Fences] A memory fence is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction.
 
-\subsection{Memory bus}
-\label{sec:orgda21942}
+    These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs.
 
-A computer bus transfers data from the primary memory to the CPU and cache memory. This bus has two parts: the data bus and the address bus. The data bus transfers information between the primary memory and the corresponding chipset. On the other hand, the address bus is used to retrieve information about the location of stored data.
-
-\subsection{Main memory}
-\label{sec:orgf1a7f27}
-
-It holds frequently accessed data for the CPU, such as instructions or processing data, and allows faster access than secondary memory.
-
-\subsection{Consistency Memory Model}
-
-When considering the simplified view of cache architecture, it is important to ensure that shared memory is correct. This requires addressing two key issues: \emph{consistency} and \emph{correctness}.
-
-The consistency (definitions) provides rules about loads and stores (memory
-reads and writes) and how they act upon memory. These definitions must consider the behavior of those operations on memory through access to multiple threads or even a single thread. The consistency models define correct shared memory behavior regarding loads and stores without reference to caches or coherence \cite{DBLP_series_synthesis_2020Nagarajan}. Shared memory correctness is specified by a memory consistency model (or memory model). This defines the allowed behavior of multithreaded programs executing with shared memory.
-
-The most intuitive and strongest memory model is the \emph{Sequential Consistency} (SC). Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order} (TSO), motivated by the desire to use \emph{first-in-first-out} write buffers to hold the results of committed stores before writing results to the caches. In addition to the prior memory model, "relaxed" or "weak" memory models are considered because these models show that most memory orderings in strong models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
-
-\subsection{Consistency Memory Model and Cache Coherence}
-\label{sec:orge62077c}
-
-\begin{enumerate}
-\item Consistency memory model
-\label{sec:org5f315b5}
-
-
-
-\item Cache coherence
-\label{sec:org01ed92c}
-
-Cache coherence protocols are used in response to solve a coherence problem in cache. For example, a coherence problem can arise if multiple cores have access to multiple copies of a datum, each in a core, and at least one is a write access. The cache coherence protocols prevent access to stale (incoherent) data; this can be done using a set of rules implemented by the distributed set of cores within a system. These protocols use the common MOESI coherence states: modified (M), owned (O), exclusive (E), shared (S), and invalid (I). The protocol acts like a state machine, moving from one state to another based on the conditions of the data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
-\end{enumerate}
-
-
+    For example, consider the following multi-thread program with two threads, each one concurrently running in one core:
+\end{description}
 
 \subsection{Memory fences}
 \label{sec:org8a96e19}
 
-A memory fence is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction.
 
-These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs.
-
-For example, consider the following multi-thread program with two threads, each one concurrently running in one core:
 
 Thread 1, core 1
 \begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
