@@ -60,7 +60,8 @@ Give a set-sequential execution S of a set-sequential object, the partial order 
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
-In addition to the mathematical computation model, understanding the hardware foundations behind concurrent computing is important. This understanding helps explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. In this section, we will discuss the high-level working of concurrent programs on computer hardware. Our focus will be on memory interactions at different levels. We will cover the following topics in detail: Cache memory, memory bus, main memory, consistency memory model, cache coherence
+In addition to the mathematical computation model, understanding the hardware foundations behind concurrent computing is important. Understanding this helps explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. This section will discuss the high-level working of concurrent programs on computer hardware. Our focus will be on memory interactions at different levels. We will cover the following topics in detail: Cache memory, memory bus, main memory, consistency memory model, and cache coherence.
+
 
 \begin{description}
     \item[Cache Memory] The cache memory, a special high-speed memory close to the processor, allows fast process access. Caches decrease the average latency when accessing storage structures~\cite{DBLP_series_synthesis_2020Nagarajan}. Multi-core chips in recent times have adopted a three-tiered cache memory system. The first two levels, L1 and L2, are private to each processor, while the third level, L3, is shared by all the cores. The main objective of L1 and L2 is to enable fast access to data and instructions for the processors. Each processor utilizes the first cache level in a computer system to fetch the required data and execute instructions. Typically, the access to this level of cache is faster than that of other levels. The second level of cache is generally larger and stores data and instructions about to be executed. Multiple processors share the third cache level and serve as a source for the L2 cache.
@@ -98,7 +99,7 @@ y = 30;
 z = 1;
 \end{lstlisting}
 
-In this case, we might expect that the \texttt{print(y)} always print the number 30, nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving, as a result, an execution where the value for \texttt{y} is undefined, and the instructions could be interleaved as follows:
+In this case, we might expect that the \texttt{print(y)} always prints the number 30. Nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving. As a result, an execution where the value for \texttt{y} is undefined, and the instructions could be interleaved as follows:
 
 \begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
 z = 1; // Thread 2
