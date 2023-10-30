@@ -1,5 +1,7 @@
 \chapter{\label{chapter:preliminaries}Preliminaries and Methodology}
 
+In this chapter, we will discuss all the necessary tools needed for this thesis. As we are considering asynchronous shared memory systems, the first section will cover the mathematical foundation for the computational model. This will include a formal description of concepts such as \emph{process},  \emph{algorithm}, and \emph{Linearizability~\cite{DBLP_journals_toplas_HerlihyW90}} in concurrent systems. In the following section, we delve into the hardware foundations of our concurrent systems. Specifically, we will explore concepts such as \emph{cache memory}, \emph{consistency memory model}, \emph{cache coherence}, and \emph{memory fences}, which are essential for implementing concurrent algorithms correctly. We will also discuss the concept of a memory model at the programming language level, and examine the Java and C++ memory models that define the allowable behavior of multithreaded programs. Finally, we will conclude this chapter by discussing the statistical experiment methodology we will use to analyze program implementations.
+
 \section{\label{sec:computation-model}Computation Model}
 
 We consider a standard concurrent shared memory system with \(n \ge 2\) \textit{asynchronous} processes, \(p_0, \ldots, p_{n-}\), which may \textit{crash} at any time during execution. The \textit{index} of process \(p_i\) is \(i\). Processes communicate with each other by invoking \textit{atomic} instructions of base objects: either simple \emph{Read}/\emph{Write}, or more powerful \emph{Read-Modify-Write}, such as \emph{Swap} or \emph{Compare\&Swap}.
@@ -42,7 +44,7 @@ We say that \(\mathcal{A}\) \emph{is linearizable with respect to} \(T\) or just
 
 Roughly speaking, while linearizability requires a total order of the operations, \emph{set-linearizability}~\cite{DBLP_journals_jacm_CastanedaRR18, DBLP_conf_podc_Neiger94} is an extension of linearizability that allows several operations to be linearized at the same linearization point.
 
-A \emph{set-sequential specification} of a concurrent object, differs from a sequential execution in that \(\delta\) receives as input the current state \(q\) of the machine and set \(Inv = \{inv_{id_1}(op_1), \ldots, inv_{id_t}(op_t)\}\) of operation invocations, and \(\delta(q, Inv)\) returns \((q', Res)\), where \(q'\) is the next state and \(Res = \{res_{id_1}(op_1), \ldots, res_{id_t}(op_t)\}\) are the responses to the invocations in \(Inv\) and each \(id_i\) denotes the index of the invoking/responding process. Intuitively , all operations \(op_1, \ldots, op_t\) are performed concurrently and move the machine from state \(q\) to \(q'\). The sequence of sets \(Inv\), \(Res\) is a \emph{concurrency class} of the machine. The state machine's sequences of concurrency classes are its \emph{set-sequential executions}. In our set-sequential specifications, invocations will be subscripted with the index of the invoking process only when there is more than one invocation in a concurrency class. Observe that a set-sequential specification in which all concurrency classes have a single element corresponds to a sequential specification.
+A \emph{set-sequential specification} of a concurrent object differs from a sequential execution in that \(\delta\) receives as input the current state \(q\) of the machine and set \(Inv = \{inv_{id_1}(op_1), \ldots, inv_{id_t}(op_t)\}\) of operation invocations, and \(\delta(q, Inv)\) returns \((q', Res)\), where \(q'\) is the next state and \(Res = \{res_{id_1}(op_1), \ldots, res_{id_t}(op_t)\}\) are the responses to the invocations in \(Inv\) and each \(id_i\) denotes the index of the invoking/responding process. Intuitively , all operations \(op_1, \ldots, op_t\) are performed concurrently and move the machine from state \(q\) to \(q'\). The sequence of sets \(Inv\), \(Res\) is a \emph{concurrency class} of the machine. The state machine's sequences of concurrency classes are its \emph{set-sequential executions}. In our set-sequential specifications, invocations will be subscripted with the index of the invoking process only when there is more than one invocation in a concurrency class. Observe that a set-sequential specification in which all concurrency classes have a single element corresponds to a sequential specification.
 
 Give a set-sequential execution S of a set-sequential object, the partial order \(<_S\) on the operations of \(S\) is defined as above: \(op <_S op'\) if and only if \(res(op)\) precedes \(inv(op')\) in \(S\), namely, the concurrency class of \(op\) appears before of the concurrency class of \(op'\).
 
@@ -60,55 +62,46 @@ Give a set-sequential execution S of a set-sequential object, the partial order 
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
-In addition to the mathematical computation model, understanding the hardware foundations behind concurrent computing is important. Understanding this helps explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. This section will discuss the high-level working of concurrent programs on computer hardware. Our focus will be on memory interactions at different levels. We will cover the following topics in detail: Cache memory, memory bus, main memory, consistency memory model, and cache coherence.
+In addition to the mathematical computation model, understanding the hardware foundations behind concurrent computing is important. Understanding this helps to explain why certain tools, such as ``\emph{fences}'' are necessary to ensure correct concurrent computing. This section will discuss the high-level working of concurrent programs on computer hardware. Our focus will be on memory interactions at different levels. 
 
+When analyzing computer systems, it is important to consider those with multi-core processors that share memory. This means all cores can perform loads and stores to all (physical) addresses. A typical system model includes a single chip with multiple cores and off-chip main memory. You can see an illustration of this in the figure~\ref{fig:multi-core-processor}\footnote{In the figure~\ref{fig:multi-core-processor}, we omit many features to simplify the reasoning about the hardware}. Usually, a multi-core processor includes \emph{cache memory}, a special high-speed memory close to the processor that allows fast process access. Caches decrease the average latency when accessing storage structures~\cite{DBLP_series_synthesis_2020Nagarajan}. Multi-core chips in recent times have adopted a three-tiered cache memory system. The first two levels, L1 and L2, are private to each core, while the third level, L3, is shared by all the cores. The main objective of L1 and L2 is to enable fast access to data and instructions for the core. Each core utilizes the first cache level in a computer system to fetch the required data and execute instructions. Cache L1 is split into two sub-caches, one for data (L1d) and the other one for instructions (L1d) that will fetched by the core. Typically, the access to this level of cache is faster than that of other levels. The second level of cache is generally larger and stores data and instructions about to be executed. Multiple cores share the third cache level and serve as a source for the L2 cache.
 
-\begin{description}
-    \item[Cache Memory] The cache memory, a special high-speed memory close to the processor, allows fast process access. Caches decrease the average latency when accessing storage structures~\cite{DBLP_series_synthesis_2020Nagarajan}. Multi-core chips in recent times have adopted a three-tiered cache memory system. The first two levels, L1 and L2, are private to each processor, while the third level, L3, is shared by all the cores. The main objective of L1 and L2 is to enable fast access to data and instructions for the processors. Each processor utilizes the first cache level in a computer system to fetch the required data and execute instructions. Typically, the access to this level of cache is faster than that of other levels. The second level of cache is generally larger and stores data and instructions about to be executed. Multiple processors share the third cache level and serve as a source for the L2 cache.
-    \item[Memory Bus] A computer bus transfers data from the primary memory to the CPU and cache memory. This bus has two parts: the data bus and the address bus. The data bus transfers information between the primary memory and the corresponding chipset. On the other hand, the address bus is used to retrieve information about the location of stored data.
-    \item[Main Memory] It holds frequently accessed data for the CPU, such as instructions or processing data, and allows faster access than secondary memory.
-    \item[Consistency Memory Model] When considering the simplified view of cache architecture, it is important to ensure that shared memory is correct. This requires addressing two key issues: \emph{consistency} and \emph{correctness}. 
-    
-    The consistency (definitions) provides rules about loads and stores (memory reads and writes) and how they act upon memory. These definitions must consider the behavior of those operations on memory through access to multiple threads or even a single thread. The consistency models define correct shared memory behavior regarding loads and stores without reference to caches or coherence \cite{DBLP_series_synthesis_2020Nagarajan}. Shared memory correctness is specified by a memory consistency model (or memory model). This defines the allowed behavior of multithreaded programs executing with shared memory.
-    
-    The most intuitive and strongest memory model is the \emph{Sequential Consistency} (SC). Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order} (TSO), motivated by the desire to use \emph{first-in-first-out} write buffers to hold the results of committed stores before writing results to the caches. In addition to the prior memory model, "relaxed" or "weak" memory models are considered because these models show that most memory orderings in strong models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
+The \emph{main memory} holds frequently accessed data for the CPU, such as instructions or processing data, and allows faster access than secondary memory. To obtain such data and instructions, the processor calls the \emph{memory bus}, which transfers data from the primary memory to the CPU and cache memory. This bus has two parts: the data bus and the address bus. The data bus transfers information between the primary memory and the corresponding chipset. On the other hand, the address bus is used to retrieve information about the location of stored data.
 
-    \item[Cache Coherence] Cache coherence protocols are used in response to solve a coherence problem in cache. For example, a coherence problem can arise if multiple cores have access to multiple copies of a datum, each in a core, and at least one is a write access. The cache coherence protocols prevent access to stale (incoherent) data; this can be done using a set of rules implemented by the distributed set of cores within a system. These protocols use the common MOESI coherence states: modified (M), owned (O), exclusive (E), shared (S), and invalid (I). The protocol acts like a state machine, moving from one state to another based on the conditions of the data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
+When considering the simplified view of cache architecture, it is important to ensure that shared memory is correct. This requires addressing two key issues: \emph{consistency} and \emph{correctness}.
+The consistency provides rules about loads and stores (memory reads and writes) and how they act upon memory. These consistency rules must consider the behavior of those operations on memory through access to multiple threads or even a single thread. The consistency models define correct shared memory behavior regarding loads and stores without reference to caches or coherence \cite{DBLP_series_synthesis_2020Nagarajan}. Shared memory correctness is specified by a memory consistency model (or memory model). This defines the allowed behavior of multithreaded programs executing with shared memory. The most intuitive and strongest memory model is the \emph{Sequential Consistency} (SC) [referencia]. Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order} (TSO) [referencia], motivated by the desire to use \emph{first-in-first-out} write buffers to hold the results of committed stores before writing results to the caches. In addition to the prior memory model, "relaxed" or "weak" memory models are considered because these models show that most memory orderings in strong models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
-    \item[Memory Fences] A memory fence is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{contents//figures/III_2_cpu.pdf}
+    \caption{Baseline model of a Multicore Processor Chip}
+    \label{fig:multi-core-processor}
+\end{figure}
 
-    These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs.
+Cache coherence protocols play an important role in solving coherence issues in caching. These protocols come into play when multiple cores have access to multiple copies of a datum, each in a core, and at least one is a write access. To prevent access to stale or incoherent data, a set of rules is implemented by the distributed set of cores within a system. Therefore, along with consistency models, it is essential to consider cache coherence protocols. These protocols use the common MOESI coherence states: modified (M), owned (O), exclusive (E), shared (S), and invalid (I). The protocol acts like a state machine, moving from one state to another based on the conditions of the data and the cache memory \cite{DBLP_series_synthesis_2020Nagarajan}.
 
-    For example, consider the following multi-thread program with two threads, each one concurrently running in one core:
-\end{description}
+A memory fence is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction. These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs. For example, consider the following multi-thread program with two threads, each one concurrently running in distinct cores, the first one executing the code shown in~\ref{lst:thread1}, and the second one executing the code shown in~\ref{lst:thread2}:
 
-\subsection{Memory fences}
-\label{sec:org8a96e19}
-
-
-
-Thread 1, core 1
-\begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
+\begin{lstlisting}[language=c++,label={lst:thread1}, caption={Thread 1, core 1} ,captionpos=b]
 while (z == 0);
 print(y);
 \end{lstlisting}
 
-Thread 2, Core 2
-\begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
+\begin{lstlisting}[language=c++,label={lst:thread2} ,caption={Thread 2, core 2} ,captionpos=b]
 y = 30;
 z = 1;
 \end{lstlisting}
 
-In this case, we might expect that the \texttt{print(y)} always prints the number 30. Nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving. As a result, an execution where the value for \texttt{y} is undefined, and the instructions could be interleaved as follows:
+In this case, we might expect that the \texttt{print(y)} always prints the number 30. Nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving as a result, an execution where the value for \texttt{y} is undefined, and the instructions could be interleaved as shown in the code~\ref{lst:reordering}:
 
-\begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
+\begin{lstlisting}[language=c++,label={lst:reordering},caption={Code reordered by CPU} ,captionpos=b]
 z = 1; // Thread 2
 while (z == 0); // Thread 1
 print(y); // Thread 1
 y = 30; // Thread 2
 \end{lstlisting}
 
-This execution is sequentially consistent but is an out-of-order execution producing an undefined result. With the use of memory barriers, we can ensure that instructions don't be reordered. For example, our code could be rewritten as follows:
+This execution is sequentially consistent but is an out-of-order execution producing an undefined result. With the use of memory barriers, we can ensure that instructions do not be reordered. For example, our code could be rewritten as follows:
 
 Thread 1, core 1.
 \begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
