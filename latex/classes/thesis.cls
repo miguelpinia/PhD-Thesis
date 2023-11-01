@@ -246,8 +246,9 @@
 \newtheorem{problem}{Problem}[chapter]
 \newtheorem{exerciseT}{Exercise}[chapter]
 \theoremstyle{blacknumex}
-\newtheorem{exampleT}{Example}[chapter]
+
 \theoremstyle{blacknumbox}
+\newtheorem{exampleT}{Example}[chapter]
 \newtheorem{definitionT}{Definition}[chapter]
 \newtheorem{descriptionT}{Description}[chapter]
 \newtheorem{vocabulary}{Vocabulary}[chapter]
@@ -297,9 +298,9 @@
           topline=false,
           bottomline=false,
           linecolor=ocre,
-          innerleftmargin=0.5cm,
+          innerleftmargin=0.3cm,
           innerrightmargin=5pt,
-          innertopmargin=12pt,
+          innertopmargin=6pt,
           leftmargin=0cm,
           rightmargin=0cm,
           linewidth=3pt,
@@ -331,7 +332,7 @@ innerbottommargin=5pt]{cBox}
 \newenvironment{exercise}{\begin{eBox}\begin{exerciseT}}{\hfill{\color{ocre}\tiny\ensuremath{\blacksquare}}\end{exerciseT}\end{eBox}}
 \newenvironment{definition}{\begin{dBox}\begin{definitionT}}{\end{definitionT}\end{dBox}}
 \newenvironment{desc}{\begin{dBox}\begin{descriptionT}}{\end{descriptionT}\end{dBox}}
-\newenvironment{example}{\begin{exampleT}}{\hfill{\tiny\ensuremath{\blacksquare}}\end{exampleT}}
+\newenvironment{example}{\begin{dBox}\begin{exampleT}}{\end{exampleT}\end{dBox}}
 \newenvironment{corollary}{\begin{cBox}\begin{corollaryT}}{\end{corollaryT}\end{cBox}}
 \newenvironment{mydescription}[1]{\begin{dBox}\textbf{#1}}{\end{dBox}\smartsmallskip}
 
@@ -340,13 +341,15 @@ innerbottommargin=5pt]{cBox}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \hyphenation{E-the-reum e-the-reum}
-\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mygray}{rgb}{191, 191, 191}
 \definecolor{mymauve}{rgb}{0.58,0,0.82}
 \definecolor{mypink}{RGB}{50, 50, 50}
 \definecolor{myblue}{RGB}{120, 120, 120}
 \definecolor{mypurple}{RGB}{170, 170, 170}
 \definecolor{amber}{rgb}{1.0, 0.49, 0.0}
 \definecolor{x11gray}{rgb}{0.75, 0.75, 0.75}
+\definecolor{backcolour}{rgb}{0.97255, 0.96863, 0.96863}
+
 \lstdefinestyle{Solidity}{
   frame=single,language=Java,morekeywords={pragma,
     solidity,struct,contract,uint,bool,address,bytes32,mapping,
@@ -370,12 +373,15 @@ innerbottommargin=5pt]{cBox}
   mathescape=true,
   frame=Trbl,
   numbers=left,
+  numbersep=5pt,
   numberstyle=\tiny\color{mygray},
   keywordstyle=\color{blue},
   showstringspaces=false,
   commentstyle=\color{x11gray},
   stringstyle=\color{amber},
-  breaklines=true
+  breaklines=true,
+  backgroundcolor=\color{backcolour},
+  keepspaces=true,  
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
