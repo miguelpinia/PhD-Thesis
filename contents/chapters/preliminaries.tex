@@ -71,7 +71,7 @@ The \emph{main memory} holds frequently accessed data for the CPU, such as instr
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.7\linewidth]{contents//figures/III_2_cpu.pdf}
-    \caption{Baseline model of a Multi-core Processor Chip}
+    \caption{Baseline model of a Multi-core Processor Chip.}
     \label{fig:multi-core-processor}
 \end{figure}
 
@@ -90,60 +90,66 @@ It's important to consider cache coherence protocols when dealing with caching a
 To ensure that the SWMR and data value invariants are maintained at all times, we use a distributed system consisting of a collection of \emph{coherence controllers}. Such controllers are finite state machines associated with each storage structure (cache and memory). These coherence controllers exchange messages with each other to ensure that invariants are upheld for each structure. The coherence protocol specifies the interaction between these finite-state machines and moving from one state to another based on the conditions of the data and the cache memory. The basic coherence states that most protocols use are: modified (M), shared (S), and invalid (I). AMD uses an extension of these states in its MOESI protocol, adding the owned (O) and exclusive (E) states~\cite{devices_amd64}. Intel uses its extension called MESIF~\cite{guideintel}.
 
 Processors that support the TSO memory model do not guarantee ordering between a store and a subsequent load that comes after it in program order. However, they do ensure that the load gets the value of the earlier store.  To order these instructions, the programmer needs to explicitly specify that ordering by inserting a \emph{fence} instruction between the store and the subsequent load.
+\hl{Address the discussion about ARM too?}
 %The \emph{fence} instruction ensures that all instructions before it in program order are executed before any instructions after it in program order.
-A \emph{memory fence} is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction. These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs. 
+A \emph{memory fence} is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction. These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs (See Example~\ref{ex:reordering}).
 
 \begin{example}[Instruction re-ordering]
+\label{ex:reordering}
+Consider the following multi-thread program with two threads, each one concurrently running on distinct cores. The first thread executes the code shown in~\ref{lst:thread1}, and the second one executes the code shown in~\ref{lst:thread2}:
 
-Consider the following multi-thread program with two threads, each one concurrently running in distinct cores, the first one executing the code shown in~\ref{lst:thread1}, and the second one executing the code shown in~\ref{lst:thread2}:
-
-\begin{lstlisting}[language=c++,label={lst:thread1}, caption={Thread 1, core 1} ,captionpos=b]
+\begin{lstlisting}[language=c++,label={lst:thread1}, caption={Code execute by thread 1 on core 1} ,captionpos=b]
 while (z == 0);
 print(y);
 \end{lstlisting}
 
-\begin{lstlisting}[language=c++,label={lst:thread2} ,caption={Thread 2, core 2} ,captionpos=b]
+\begin{lstlisting}[language=c++,label={lst:thread2} ,caption={Code executed by thread 2 on core 2} ,captionpos=b]
 y = 30;
 z = 1;
 \end{lstlisting}
 
-In this case, we might expect that the instruction \texttt{print(y)} always prints the number 30. Nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving as a result, an execution where the value for \texttt{y} is undefined, and the instructions could be interleaved as shown in the code~\ref{lst:reordering}:
 
-\begin{lstlisting}[language=c++,label={lst:reordering},caption={Code reordered by CPU}]
+In this case, we might expect that the instruction \texttt{print(y)} always prints the number 30. Nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving as a result, an execution where the value for \texttt{y} is \emph{undefined}, and the instructions could be interleaved as shown in the code~\ref{lst:reordering}:
+
+\begin{lstlisting}[language=c++,label={lst:reordering},caption={Code reordered by CPU}, captionpos=b]
 z = 1; // Thread 2
 while (z == 0); // Thread 1
 print(y); // Thread 1
 y = 30; // Thread 2
 \end{lstlisting}
 
-This execution is sequentially consistent but is an out-of-order execution producing an undefined result. With the use of memory barriers, we can ensure that instructions do not be reordered. For example, our code could be rewritten as follows:
+However, this execution is sequentially consistent but is an out-of-order execution producing an undefined result. With the use of memory barriers, we can ensure that instructions do not be reordered. For example, our code could be rewritten as shown in~\ref{lst:thread1-fence} and~\ref{lst:thread2-fence}:
 
-Thread 1, core 1.
-\begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
+\begin{lstlisting}[language=c++,label={lst:thread1-fence} ,caption={Updating code~\ref{lst:thread1} to use fences.} ,captionpos=b,numbers=none]
 while (z == 0);
-fence()
+fence();
 print(y);
 \end{lstlisting}
 
-Thread 2, core 2.
-\begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
+\begin{lstlisting}[language=c++,label={lst:thread2-fence},caption={Updating code~\ref{lst:thread2} to use fences.} ,captionpos=b,numbers=none]
 y = 30;
 fence();
 z = 1;
 \end{lstlisting}
 
-
-Languages such as \texttt{Java} or \texttt{C++} provide instructions to establish synchronization
-and ordering constraints between threads without an atomic operation. These
-instructions have semantics well-defined for
-
 \end{example}
 
+\section{After Hardware Foundations, What's Up About Programming Languages?}
 
+The previous section introduces the hardware foundations necessary to understand the memory consistency models and the cache protocols to implement correct concurrent programs. The model presented in the previous section is placed at the hardware level and low-level software. However, it is also important to (re)define memory models for high-level languages because it defines an interface between a program and any hardware or software that may transform that program. Also, a memory model helps to reason about how the program will behave in a multi-core environment~\cite{DBLP_journals_cacm_AdveB10, DBLP_series_synthesis_2020Nagarajan}.
 
+In recent years, memory models have been specified for C++~\cite{DBLP_conf_pldi_BoehmA08} and Java~\cite{DBLP_conf_popl_MansonPA05}, which are two of the most used programming languages currently. These programming language memory models describe the expected behavior of language-level threads, locks, atomics, and Read-Modify-Write instructions. Also, these memory models help to specify what high-level language authors should expect and what implementors of compilers, runtime systems, and hardware may do. Figure~\ref{fig:memory-models} illustrates the difference between (a) high-level and (b) low-level memory models.
 
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.9\linewidth]{contents//figures/III_3_memory_model.pdf}
+    \caption{(a) High-level language and (b) hardware memory models.}
+    \label{fig:memory-models}
+\end{figure}
 
-In the case of Java, we have static methods of the class VarHandle\footnote{\texttt{java.lang.invoke.VarHandle}}. Those are memory fence methods that help provide fine-grained control of memory ordering. These statics
+Java and C++ adopt the relaxed memory model approach of ``Sequential Consistency for Data-Race Freedom (SC for DRF)''~\cite{DBLP_conf_isca_AdveH90}.  A data race occurs when two memory accesses target the same location simultaneously and are not reads or synchronization operations. The approach of SC for DRF guarantees that a program is correctly synchronized if and only if all sequentially consistent executions are free of data races. If a program is correctly synchronized, then all program executions will appear to be sequentially consistent~\cite{javamemorymodelspec}. It is important to note that according to the C++ specification, there is a possibility of having valid programs that use synchronization operations with a memory order other than \texttt{memory\_order\_seq\_cst}. In such cases, the resulting program may be correct, but there is no guarantee of sequential consistency~\cite{DBLP_conf_pldi_BoehmA08}.
+
+VarHandle\footnote{\texttt{java.lang.invoke.VarHandle}}. Those are memory fence methods that help provide fine-grained control of memory ordering. These statics
 methods are \cite{varHandleJdk92017}:
 
 \begin{description}
@@ -282,7 +288,6 @@ atomic<int> is associated with each node. Whenever a reference to node N is
 created
 \end{enumerate}
 
-\section{\label{sec:practical-model}Language Model of Computation}
 \section{\label{sec:methodology}Experimental Methodology}
 
 \label{sec:orgebd0619}
