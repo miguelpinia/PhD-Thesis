@@ -1,6 +1,6 @@
 \chapter{\label{chapter:preliminaries}Preliminaries and Methodology}
 
-In this chapter, we will discuss all the necessary tools needed for this thesis. As we are considering asynchronous shared memory systems, the first section will cover the mathematical foundation for the computational model. This will include a formal description of concepts such as \emph{process},  \emph{algorithm}, and \emph{Linearizability~\cite{DBLP_journals_toplas_HerlihyW90}} in concurrent systems. In the following section, we delve into the hardware foundations of our concurrent systems. Specifically, we will explore concepts such as \emph{cache memory}, \emph{consistency memory model}, \emph{cache coherence}, and \emph{memory fences}, which are essential for implementing concurrent algorithms correctly. We will also discuss the concept of a memory model at the programming language level, and examine the Java and C++ memory models that define the allowable behavior of multithreaded programs. Finally, we will conclude this chapter by discussing the statistical experiment methodology we will use to analyze program implementations.
+In this chapter, we will discuss all the necessary tools needed for this thesis. As we are considering asynchronous shared memory systems, the first section will cover the mathematical foundation for the computational model. This will include a formal description of concepts such as \emph{process},  \emph{algorithm}, and \emph{Linearizability~\cite{DBLP_journals_toplas_HerlihyW90}} in concurrent systems. In the following section, we delve into the hardware foundations of our concurrent systems. Specifically, we will explore concepts such as \emph{cache memory}, \emph{consistency memory model}, \emph{cache coherence}, and \emph{memory fences}, which are essential for implementing concurrent algorithms correctly. We will also discuss the concept of a memory model at the programming language level and examine the Java and C++ memory models that define the allowable behavior of multithreaded programs. Finally, we will conclude this chapter by discussing the statistical experiment methodology we will use to analyze program implementations.
 
 \section{\label{sec:computation-model}Computation Model}
 
@@ -19,11 +19,11 @@ An operation in an execution is \emph{complete} if both its invocation and respo
 
 For any finite execution \(E\) and any process \(p_i\), \(E|p_i\) denotes the sequence of invocations and responses of \(p_i\) in \(E\). Two finite executions \(E\) and \(F\) are equivalent if \(E|p_i = F|p_i\) \(\forall p_i\). For any execution \(E\), \(comp(E)\) denotes the execution obtained by removing from \(E\) all steps and invocations of pending operations.
 
-\hl{A process is \emph{correct} in an infinite execution if it takes infinitely many steps.} An implementation is lock-free if in every infinite execution, infinitely many operations are complete~\cite{DBLP_journals_toplas_HerlihyW90}. An implementation is \emph{wait-free} if, in every infinite execution, every correct process completes infinitely many operations~\cite {DBLP_journals_toplas_Herlihy91}. Thus, a wait-free implementation is lock-free but not necessarily vice-versa. \emph{Bounded wait-freedom}~\cite{DBLP_conf_spaa_Herlihy91} additionally requires that there is a bound on the number of steps needed to terminate. The \emph{step complexity} is the maximum number of steps a process needs to execute to return. The step complexity of an algorithm is the maximum among the step complexity of its operations.
+A process is \emph{correct} in an infinite execution if it takes infinitely many steps. An implementation is lock-free if, in every infinite execution, infinitely many operations are complete~\cite{DBLP_journals_toplas_HerlihyW90}. An implementation is \emph{wait-free} if, in every infinite execution, every correct process completes infinitely many operations~\cite {DBLP_journals_toplas_Herlihy91}. Thus, a wait-free implementation is lock-free but not necessarily vice-versa. \emph{Bounded wait-freedom}~\cite{DBLP_conf_spaa_Herlihy91} additionally requires a bound on the number of steps needed to terminate. The \emph{step complexity} is the maximum number of steps a process needs to execute to return. The step complexity of an algorithm is the maximum among the step complexity of its operations.
 
-In the \emph{Read-After-Write} synchronization pattern, a process first writes in a shared variable and then reads another shared variable, maybe executing other instructions in between. For example, this mechanism is widely used in the classic Lamport's bakery mutual exclusion algorithm (see for example,~\cite {DBLP_books_daglib_0020056}). The correctness of the mechanism requires that the write and read instructions of a process are executed in a specific order, although there is no data dependence relation between them.
+In the \emph{Read-After-Write} synchronization pattern, a process first writes in a shared variable and then reads another shared variable, maybe executing other instructions in between. For example, this mechanism is widely used in the classic Lamport's bakery mutual exclusion algorithm (see~\cite {DBLP_books_daglib_0020056}). The correctness of the mechanism requires that the write and read instructions of a process are executed in a specific order, although there is no data dependence relation between them.
 
-An algorithm, or one of its operations, is \emph{fence-free} if it does not require any specific ordering among its steps beyond what is implied by data dependence (e.g. the value written by a \emph{Write} instruction depends on the value read by a previous \emph{Read} instruction). Note that a fence-free algorithm does not use \emph{Read-After-Write} synchronization patterns. In our algorithms, we use notation \(\{O_1.inst_1, \ldots, O_x.inst_x\}\) to denote that the instructions \(O_1.inst_1, \ldots, O_x.inst_x\) can be executed in any order. Observe that memory fences (also called memory barriers) are not required to correctly implement a fence-free algorithm in a concrete language or multi-core architecture since any reordering of non-data-dependent instructions does not affect the correctness of the algorithm.
+An algorithm, or one of its operations, is \emph{fence-free} if it does not require any specific ordering among its steps beyond what is implied by data dependence (e.g., the value written by a \emph{Write} instruction depends on the value read by a previous \emph{Read} instruction). Note that a fence-free algorithm does not use \emph{Read-After-Write} synchronization patterns. In our algorithms, we use notation \(\{O_1.inst_1, \ldots, O_x.inst_x\}\) to denote that the instructions \(O_1.inst_1, \ldots, O_x.inst_x\) can be executed in any order. Observe that memory fences (also called memory barriers) are not required to correctly implement a fence-free algorithm in a concrete language or multi-core architecture since any reordering of non-data-dependent instructions does not affect the correctness of the algorithm.
 
 \emph{Linearizability}~\cite{DBLP_journals_toplas_HerlihyW90} is the standard correctness condition for concurrent objects. Intuitively, an execution is linearizable if its (high-level) operations can be ordered sequentially, without reordering non-overlapping operations, so that their responses satisfy the specification of the implemented object.
 
@@ -76,7 +76,7 @@ The \emph{main memory} holds frequently accessed data for the CPU, such as instr
 \end{figure}
 
 When considering the simplified view of cache and memory architecture, it is important to ensure that shared memory is correct. Incoherence can occur when multiple actors have concurrent access to caches and memory, such as processor cores, external devices, system buses, etc., which may read and/or write to them. To us, the cores will be the main actors, but we must consider the possibility of other actors interacting with caches and memory.
-To ensure that shared memory is correct, we must address two key issues: \emph{consistency} and \emph{correctness}. Consistency provides rules about loads and stores (memory reads and writes) and how they act upon memory. These consistency rules must consider the behavior of those operations on memory through access to multiple threads or even a single thread. The consistency models define correct shared memory behavior regarding loads and stores without reference to caches or coherence \cite{DBLP_series_synthesis_2020Nagarajan}. Shared memory correctness is specified by a memory consistency model (or memory model). This defines the allowed behavior of multithreaded programs executing with shared memory. The most intuitive and strongest memory model is the \emph{Sequential Consistency} (SC)~\cite{lamport1979how}. Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order} (TSO) ~\cite{DBLP_conf_tphol_OwensSS09, DBLP_journals_cacm_SewellSONM10, sparc1992sparc}, motivated by the desire to use \emph{first-in-first-out} write buffers to hold the results of committed stores before writing results to the caches.  In addition to the prior memory model, ``relaxed'' or ``weak'' memory models are considered because these models show that most memory orderings in strong models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
+To ensure that shared memory is correct, we must address two key issues: \emph{consistency} and \emph{correctness}. Consistency provides rules about loads and stores (memory reads and writes) and how they act upon memory. These consistency rules must consider the behavior of those operations on memory through access to multiple threads or even a single thread. The consistency models define correct shared memory behavior regarding loads and stores without reference to caches, or coherence~\cite{DBLP_series_synthesis_2020Nagarajan}. Shared memory correctness is specified by a memory consistency model (or memory model). This defines the allowed behavior of multithreaded programs executing with shared memory. The most intuitive and strongest memory model is the \emph{Sequential Consistency} (SC)~\cite{lamport1979how}. Another memory model used by systems \emph{x86} and \emph{SPARC} is \emph{Total Store Order} (TSO) ~\cite{DBLP_conf_tphol_OwensSS09, DBLP_journals_cacm_SewellSONM10, sparc1992sparc}, motivated by the desire to use \emph{first-in-first-out} write buffers to hold the results of committed stores before writing results to the caches.  In addition to the prior memory model, ``relaxed'' or ``weak'' memory models are considered because these models show that most memory orderings in strong models are unnecessary \cite{DBLP_series_synthesis_2020Nagarajan}.
 
 It's important to consider cache coherence protocols when dealing with caching and solving coherence issues. These protocols come into play when multiple cores access multiple copies of data, with at least one being a write access. To ensure that the data accessed is up-to-date and consistent, the distributed set of cores implements a set of rules within a system~\cite{DBLP_series_synthesis_2020Nagarajan}. Hence, it is essential to consider consistency models and cache coherence protocols to prevent access to stale or incoherent data. The goal of a coherence protocol is to maintain coherence by enforcing the next invariants~\cite{DBLP_series_synthesis_2020Nagarajan}:
 
@@ -87,16 +87,16 @@ It's important to consider cache coherence protocols when dealing with caching a
   \item \emph{Data-Value Invariant}.The memory location's value at the start of an epoch equals its value at the end of the last write epoch.
 \end{enumerate}
 
-To ensure that the SWMR and data value invariants are maintained at all times, we use a distributed system consisting of a collection of \emph{coherence controllers}. Such controllers are finite state machines associated with each storage structure (cache and memory). These coherence controllers exchange messages with each other to ensure that invariants are upheld for each structure. The coherence protocol specifies the interaction between these finite-state machines and moving from one state to another based on the conditions of the data and the cache memory. The basic coherence states that most protocols use are: modified (M), shared (S), and invalid (I). AMD uses an extension of these states in its MOESI protocol, adding the owned (O) and exclusive (E) states~\cite{devices_amd64}. Intel uses its extension called MESIF~\cite{guideintel}.
+To ensure that the SWMR and data value invariants are always maintained, we use a distributed system consisting of a collection of \emph{coherence controllers}. Such controllers are finite state machines associated with each storage structure (cache and memory). These coherence controllers exchange messages with each other to ensure that invariants are upheld for each structure. The coherence protocol specifies the interaction between these finite-state machines and moving from one state to another based on the conditions of the data and the cache memory. 
+Coherence states play a crucial role in ensuring that the system operates smoothly. The most commonly used coherence states are modified (M), shared (S), and invalid (I). However, AMD has gone a step further with its MOESI protocol~\cite{devices_amd64} and introduced two additional states, owned (O) and exclusive (E), to improve the system's efficiency. On the other hand, Intel has created its extension called MESIF~\cite{guideintel} to achieve the same goal. 
 
-Processors that support the TSO memory model do not guarantee ordering between a store and a subsequent load that comes after it in program order. However, they do ensure that the load gets the value of the earlier store.  To order these instructions, the programmer needs to explicitly specify that ordering by inserting a \emph{fence} instruction between the store and the subsequent load.
-\hl{Address the discussion about ARM too?}
+Processors that support the TSO memory model do not guarantee ordering between a store and a subsequent load that comes after it in program order. However, they ensure that the load gets the value of the earlier store.  To order these instructions, the programmer must explicitly specify that ordering by inserting a \emph{fence} instruction between the store and the subsequent load.
 %The \emph{fence} instruction ensures that all instructions before it in program order are executed before any instructions after it in program order.
 A \emph{memory fence} is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction. These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs (See Example~\ref{ex:reordering}).
 
 \begin{example}[Instruction re-ordering]
 \label{ex:reordering}
-Consider the following multi-thread program with two threads, each one concurrently running on distinct cores. The first thread executes the code shown in~\ref{lst:thread1}, and the second one executes the code shown in~\ref{lst:thread2}:
+Consider the following multi-thread program with two threads, each concurrently running on distinct cores. The first thread executes the code shown in~\ref{lst:thread1}, and the second one executes the code shown in~\ref{lst:thread2}:
 
 \begin{lstlisting}[language=c++,label={lst:thread1}, caption={Code execute by thread 1 on core 1} ,captionpos=b]
 while (z == 0);
@@ -109,7 +109,7 @@ z = 1;
 \end{lstlisting}
 
 
-In this case, we might expect that the instruction \texttt{print(y)} always prints the number 30. Nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving as a result, an execution where the value for \texttt{y} is \emph{undefined}, and the instructions could be interleaved as shown in the code~\ref{lst:reordering}:
+In this case, we might expect that the instruction \texttt{print(y)} always prints the number 30. Nevertheless, the compiler or the CPU could change the order of the instructions for thread 2, giving, as a result, an execution where the value for \texttt{y} is \emph{undefined}, and the instructions could be interleaved as shown in the code~\ref{lst:reordering}:
 
 \begin{lstlisting}[language=c++,label={lst:reordering},caption={Code reordered by CPU}, captionpos=b]
 z = 1; // Thread 2
@@ -147,234 +147,111 @@ In recent years, memory models have been specified for C++~\cite{DBLP_conf_pldi_
     \label{fig:memory-models}
 \end{figure}
 
-Java and C++ adopt the relaxed memory model approach of ``Sequential Consistency for Data-Race Freedom (SC for DRF)''~\cite{DBLP_conf_isca_AdveH90}.  A data race occurs when two memory accesses target the same location simultaneously and are not reads or synchronization operations. The approach of SC for DRF guarantees that a program is correctly synchronized if and only if all sequentially consistent executions are free of data races. If a program is correctly synchronized, then all program executions will appear to be sequentially consistent~\cite{javamemorymodelspec}. It is important to note that according to the C++ specification, there is a possibility of having valid programs that use synchronization operations with a memory order other than \texttt{memory\_order\_seq\_cst}. In such cases, the resulting program may be correct, but there is no guarantee of sequential consistency~\cite{DBLP_conf_pldi_BoehmA08}.
+Java and C++ adopt the relaxed memory model approach of ``\emph{Sequential Consistency for Data-Race Freedom (SC for DRF)}''~\cite{DBLP_conf_isca_AdveH90}.  A data race occurs when two memory accesses target the same location simultaneously and are not reads or synchronization operations. The approach of \emph{SC for DRF} guarantees that a program is correctly synchronized if and only if all sequentially consistent executions are free of data races. If a program is correctly synchronized, then all program executions will appear to be sequentially consistent~\cite{javamemorymodelspec}. It is important to note that according to the C++ specification, there is a possibility of having valid programs that use synchronization operations with a memory order other than \texttt{memory\_order\_seq\_cst}. In such cases, the resulting program may be correct, but there is no guarantee of sequential consistency~\cite{DBLP_conf_pldi_BoehmA08}. In both cases, reordering or eliminating memory accesses between synchronization accesses is allowed for performance as long as data-race-free programs obey Sequential Consistency~\cite{DBLP_series_synthesis_2020Nagarajan}.
 
-VarHandle\footnote{\texttt{java.lang.invoke.VarHandle}}. Those are memory fence methods that help provide fine-grained control of memory ordering. These statics
-methods are \cite{varHandleJdk92017}:
+The memory order in C++ determines how memory is accessed~\cite{memoryOrderCpp2020}. It ensures that regular, non-atomic memory accesses are ordered around atomic operations. In a multi-core system, where multiple threads read and write to several variables simultaneously, one thread may observe the values changing in a different order than the order in which another thread wrote them. This can cause the apparent order of changes to differ among multiple reader threads~\cite{memoryOrderCpp2020}. Similar effects can occur even on uniprocessor systems due to compiler transformations allowed by the memory model. By default, all atomic operations in the library follow a sequentially consistent ordering. However, this default approach can negatively impact performance. To mitigate this, the atomic operations in the library can be provided with an additional \texttt{std::memory\_order} argument. This argument specifies the precise constraints the compiler and processor must enforce for a given operation beyond just ensuring atomicity~\cite{memoryOrderCpp2020}. Six memory models are defined in the specification, ranging from the weakest model (\texttt{memory\_order\_relaxed}) to the strongest one (\texttt{memory\_order\_seq\_cst}).
 
-\begin{description}
-\item[{fullFence}] Ensures that loads and stores before the fence will not be
-reordered with loads and stores after the fence. This method has memory
-ordering effects compatible with
-\texttt{atomic\_thread\_fence(memory\_order\_seq\_cst)}.
-\item[{acquireFence}] Ensures that loads before the fence will not be reordered
-with loads and stores after the fence. This method has memory ordering
-effects compatible with \texttt{atomic\_thread\_fence(memory\_order\_acquire)}.
-\item[{releaseFence}] Ensures that loads and stores before the fence will not
-be reordered with stores after the fence. This method has memory ordering
-effects compatible with \texttt{atomic\_thread\_fence(memory\_order\_release)}.
-\item[{loadLoadFence}] Ensures that loads before the fence will not be
-reordered with loads after the fence.
-\item[{storeStoreFence}] Ensures that stores before the fence will not be
-reordered with stores after the fence.
-\end{description}
+At the end of the previous section, we discussed about memory fences. C++ and Java provide memory fences to implement correct concurrent programs. C++ provides the function \texttt{atomic\_thread\_fence}, which establishes memory synchronization ordering of non-atomic and relaxed atomic accesses as instructed by order, without an associated atomic operation. A note about \texttt{atomic\_thread\_fence} functions is that on x86 (x86\_64), these functions issue no CPU instructions and only affect compile time code, with the exception for \texttt{std::atomic\_thread\_fence(std::memory\_order::seq\_cst)}, which issue the full memory fence instruction \texttt{MFENCE}. 
 
-For C++, we have the function
-\texttt{std::atomic\_thread\_fence}\cite{threadFenceCpp2020}, which establishes
-memory synchronization ordering of non-atomic and relaxed atomic access, as
-instructed by order, without an associated atomic operation. The type of
-synchronization that can handle the following:
+In the case of Java, the latest versions provide the class \texttt{VarHandle}\footnote{\texttt{java.lang.invoke.VarHandle}}, which exposes the memory fence methods~\cite{varHandleJdk92017} shown in the table~\ref{table:fences}. Many of these fences try to be similar to those defined by the specification of C++.
 
-\begin{itemize}
-\item Fence-atomic synchronization
-\item Atomic-fence synchronization
-\item Fence-Fence Synchronization
-\end{itemize}
+\begin{table}[ht!]
+\begin{tabular}{@{}ll@{}}
+\toprule
+\multicolumn{1}{l}{\textbf{Fence}} & \textbf{Description} \\ \midrule
+\texttt{fullFence} & \begin{tabular}[c]{@{}l@{}}Ensures that loads and stores before the fence will \\not be reordered with loads and stores after the fence.\\ This method has memory ordering effects compatible with \\  \texttt{atomic\_thread\_fence(memory\_order\_seq\_cst)}.\end{tabular} \\
+\midrule
+\texttt{acquireFence} & \begin{tabular}[c]{@{}l@{}}Ensures that loads before the fence will not be reordered\\ with loads and stores after the fence. This method has\\ memory ordering effects compatible with \\\texttt{atomic\_thread\_fence(memory\_order\_acquire)}.\end{tabular} \\
+\midrule
+\texttt{releaseFence} & \begin{tabular}[c]{@{}l@{}}Ensures that loads and stores before the fence will\\ not be reordered with stores after the fence. \\ This method has memory ordering effects compatible with\\  \texttt{atomic\_thread\_fence(memory\_order\_release)}.\end{tabular} \\
+\midrule
+\texttt{loadLoadFence} & \begin{tabular}[c]{@{}l@{}}Ensures that loads before the fence will\\ not be reordered with loads after the fence.\end{tabular} \\
+\midrule
+\texttt{storeStoreFence} & \begin{tabular}[c]{@{}l@{}}Ensures that stores before the fence will\\ not be reordered with stores after the fence.\end{tabular} \\ \bottomrule
+\end{tabular}
+\caption{\label{table:fences}Memory fences provided by Java}
+\end{table}
 
-Using a memory order\cite{memoryOrderCpp2020}, it can specify how memory accesses, including regular, non-atomic memory accesses, will be
-ordered around an atomic operation. There are six orders, from the
-relaxed memory order to the sequentially consistent memory order. They are:
-\texttt{memory\_order\_relaxed}, \texttt{memory\_order\_consume}, \texttt{memory\_order\_acquire},
-\texttt{memory\_order\_acq\_rel} and \texttt{memory\_order\_seq\_cst}. A note about
-\texttt{atomic\_thread\_fence} functions is that on x86 (x86\textsubscript{64}), these functions
-issue no CPU instructions and only affect compile time code, with the exception
-for \texttt{std::atomic\_thread\_fence(std::memory\_order::seq\_cst)}, which issue the
-full memory fence instruction \texttt{MFENCE}.
+%\subsection{Memory management}
+%\label{sec:org1ca9ee9}
 
-\subsection{Memory management}
-\label{sec:org1ca9ee9}
+%To implement efficiently the idempotent algorithms in an environment without garbage collection, it's necessary to use some technique or methodology to provide garbage collection when atomic pointers are used or when distinct threads want to reclaim the memory of the object associated with the pointer.
 
-To implement efficiently the idempotent algorithms in an environment without
-garbage collection, it's necessary to use some technique or methodology to
-provide garbage collection when atomic pointers are used or when distinct
-threads want to reclaim the memory of the object associated with the pointer.
+%\begin{enumerate}
+%\item Strategies to delete shared pointers
+%\label{sec:org36ce5a6}
 
-\begin{enumerate}
-\item Strategies to delete shared pointers
-\label{sec:org36ce5a6}
-
-\begin{itemize}
-\item Add pointers to list to safety delete.
-\item Do this when there aren't more threads accessing methods.
-\begin{itemize}
-\item Increase the counter when a thread enters the method and decrease when
-it exits.
-\item Delete all pointers when the counter is equal to zero.
-\end{itemize}
-\end{itemize}
+%\begin{itemize}
+%\item Add pointers to list to safety delete.
+%\item Do this when there aren't more threads accessing methods.
+%\begin{itemize}
+%\item Increase the counter when a thread enters the method and decrease when
+%it exits.
+%\item Delete all pointers when the counter is equal to zero.
+%\end{itemize}
+%\end{itemize}
 
 
-\item Hazard pointers
-\label{sec:org3992578}
+%\item Hazard pointers
+%\label{sec:org3992578}
 
-The \emph{Hazard Pointers} is a technique to manage language memory without garbage collectors. Maged proposed this technique
-Michael \cite{DBLP_journals_tpds_Michael04}. They are so-called because
-deleting a pointer that might be referenced by other thread(s) is
-dangerous. If another thread keeps holding references to that pointer and
-proceeds to access that pointer after being deleted, you have an undefined
-behavior \cite{DBLP_journals_tpds_Michael04}.
+%The \emph{Hazard Pointers} is a technique to manage language memory without garbage collectors. Maged proposed this technique Michael \cite{DBLP_journals_tpds_Michael04}. They are so-called because deleting a pointer that might be referenced by other thread(s) is dangerous. If another thread keeps holding references to that pointer and proceeds to access that pointer after being deleted, you have an undefined behavior \cite{DBLP_journals_tpds_Michael04}.
 
-The basic idea of this technique is the following:
+%The basic idea of this technique is the following:
 
-\begin{itemize}
-\item If a thread wants to use a pointer that another thread might want to
-delete, it first sets a hazard pointer to the pointer, informing the
-other thread that deleting it would be dangerous. Once the object
-is no longer needed, the hazard pointer is cleared.
-\item When a thread wants to delete the pointer, it must check if the hazard
-pointers belong to the other threads in the system. If no one has a
-reference to the pointer, then it's safe to delete it. Otherwise, it must be left until later.
-\item Periodically, we must check the list of objects that have been left until
-later to see if any of them can be deleted now.
-\end{itemize}
+%\begin{itemize}
+%\item If a thread wants to use a pointer that another thread might want to delete, it first sets a hazard pointer to the pointer, informing the other thread that deleting it would be dangerous. Once the object is no longer needed, the hazard pointer is cleared.
+%\item When a thread wants to delete the pointer, it must check if the hazard pointers belong to the other threads in the system. If no one has a reference to the pointer, then it's safe to delete it. Otherwise, it must be left until later.
+%\item Periodically, we must check the list of objects left until later to see if any of them can be deleted now. 
+%\end{itemize}
 
-A general pseudocode for this technique could be the following:
+%A general pseudocode for this technique could be the following:
 
-\begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
-void func() {
-    std::atomic<void*>& hp = get_hazard_pointer_for_current_thread();
-    void* old_data = data.load();
-    do {
-        void* temp;
-        do{ // Loop until you've set the hazard pointer
-            temp = old_data;
-            hp.store(old_data);
-            old_data = data.load();
-        } while (old_data != temp);
-          }while (old_data &&
-            !data.compare_exchange_strong(old_data, old_data->next);
-    // Do something with old_data
-    hp.store(nullptr); // clearing usage of hazard pointer
-    // Trying clearing
-    if (outstanding_hazard_pointers_for(old_head))
-    {
-        reclaim_later(old_data);
-    }
-    else
-    {
-        delete old_data;
-    }
-    delete_nodes_with_no_hazards();
-}
-\end{lstlisting}
+%\begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
+%void func() {
+%    std::atomic<void*>& hp = get_hazard_pointer_for_current_thread();
+%    void* old_data = data.load();
+%    do {
+%        void* temp;
+%        do{ // Loop until you've set the hazard pointer
+%            temp = old_data;
+%            hp.store(old_data);
+%            old_data = data.load();
+%        } while (old_data != temp);
+%          }while (old_data &&
+%            !data.compare_exchange_strong(old_data, old_data->next);
+%    // Do something with old_data
+%    hp.store(nullptr); // clearing usage of hazard pointer
+%    // Trying clearing
+%    if (outstanding_hazard_pointers_for(old_head))
+%    {
+%        reclaim_later(old_data);
+%    }
+%    else
+%    {
+%        delete old_data;
+%    }
+%    delete_nodes_with_no_hazards();
+%}
+%\end{lstlisting}
 
 
-\item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
-\label{sec:org58c7cdb}
+%\item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
+%\label{sec:org58c7cdb}
 
 
-When a memory region is reclaimed, the programmer cannot know how that
-region of memory will be reused or whether it is reused. We need a
-way of developing a (general) solution to prevent the sorts of races
-when a memory region is reclaimed by many threads asynchronously. We can
-do this by delaying reclamation.
-Thinking in terms of pending operations on a concurrent data structure, a
-sufficient condition is that \emph{memory is only reclaimed when it is impossible
-for any pending operation to access in the future}.
+%When a memory region is reclaimed, the programmer cannot know how that region of memory will be reused or whether it will be reused. We need a way of developing a (general) solution to prevent the sorts of races when a memory region is reclaimed by many threads asynchronously. We can do this by delaying reclamation. Considering pending operations on a concurrent data structure, a sufficient condition is that \emph{memory is only reclaimed when it is impossible for any pending operation to access in the future}.
 
-This property could also be achieved by \emph{reference counting}. In a reference
-counted implementation of a data structure (like a list), a counter of type
-atomic<int> is associated with each node. Whenever a reference to node N is
-created
-\end{enumerate}
+%This property could also be achieved by \emph{reference counting}. In a reference counted implementation of a data structure (like a list), a counter of type atomic<int> is associated with each node. Whenever a reference to node N is created
+%\end{enumerate}
 
 \section{\label{sec:methodology}Experimental Methodology}
 
-\label{sec:orgebd0619}
+One of the goals of this thesis is to assess the performance of our algorithms. In experimental computer science research and development, benchmarking plays a vital role. Developers perform benchmarking tests on their products under development to evaluate their performance, while researchers use benchmarking to assess the impact on the performance of their novel research ideas~\cite{DBLP_conf_oopsla_GeorgesBE07}.
 
-To evaluate the performance of our Queue, we design a set of experiments that
-allow us to know if the Queue is competitive against other queues in the
-literature. We divide our experiments into two classes: \emph{inner experiments}
-\sout{(this name could change in the future)} and \emph{outer experiments}. We used the
-inner experiments to know which one of our implementations (LL/IC object and
-Queue based on distinct variants of the LL/IC objects) have the best
-performance and throughput. Once the inner experiments and the best
-option are chosen, we evaluate the Queue against queues in state of the
-art. We compare our Queue against:
+In this thesis, we have followed and adapted the guidelines presented in the following sources \cite{forsyth2018probability, DBLP_conf_oopsla_GeorgesBE07,lilja2005measuring}. These guidelines provide fundamental techniques for measuring computer performance, along with strategies for analyzing and interpreting the resulting data. Topics covered include performance metrics, benchmarking programs, and statistical tools. By following these guidelines, we can perform rigorous statistical evaluation, gain a better understanding of the performance of our algorithm implementations, and compare them against other algorithms.
 
-\begin{enumerate}
-\item Queue from Michael and Scott \cite{DBLP_conf_podc_MichaelS96}.
-\item Queue from Yang and Mellor-Crummey \cite{DBLP_conf_ppopp_YangM16}.
-\item We try to compare against the Queue from Ostrovsky and Morrison, but we
-are limited by hardware \cite{scalingconcurrent2020}. (Possible change).
-\end{enumerate}
-
-We follow and adapt the guidelines shown in
-\cite{lilja2005measuring, DBLP_conf_oopsla_GeorgesBE07, forsyth2018probability} to perform such evaluation. In
-these guidelines, they explain how to measure computer performance using
-fundamental techniques to analyze and understand the performance of computer
-systems. They also discuss performance metrics, strategies used in
-benchmark programs, and statistical tools to interpret measured performance
-data.
-
-\subsection{Inner Experiments}
-\label{sec:org4649774}
-
-To evaluate the performance of our distinct variants for the LL/IC Object
-and the Queue, we perform the following experiments:
-
-\begin{enumerate}
-\item For an initial empty LL/IC Object, we perform a fixed number of calls to
-LL/IC pairs. In each iteration, a thread executes a call to the LL method
-followed by a call to the IC method. These calls are spread evenly among
-a fixed number of threads, which work concurrently. Each thread performs
-a random amount of "fake work" between both calls to avoid long-run
-scenarios
-\cite{DBLP_conf_ppopp_YangM16,DBLP_conf_podc_MichaelS96}. This fake
-work is just an empty spin.
-\item To test our concurrent Queue, we perform two benchmarks. The first one is
-to perform enqueue-dequeue pairs similar to the previous experiment. In
-the second one, in each iteration, each thread decides randomly to
-execute a dequeue or enqueue with the same probability. The total of
-calls is partitioned evenly among all threads.
-\end{enumerate}
-
-
-\subsection{Update experiments}
-\label{sec:org5027fac}
-
-To update the experiments, we must understand what metrics
-allow us to compare the algorithms designed for LL/IC objects and Baskets. A
-common way to evaluate experimental results is the use of measurements to
-understand the performance or the throughput of the experiments;
-but what is the meaning of performance and throughput? According to the
-Cambridge Dictionary, \emph{Throughput} is the amount of work done in a particular
-period; on the other side, performance is how well someone or something
-functions, works, etc. Conversely, \emph{Performance} refers to the amount
-of useful work a system accomplices. Performance usually is measured in
-terms of accuracy, efficiency, and speed of executing instructions. From
-\cite{lilja2005measuring}, some strategies for measurement are:
-
-\begin{description}
-\item[{Event driven}] It records the information necessary to calculate the
-performance metric whenever an event occurs.
-\item[{Tracing}] Similarly to the previous, but instead of recording the event
-that has occurred, a portion of the system is recorded to identify the event.
-\item[{Sampling}] This strategy records a portion of the system in a fixed time
-interval.
-\item[{Indirect measurement}] This type occurs when the metric data is not
-directly accessible, and you must find another metric that can be measured
-directly.
-\end{description}
-
-We can combine those strategies with the use of interval timers to measure
-how much time it takes to execute the program or some section of code; this can
-also provide a time basis for sampling.
-
-In \href{https://en.wikipedia.org/wiki/Computer\_performance}{terms of computing}, the performance refers to the amount of useful
-work accomplished by a computer system. Computer performance is measured in
-terms of accuracy, efficiency, and speed of executing computer program
-instructions. One or more of the following factors might be involved:
+A common method of evaluating experimental results is by measuring performance or throughput. But what do these terms mean? \emph{Throughput}, as defined by the Cambridge Dictionary, is the amount of work completed in a given period. In contrast, \emph{performance} refers to how well something functions or works. Specifically, performance is measured by the amount of useful work a system accomplishes, typically determined by its accuracy, efficiency, and speed of executing instructions. One or more of the following factors might be involved when performance is measured:
 
 \begin{enumerate}
 \item Short response time for a given piece of work.
@@ -385,43 +262,35 @@ instructions. One or more of the following factors might be involved:
 \item Short data transmission time.
 \end{enumerate}
 
-To begin with a performance-analysis problem, three techniques can be used to find the desired solution:
-
-\begin{enumerate}
-\item Measurements of existing systems.
-\item Simulation.
-\item Analytical modeling.2
-\end{enumerate}
-
-Some benchmarks used to test concurrent queues are:
+From the work of Lilja~\cite{lilja2005measuring}, some strategies for measurement are:
 
 \begin{itemize}
-\item enqueue - dequeue pairs:
-\item 50\% enqueues
+\item \textbf{Event driven}: It records the information necessary to calculate the
+performance metric whenever an event occurs.
+\item \textbf{Tracing}: Similarly to the previous, but instead of recording the event
+that has occurred, a portion of the system is recorded to identify the event.
+\item \textbf{Sampling}: This strategy records a portion of the system in a fixed time
+interval.
+\item \textbf{Indirect measurement}: This type occurs when the metric data is not
+directly accessible, and you must find another metric that can be measured
+directly.
 \end{itemize}
 
-In both benchmarks, some work is added to avoid long-run scenarios. This
-anomaly is described in \cite{DBLP_conf_podc_MichaelS96} and to avoid it, the
-work added consists of spinning a small amount of time (6 \(\mu\)s) in an
-empty loop. The idea behind this is to prevent long runs of queue operations
-by the same process without this being interrupted, so this would display
-an overly optimistic performance due to the lower cache miss rate.
+We can combine those strategies with interval timers to measure how long it takes to execute the program or some section of code; this can also provide a time basis for sampling.
 
 
-\subsection{Statistics tools for experiments}
-\label{sec:orga1c9a7a}
+%\hl{To begin with a performance-analysis problem, three techniques can be used to find the desired solution:}
 
-To evaluate our modular queue with all its variants, we need to determine a
-methodology to know their performance and the throughput of each
-variant. Also, we need to compare them with other queue algorithms in the
-literature to check if it is competitive. We will divide the experiments into
-two categories; the first is related to measuring the performance of the
-distinct variants described previously. The second is to compare our best
-queue algorithm (or the two best) to related queue algorithms in the
-literature. To know the performance of our algorithms, we want to measure the
-time required to execute a set of operations over an interval of time, i.e.,
-how quickly complete its execution the program. The technique used to measure
-the time of an event is the following:
+%\begin{enumerate}
+%\item Measurements of existing systems.
+%\item Simulation.
+%\item Analytical modeling.
+%\end{enumerate}
+
+\subsection{\label{subsec:statistics}Statistic tools for experiments}
+
+As computer science researchers, we aim to measure and compare the performance of novel and existing algorithms. To evaluate the effectiveness of these algorithms, we need to establish an experimental methodology that allows us to measure their performance and throughput and determine whether they are competitive. In this thesis, we propose various versions of the same algorithm for different studies. We will divide our experiments into two categories. The first category is related to measuring the performance of the different algorithm versions.
+In contrast, the second category is focused on comparing our best algorithm (or the two best) to other algorithms in the literature. To evaluate the performance of our algorithms, we will measure the time required to execute a set of operations over a given interval of time, i.e., this will help us determine how quickly the program can complete its execution. The technique used to measure the time of an event is the following:
 
 \begin{itemize}
 \item Read the current time and store it in a variable \texttt{start\_count}.
@@ -432,29 +301,15 @@ total time required to execute the event.
 \end{itemize}
 
 This technique for measuring the execution time of any portion of a program
-is known as the \emph{wall clock} time\cite{lilja2005measuring}. All the events we
-want to measure will use this technique to get their execution time.
-However, this measurement includes the time spent on other system operations,
-like memory paging, thread interleaving, input/output operations, and network
-communication, if applicable. Those external events could introduce
-uncertainty into our measurements. We refer to these uncertainties in
-measurements as errors or noise. To know how much uncertainty exists, we must
-use probability and statistics tools to quantify it. To summarize a
-collection of measures, we can use indices of central tendency (the mean, the
-median, and the mode). The most commonly used index is the (sample
-arithmetic) mean or average, which can summarize all the measurements
-performed into a single number that somehow represents the center of the
-distribution of these values. To quantify the precision of our measurements,
-we can use a \emph{confidence interval} for the mean
-value\cite{lilja2005measuring, DBLP_conf_oopsla_GeorgesBE07}. Other tools we
-need are the \emph{sample variance}, the \emph{standard deviation}, and the \emph{coefficient of
-variation}. Formally, the \emph{(sample arithmetic) mean} is defined to be:
+is known as the \emph{wall clock} time~\cite{lilja2005measuring}. We will use this technique to measure all the events we want to track. However, remember that this measurement includes time spent on other system operations, such as memory paging, thread interleaving, input/output operations, and network communication, if applicable. These external events can introduce uncertainty, errors, or noise into our measurements. To quantify the uncertainty, we need to use probability and statistics tools. To summarize a collection of measures, we can use indices of central tendency such as the mean, median, and mode. The most commonly used index is the sample arithmetic mean or average, which can summarize all the measurements into a single value that represents the center of the distribution of these values.  To quantify the precision of our measurements, we can use a \emph{confidence interval} for the mean value~\cite{DBLP_conf_oopsla_GeorgesBE07, lilja2005measuring}. Other tools we need are the \emph{sample variance}, the \emph{standard deviation}, and the \emph{coefficient of variation}.
+
+Formally, the \emph{(sample arithmetic) mean} is defined to be:
 
 \begin{equation}
 \bar{x}_A = \frac{1}{n}\sum^n_{i = 1}x_i
 \end{equation}
 
-Where \(x_i\) values the individual measurements. The \emph{sample variance}
+Where \(x_i\) values are the individual measurements. The \emph{sample variance}
 represent our calculated estimate of the actual variance. It is defined to be:
 
 \begin{equation}
@@ -534,13 +389,7 @@ follows the \emph{Student's t}-distribution with \(n - 1\), obeys: \(Pr[T < t_{1
    \alpha/2;n - 1}] = 1 - \alpha/2\), where the value \(z_{1 - \alpha/2;n - 1}\)
 is typically obtained from a pre-computed table.
 
-The interesting thing about confidence intervals is that they tell us
-something about how much noise there is in the measurements. However, we want
-to use those measurements to make decisions, considering the performance of
-one or more systems. To perform that, we need a technique to determine
-whether any changes are due to random fluctuations in the measurements or
-whether they are significant in a statistical sense. We can use the following
-two techniques:
+Confidence intervals are an interesting concept because they provide insight into how much noise there is in measurements. However, when making decisions about the performance of one or more systems, we need to determine whether changes are due to random fluctuations or if they are statistically significant. To do this, we can use the following two techniques~\cite{DBLP_conf_oopsla_GeorgesBE07, lilja2005measuring}:
 
 \begin{enumerate}
 \item Comparing two alternatives
@@ -590,7 +439,7 @@ nearest to:
  n_{df} = \frac{(\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2})^2}{\frac{(s_1^2/n_1)^2}{n_1 - 1} + \frac{(s_2^2/n_2)^2}{n_2 - 1}}
 \end{equation}
 
-In the case of the \textbf{Analysis of Variance (ANOVA)}, which is a general technique
+In the case of the \textbf{Analysis of Variance (ANOVA)}, a general technique
 for observing the variation in a collection of measurements into meaningful
 components. To perform this analysis, it is necessary to assume that the errors
 in the measurements for the distinct alternatives are independent and under
@@ -603,12 +452,16 @@ measurement error.
 \item The variation \emph{between} alternatives.
 \end{enumerate}
 
-If the variation between the alternatives is larger than the variation within
-each alternative, then it can be concluded that there is a statistically significant difference between the alternatives. To evaluate ANOVA, we must
-organize the measurements as it is shown in the table:
+If the variation between the alternatives is larger than the variation within each alternative, then it can be concluded that there is a statistically significant difference between the alternatives. To evaluate ANOVA, we must organize the measurements as shown in the table~\ref{table:anova}: there are \(n \cdot k\) measurements for all \(k\) alternatives. The column means are defined as:
 
+\begin{equation}
+  \bar{y}_{.j} = \frac{\sum^n_{i = 1}y_{ij}}{n}
+\end{equation}
+
+
+\begin{table}
 \begin{center}
-\begin{tabular}{llllllll}
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
 \hline
 Measurements & 1 & 2 & \(\hdots\) & \(j\) & \(\hdots\) & \(k\) & Overall mean\\[0pt]
 \hline
@@ -623,15 +476,37 @@ Column means & \(\bar{y}_{.1}\) & \(\bar{y}_{.2}\) & \(\hdots\) & \(\bar{y}_{.j}
 \hline
 \end{tabular}
 \end{center}
-
-The column means are defined as:
-
-\begin{equation}
-  \bar{y}_{.j} = \frac{\sum^n_{i = 1}y_{ij}}{n}
-\end{equation}
+\caption{\label{table:anova}Organizing the \(n\) measurements for \(k\) alternatives in an ANOVA analysis}
+\end{table}
 
 The overall mean is defined as:
 
 \begin{equation}
   \bar{y}_{..} = \frac{\sum^k_{j = 1}\sum^n_{i = 1}y_{ij}}{n\cdot{}k}
 \end{equation}
+
+Compute the sum of squares of the differences between the mean of the measurements for each alternative and the overall mean to find the variation due to the effects of the alternatives (SSA):
+
+\begin{equation}
+    SSA = n \sum_{j = 1}^{k} (\bar{y}_{.j} - \bar{y}_{..})^2
+\end{equation}
+
+The variation within an alternative due to random effects is calculated by summing the differences (or errors) between individual measurements and their respective alternative mean.
+
+\begin{equation}
+    SSE = \sum_{j = 1}^{k}\sum_{i = 1}^{n} (y_{ij} - \bar{y}_{.j})^2
+\end{equation}
+
+Finally, the sum-of-squares total, SST, or the sum of squares of the differences between the individual measurements and the overall mean is defined as:
+
+\begin{equation}
+    SST = \sum_{j = 1}^{k}\sum_{i = 1}^{n} (y_{ij} - \bar{y}_{..})^2
+\end{equation}
+
+It is possible to split the observed total variation (SST) into a \emph{within} component (SSE) and a \emph{between} component (SSA).
+
+\begin{equation}
+    SST = SSA + SSE
+\end{equation}
+
+ANOVA analysis quantifies whether there is a difference in variation across alternatives (SSA) compared to variation within each alternative (SSE) due to random measurement errors. One way to do this is to compare the fractions \(\frac{SSA}{SST}\) and \(\frac{SSE}{SST}\). A more rigorous approach is to use the F-test~\cite{lilja2005measuring}, which tests whether two variances are significantly different.  After conducting an ANOVA test, we may determine a significant difference between the alternatives, but the test does not specify which alternatives have a significant difference. Various techniques can be employed to determine between which alternatives there is or is not a statistically significant difference. We will describe the techniques we'll use for each of our specific case studies.

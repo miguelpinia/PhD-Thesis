@@ -398,9 +398,61 @@ innerbottommargin=5pt]{cBox}
 %%%%%%%%%%%%%%%%%%%
 
 \hyphenation{Reentrant-Read-Write-Lock Stamped-Lock}
+% \renewcommand{\lstlistlistingname}{Índice de códigos}%\lstlistingname
+% \setlist{itemsep=4pt,parsep=0pt}
+\newcommand{\Put}{{\sf \small Put}\xspace}
+\newcommand{\Take}{{\sf \small Take}\xspace}
+\newcommand{\Puts}{{\sf \small Puts}\xspace}
+\newcommand{\Takes}{{\sf \small Takes}\xspace}
+\newcommand{\Steal} {{\sf \small Steal}\xspace}
+\newcommand{\Steals} {{\sf \small Steals}\xspace}
+\newcommand{\RAW}{{\sf \small Read-After-Write}\xspace}
+\newcommand{\RMW}{{\sf \small Read-Modify-Write}\xspace}
+\newcommand{\CAS}{{\sf \small Compare\&Swap}\xspace}
+\newcommand{\TAS}{{\sf \small Test\&Set}\xspace}
 \newcommand{\R}{{\sf \small Read}\xspace}
 \newcommand{\W}{{\sf \small Write}\xspace}
+\newcommand{\MaxReg}{{\sf \small MaxRegister}\xspace}
+\newcommand{\RangeMaxReg}{{\sf \small RangeMaxRegister}\xspace}
+\newcommand{\abort}{{\sf \small abort}\xspace}
+\newcommand{\SWAP}{{\sf \small Swap}\xspace}
+\newcommand{\Enq}{{\sf \small Enqueue}\xspace}
+\newcommand{\Push}{{\sf \small Push}\xspace}
+\newcommand{\Pop}{{\sf \small Pop}\xspace}
+\newcommand{\Deq}{{\sf \small Dequeue}\xspace}
+\newcommand{\op}{{\sf \small op}\xspace}
+\newcommand{\true}{{\sf \small true}\xspace}
+\newcommand{\false}{{\sf \small false}\xspace}
+\newcommand{\epty}{{\sf \small empty}\xspace}
+\newcommand{\NBWSM}{{\sf \small NB-WS-MULT}\xspace}
+\newcommand{\SetLin}{{\sf \small SetLin}\xspace}
+\newcommand{\WFWSM}{{\sf \small WS-MULT}\xspace}
+\newcommand{\MaxR}{{\sf \small MaxRead}\xspace}
+\newcommand{\MaxW}{{\sf \small MaxWrite}\xspace}
+\newcommand{\RMaxR}{{\sf \small RMaxRead}\xspace}
+\newcommand{\RMaxW}{{\sf \small RMaxWrite}\xspace}
+\newcommand{\NCWSM}{{\sf \small WS-WMULT}\xspace}
+\newcommand{\Lin}{{\sf \small Lin}\xspace}
+\newcommand{\ABWSM}{{\sf \small ABRT-WS-MULT}\xspace}
+\newcommand{\BNBWSM}{{\sf \small B-WS-MULT}\xspace}
+\newcommand{\BNCWSM}{{\sf \small B-WS-WMULT}\xspace}
+\newcommand{\BWFWSM}{{\sf \small B-WS-MULT}\xspace}
 
-% \renewcommand{\lstlistlistingname}{Índice de códigos}%\lstlistingname
+\newcounter{linecounter}
+\newcommand{\linenumbering}{\ifthenelse{\value{linecounter}<10}{(0\arabic{linecounter})}{(\arabic{linecounter})}}
+\renewcommand{\line}[1]{\refstepcounter{linecounter}\label{#1}\linenumbering}
+\newcommand{\resetline}[1]{\setcounter{linecounter}{0}#1}
 
-% \setlist{itemsep=4pt,parsep=0pt}
+\newcommand{\AC}[1]{{\color{violet}#1}}
+\newcommand{\ACC}[1]{{\color{red}#1}}
+\definecolor{hanblue}{RGB}{68, 108, 207}
+\newcommand{\MP}[1]{{\textcolor{hanblue}{#1}}}
+\newcommand{\DISCUSS}[1]{{\textcolor{orange}{#1}}}
+\hyphenation{li-nea-ri-za-bi-li-ty}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

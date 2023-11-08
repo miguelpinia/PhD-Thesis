@@ -1,1 +1,53 @@
 \chapter{Case Of Study 2: Modular Basket Queues}
+
+To evaluate the performance of our Queue, we design a set of experiments that allow us to know if the Queue is competitive against other queues in the literature. We divide our experiments into two classes: \emph{inner experiments} \sout{(this name could change in the future)} and \emph{outer experiments}. We used the inner experiments to know which one of our implementations (LL/IC object and Queue based on distinct variants of the LL/IC objects) have the best performance and throughput. Once the inner experiments and the best option are chosen, we evaluate the Queue against queues in state of the art. We compare our Queue against:
+
+\begin{enumerate}
+\item Queue from Michael and Scott \cite{DBLP_conf_podc_MichaelS96}.
+\item Queue from Yang and Mellor-Crummey \cite{DBLP_conf_ppopp_YangM16}.
+\item We try to compare against the Queue from Ostrovsky and Morrison, but we are limited by hardware \cite{scalingconcurrent2020}. (Possible change).
+\end{enumerate}
+
+
+\subsection{Inner Experiments}
+\label{sec:org4649774}
+
+To evaluate the performance of our distinct variants for the LL/IC Object
+and the Queue, we perform the following experiments:
+
+\begin{enumerate}
+\item For an initial empty LL/IC Object, we perform a fixed number of calls to
+LL/IC pairs. In each iteration, a thread executes a call to the LL method
+followed by a call to the IC method. These calls are spread evenly among
+a fixed number of threads, which work concurrently. Each thread performs
+a random amount of "fake work" between both calls to avoid long-run
+scenarios
+\cite{DBLP_conf_ppopp_YangM16,DBLP_conf_podc_MichaelS96}. This fake
+work is just an empty spin.
+\item To test our concurrent Queue, we perform two benchmarks. The first one is
+to perform enqueue-dequeue pairs similar to the previous experiment. In
+the second one, in each iteration, each thread decides randomly to
+execute a dequeue or enqueue with the same probability. The total of
+calls is partitioned evenly among all threads.
+\end{enumerate}
+
+
+\subsection{Update experiments}
+\label{sec:org5027fac}
+
+To update the experiments, we must understand what metrics
+allow us to compare the algorithms designed for LL/IC objects and Baskets.
+
+Some benchmarks used to test concurrent queues are:
+
+\begin{itemize}
+\item enqueue - dequeue pairs:
+\item 50\% enqueues
+\end{itemize}
+
+In both benchmarks, some work is added to avoid long-run scenarios. This
+anomaly is described in \cite{DBLP_conf_podc_MichaelS96} and to avoid it, the
+work added consists of spinning a small amount of time (6 \(\mu\)s) in an
+empty loop. The idea behind this is to prevent long runs of queue operations
+by the same process without this being interrupted, so this would display
+an overly optimistic performance due to the lower cache miss rate.
