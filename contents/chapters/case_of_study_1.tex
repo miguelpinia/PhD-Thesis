@@ -457,3 +457,21 @@ By composability of linearizability~\cite{DBLP_journals_toplas_HerlihyW90}, the 
 \end{thesisproof}
 
 Figure~\ref{figure-w-mult} contains an optimized \NCWSM algorithm with the \RangeMaxReg algorithm in Figure~\ref{figure-algo-range-max-reg} inlined. Since \Take and \Steal first \RMaxR from and then \RMaxW to \(Head\), the algorithm remains sequentially exact when removing Line~\ref{C01} of \RMaxW in Figure~\ref{figure-algo-range-max-reg}. Our experimental evaluation in Section~\ref{sec-experiments} tested implementations of this algorithm.
+
+\section{Bounding the Multiplicity\label{sec-bound-mult}}
+
+In this section, we discuss simple variants of our algorithms that bound the number of operations that can extract the same task.  We only discuss the case of \WFWSM as the variants for \NCWSM are similar.
+
+\paragraph*{Bounding multiplicity}
+
+We call this variant \BNCWSM. The modification consists of an extra array \(A\) of the same length as \(Tasks\) array, with its first two entries initialized to $\true$.  $\Steal$ is modified as follows: after Line~\ref{A14}, a thief performs \(A[head].\SWAP(\false)\), and it executes Lines~\ref{A16} and~\ref{A17} only if the $\SWAP$ successfully takes the \true value in \(A[head]\); otherwise, it goes to the Line~\ref{A12} to start over.  The modified algorithm guarantees that no two distinct $\Steal$ operations take the same task, however, a \Take and a $\Steal$ can take the same task.  Note that $\Steal$ is only nonblocking in the modified algorithm.  The new algorithm is a set-linearizable solution to the variant of work-stealing with multiplicity (Definition~\ref{def-ws-mult}), where every concurrency class has at most one \Take and one \Steal that return the same task. The set-linearizability proof is basically the same with the difference in the sizes of concurrency classes.
+
+
+\paragraph*{Removing multiplicity}
+
+The \Take operation of \BNBWSM can be modified similarly to obtain an algorithm for exact (FIFO) work-stealing, i.e., every task is taken \emph{exactly} once (Definition~\ref{def-ws-mult} with singleton concurrency classes). The modified \Take operation is only nonblocking.
+
+
+\paragraph*{Multiplicity on demand}
+
+Consider a variant of Definition~\ref{def-ws-mult} in which a task \(x\) encodes if several processes can execute it, denoted \({\sf mult}(x)\), or it has to be executed by a single process, denoted \({\sf \neg mult}(x)\) (in practice this can be done, for example, by stealing a bit from the task representation). Then, \WFWSM can be modified to have multiplicity \emph{on demand}. In the modified \Take operation, after executing the instructions in Line~\ref{A06}, the owner tests if \({\sf mult}(x)\) holds, and if so, it returns \(x\); otherwise, it performs \(Tasks[head].\SWAP(\top)\), and then returns \(x\) only if the \(\SWAP\) successfully takes the task in \(Tasks[head]\) (i.e. if it obtains a value distinct from $\bot$ and $\top$), else it goes to Line~\ref{A04} and starts over. In the modified \Steal operation, after Line~\ref{A13}, a thief checks if \(x = \bot\), and if so, it returns \(\epty\). Then, it checks if \(x \neq \top\) and \({\sf mult}(x)\) holds, and if so it returns \(x\).  Otherwise, \(x \neq \top\) and \({\sf \neg mult}(x)\) holds, and hence the thief performs \(Tasks[head].\SWAP(\top)\) and returns \(x\) only if \(\SWAP\) returns a value distinct from \(\top\), else it goes to Line~\ref{A12} and starts over.  In the resulting algorithm, if \({\sf mult}(x)\) holds, \(x\) is taken by one operation.  The modified $\Take$ and $\Steal$ operations are only nonblocking.  Again, the set-linearizability proof is basically the same with the difference in the sizes of concurrency classes.
