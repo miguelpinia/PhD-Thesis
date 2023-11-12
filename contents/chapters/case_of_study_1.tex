@@ -18,6 +18,453 @@ Morrison and Afek consider the TSO model~\cite{DBLP_journals_cacm_SewellSONM10} 
 
 \section{\label{sec-ws-mult}Work-Stealing with Multiplicity}
 
+Work-stealing with \emph{multiplicity} is a relaxation in which, roughly speaking, every task is extracted \emph{at least once}, and if several operations extract the task, they must be \emph{concurrent}.  In the formal set-sequential specification below (and its variant in the next section), tasks are inserted/extracted in FIFO order.  The definition can be easily adapted to encompass other orders (e.g., LIFO).  Figure~\ref{fig-example-execution} depicts an example of a set-sequential execution of work stealing with multiplicity, where concurrent \Take/\Steal operations extract the same task.
+
+\begin{figure}[ht]
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{figures/figure2}
+    \caption{\label{fig-example-execution}A set-sequential execution
+      of work-stealing with multiplicity.}
+  \end{center}
+\end{figure}
+
+\begin{definition}[FIFO Work-Stealing with Multiplicity\label{def-ws-mult}]
+
+The universe of tasks that the owner can put is \(\mathbf{N} = \{ 1, 2, \hdots \}\), and the set of states \(Q\) is the infinite set of finite strings \(\mathbf{N}^*\).  The initial state is the empty string, denoted \(\epsilon\).  In state \(q\), the first element in \(q\) represents the \emph{head} and the last one the \emph{tail}. The transitions are the following:
+
+{\def\OldComma{,}
+  \catcode`\,=13
+  \def,{%
+    \ifmmode%
+    \OldComma\discretionary{}{}{}%
+    \else%
+    \OldComma%
+    \fi%
+  }%
+  \begin{enumerate}
+
+  \item \(\forall q \in Q\),
+    \( \delta(q, \Put(x)) = (q \cdot x, \langle \Put(x): \true
+    \rangle)\).
+
+  \item \(\forall q \in Q, 0\leq t\leq n-1\), \(x \in \mathbf{N}\), \(
+    \delta(x \cdot q, \{\Take(), \Steal_1(), \hdots, \Steal_t() \})
+    = (q, \{ \langle \Take():x \rangle, \langle \Steal_1():x \rangle,
+    \hdots, \langle \Steal_t():x \rangle \})\).
+
+  \item \(\forall q \in Q\), \(1\leq t\leq n-1\), \(x \in \mathbf{N}\),
+    \(\delta(x \cdot q, \{\Steal_1(), \hdots, \Steal_t() \}) =
+    (q, \{\langle \Steal_1():x \rangle, \hdots, \langle
+    \Steal_t():x \rangle\})\).
+
+  \item \(\delta(\epsilon, \Take()) = (\epsilon, \langle \Take(): \epty
+    \rangle)\).
+
+  \item \(\delta(\epsilon, \Steal()) = (\epsilon, \langle \Steal(): \epty
+    \rangle)\).
+
+  \end{enumerate}}
+
+\end{definition}
+
+Let \(\mathcal A\) be a set-linearizable algorithm for work-stealing with multiplicity.  Note that items 2 and 3 in Definition~\ref{def-ws-mult} and the definition of set-linearizability directly imply that in every execution of \(\mathcal A\), the number of \Take/\Steal operations that take the same task is, at most, the number of processes in the system, as the operations must be pairwise concurrent to be set-linearized together. Furthermore, every \emph{sequential} execution of \(\mathcal A\) (i.e., an execution where operations do not overlap in time) is a sequential executions of non-relaxed work-stealing, as every operation is linearized alone, by definition of set-linearizability. Formally, every sequential execution of \(\mathcal A\) is a sequential execution of (FIFO) work-stealing. We call this property \emph{sequentially-exact}.  Thus, without contention, \(\mathcal A\) provides an exact solution for (FIFO) work-stealing.
+
+\begin{remark}~\label{remark-seq-exact-set-lin}
+Every set-linearizable algorithm for work-stealing with multiplicity is sequentially-exact.
+\end{remark}
+
+\subsection{\label{sec-ws-mult-max-reg}Work-Stealing with Multiplicity from \MaxReg}
+
+
+We show that work-stealing with multiplicity can be reduced to a single instance of a \MaxReg object (defined below).  Our algorithm together with any \R/\W wait-free linearizable algorithms for \MaxReg provides a \R/\W algorithm for work-stealing with multiplicity.  We argue that using the \MaxReg algorithm of Aspnes, Attiya and Censor-Hillel~\cite{DBLP_journals_jacm_AspnesAC12}, the resulting work-stealing algorithm with multiplicity has logarithmic step complexity , devoid of \RAW synchronization patterns. The algorithm presented in this section seem to have no practical implications, however, it will lead us to our efficient fully fence-free \R/\W work-stealing algorithm with
+
+constant step complexity in all its operations.
+
+Figure~\ref{figure-max-reg-mult} contains \WFWSM, a set-linearizable algorithm for work-stealing with multiplicity. The algorithm uses \MPR{a linearizable wait-free \MaxReg object}, which provides two operations: \MaxR that returns the maximum value written so far in the object, and \MaxW that writes a new value only if it is greater than the largest value that has been written so far.
+
+
+In \WFWSM, the tail of the queue is stored in the persistent local variable \(tail\) of the owner, while the head is stored in the shared \MaxReg \(Head\). Persistent means that the local variable retains its value between invocations to operations. When the owner wants to put a new task, it first locally increments \(tail\) (Line~\ref{A01}) and then stores the task in the corresponding entry of \(Tasks\) and marks one more entry with \(\bot\) (Line~\ref{A02}); \(\bot\) indicates lack of tasks.  Recall that the notation in Line~\ref{A02} (instructions between brackets) denotes that the instructions can be executed in any order.  When the owner wants to take a task, it first reads the current head of the queue from \(Head\) (Line~\ref{A04}). Then, if there are tasks available (i.e., the head is less or equal to the tail), it reads the task at the head, updates \(Head\), and finally returns the task (Lines~\ref{A06} and~\ref{A09}); if there are no tasks available, the owner returns $\epty$ (Lines~\ref{A11}).  When a thief wants to steal a task, it first reads the current value of \(Head\) (Line~\ref{A12}) and then reads that entry of \(Tasks\) (Line~\ref{A13}).  If it reads a task (i.e. a non-\(\bot\) value), it updates \(Head\) and then returns the task (Lines~\ref{A16} and~\ref{A17}).  Otherwise, all tasks have been extracted, and it returns \epty (Line~\ref{A19}).
+
+The semantics of \MaxW guarantees that $Head$ contains the current value of the head at all times, as a ``slow'' process cannot ``move back'' the head by writing a smaller value in \(Head\) (in Lines~\ref{A06} or~\ref{A16}).  Thus, the \MaxReg \(Head\) acts as a sort of barrier in the algorithm.  Two \Take/\Steal operations can return the same task only if they are concurrent, reading the same value from \(Head\).
+
+%==================================================================
+\begin{figure}[ht]
+  \centering
+  \fbox{\tiny
+    \begin{minipage}[t]{150mm} \footnotesize
+      \renewcommand{\baselinestretch}{2.5} \resetline
+      \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
+
+        {\bf Shared Variables:}\\
+        \> \> \(Head\): atomic $\MaxReg$ object initialized to \(1\)\\
+        \> \> \(Tasks[1, 2, \hdots]\): array of atomic $\R/\W$ objects
+        with\\ \>\>\>\>\>\>\> the first two objects initialized to \(\bot\)\\
+
+        {\bf Local Variables of the Owner:}\\
+        \> \> \(tail \leftarrow 0\)\\ \\
+
+        {\bf Operation} \(\Put(x)\): \\
+        \line{A01} \> \> \(tail \leftarrow tail + 1\)\\
+        \line{A02} \> \> \(\{Tasks[tail].\W(x),\ \MP{Tasks[tail + 2]}.\W(\bot)\}\)\\
+        \line{A03} \> \> {\bf return } $\true$\\
+        {\bf end} $\Put$ \\ \\
+
+        {\bf Operation} \(\Take()\): \\
+        \line{A04} \> \> \(head \leftarrow Head.\MaxR()\)\\
+        \line{A05} \> \> {\bf if \(head \leq tail\) then}\\
+        \line{A06} \> \> \> \(\{ x \leftarrow Tasks[head].\R(),
+        Head.\MaxW(head+1)\}\)\\
+        % \line{A07} \> \> $head \leftarrow head+1$\\
+        % AC: Miguel ya habia observado que la sigueinte linea no es
+        % necesaria. Yo no habia entendido
+        % \line{A08} \> \> $Head.\MaxW(head)$\\
+        \line{A09} \> \> \> {\bf return} \(x\)\\
+        \line{A10} \> \> {\bf end if}\\
+        \line{A11} \> \> {\bf return} $\epty$\\
+        {\bf end} $\Take$ \\ \\
+
+
+        {\bf Operation} \(\Steal()\): \\
+        \line{A12} \> \> \(head \leftarrow Head.\MaxR()\)\\
+        \line{A13} \> \> \(x \leftarrow Tasks[head].\R()\) \\
+        \line{A14} \> \> {\bf if \(x \neq \bot\) then}\\
+        % \line{A15}\>  \> \> $head \leftarrow head+1$\\
+        \line{A16} \> \> \> \(Head.\MaxW(head+1)\)\\
+
+        \line{A17} \> \> \> {\bf return} \(x\)\\
+        \line{A18} \> \> {\bf end if}\\
+        \line{A19} \> \> {\bf return} $\epty$\\
+        {\bf end} $\Steal$
+
+      \end{tabbing}
+    \end{minipage}
+  }
+  \caption{\label{figure-max-reg-mult}\WFWSM: a \MaxReg-based
+    set-linearizable algorithm for work-stealing with multiplicity.}
+\end{figure}
+% =================================================================
+
+Note that if only the first object in \(Tasks\) is initialized to \(\bot\) (and hence \Put is modified accordingly), it is possible that a thief reads a value from \(Tasks\) that has not been written by the owner: in an execution with a single \(\Put(x)\) operation, the steps in Line~\ref{A02} could be executed \(Tasks[1].\W(x)\) first and then \(Tasks[2].\W(\bot)\) with a sequence of two \Steal operations completing in between, resulting in the second operation reading $Tasks[2]$, which has not been written yet by the owner, and might contain a value distinct from \(\bot\).
+
+
+\begin{theorem}\label{theo-wf}
+\WFWSM (Figure~\ref{figure-max-reg-mult}) is a set-linearizable wait-free algorithm for work-stealing with multiplicity, using \MPR{\R/\W instructions and a single instance of a linearizable \MaxReg object}.  Moreover, all operations \MPR{execute a constant number of \R/\W instructions, invoke a constant number of operations of the \MaxReg object}, and \Put is \R/\W.
+\end{theorem}
+
+\begin{proof}
+
+Clearly, the algorithm is wait-free since the \MaxReg object is assumed to be wait-free and none of the operations executes a loop.  Observe that \Put uses only \R/\W.  Before proving that \WFWSM is set-linearizable, we first observe that at any time the thieves read the range of \(Tasks\) that the owner has already initialized; more specifically, every \Steal operation reads from \(Tasks\) (in Line~\ref{A13}), a value that was written by the owner, either \(\bot\) or a task.
+
+In any given execution, the range \(Tasks[Head, Head+1, \hdots, ]\) contains a (possibly empty) sequence of tasks followed by at least one \(\bot\) value, considering the entries in index-ascending order. The claim is true initially as the first two entries if \(Tasks\) are initialized to \(\bot\).  Every time the owner stores a new task, it initializes a new entry of \(Task\) to \(\bot\) (Line~\ref{A02}); hence the claim holds at any time, as \(Head\) is incremented only if the owner or a thief reads that \(Tasks[Head]\) contains a non-\(\bot\) value (Lines~\ref{A06} or~\ref{A16}).  Note that the order of the instructions in Line~\ref{A02} is irrelevant.
+
+We now prove that \WFWSM is set-linearizable. Consider any finite execution \(E\) of it. Since we already argued the algorithm is wait-free, there is a finite extension of \(E\) in which all its operations are completed, and no new operations start. Thus, we can assume that there are no pending operations in \(E\).
+
+First, note that the semantics of \MaxW implies that there is no pair of non-concurrent \Take/\Steal operations that return the same task: if two operations are not concurrent, then the first one increments the value of \(Head\), hence the second operation cannot read the same tasks from \(Tasks\). Thus, we have:
+
+\begin{remark}\label{remark-concurrency}
+If a task is returned by more than one \Take/\Steal operation, these operations are pairwise concurrent.  Thus, two distinct \Take operations cannot return the same task.
+\end{remark}
+
+
+The main observation for the set-linearizability proof is that, at any time, the state of the object is represented by the tasks in the range \(Tasks[Head, Head+1, \hdots ]\), i.e. the sequence of non-\(\bot\) values (in index-ascending order) written by the owner in that range.  The set-linearization \(\SetLin(E)\) of \(E\) is obtained as follows:
+
+\begin{itemize}
+
+\item Every \Put operation is set-linearized \emph{alone} (i.e. in a concurrency class containing only that operation) placed at its step corresponding to \(Tasks[tail].\W(x)\) in \(E\) (Line~\ref{A02}).
+
+\item For every task returned by at least one \Take/\Steal operation, all operations returning the task are set-linearized in the same concurrency class placed at the first step \(e\) of \(E\) that corresponds to \(Head.\MaxW(head+1)\) (either Line~\ref{A06} or~\ref{A16}) among the steps of the operations.  Note that that \(e\) occurs between the invocation and response of every operation in the concurrency class: since the operations return the same task, all of them execute the \MaxR steps in Lines~\ref{A04} or~\ref{A12} before \(e\), and, by definition, \(e\) appears in \(E\) before any other operation executes its step corresponding to \(Head.\MaxW(head+1)\).  Observe that the order in which the instructions in Line~\ref{A06} is executed is irrelevant.
+
+\item Every \Take operation returning \epty is set-linearized alone, placed at its step in \(E\) corresponding to\\ \(Head.\MaxR()\) (Line~\ref{A04}).
+
+\item Every \Steal operation returning \epty is set-linearized alone, placed at its step in \(E\) corresponding to \(Head.\MaxR()\) (Line~\ref{A12}).
+
+\end{itemize}
+
+Every concurrency class of \(\SetLin(E)\) is placed at a step of \(E\) that lies between the invocation and response of each operation in the concurrency class, which immediately implies that \(\SetLin(E)\) respects the partial order \(<_E\) of~\(E\). Thus, to conclude that \(\SetLin(E)\) is a set-linearization of \(E\), we need to show that it is indeed a set-sequential execution of work-stealing with multiplicity.
+
+First, note that a task can be extracted by a \Take/\Steal operation only if the \Put operation that stores the task executes its step corresponding to \(Tasks[tail].\W(x)\) (in Line~\ref{A02}) before the \Take/\Steal operation reads the entry of \(Tasks\) where the task is stored.  Thus, in \(\SetLin(E)\) every task is inserted before it is extracted.
+
+Now, \Put stores tasks in \(Tasks\) in index-ascending order.  Due to the semantics of \MaxReg, \(Head\) never ``moves back'', i.e. it only increases by one at a time, and hence \Take and \Steal extract tasks in index-ascending order too.  It follows that tasks in \(\SetLin(E)\) are inserted/extracted in FIFO order.
+
+More specifically, for any concurrency class \(C\) of \(\SetLin(E)\) with \Take/\Steal operations that return the same task~\(x\), right before the step \(e\) of \(E\) where \(C\) is set-linearized, we have that \(x\) is a task with the smallest index (left-most) in the range \(Tasks[Head, Head+1, \hdots]\), and thus indeed the operations in \(C\) get the ``oldest" task in the object.
+
+It only remains to be argued that any \Take/\Steal operation that returns \epty, does so correctly, i.e., each of these operations is set-linearized at a step of \(E\) at which \(Tasks[Head, Head+1, \hdots]\) is empty, i.e., all its entries initialized by the owner in that range contain \(\bot\).
+
+Consider any \Take operation in \(E\) that returns \(\epty\).  Observe that this can happen only if the owner sees that \(head > tail\), namely, the conditional of Line~\ref{A05} is not satisfied.  This is possible only when no task has been inserted or all items have been extracted, and hence \(Tasks[Head, Head+1, \hdots]\) is empty.  Consider now any \Steal operation in \(E\) that returns \(\epty\).  This is possible only when the thief reads \(\bot\) from \(Tasks\) in Line~\ref{A13}, and since we already argued that the owner inserts tasks in ascending order, the sequence \(Tasks[Head, Head+1, \hdots]\) is empty.
+
+We conclude that \(\SetLin(E)\) is a valid set-sequential execution of work-stealing with multiplicity, and as it respects the partial order \(<_E\) of \(E\), we have that it is a set-linearization of \(E\), and therefore \WFWSM is set-linearizable. The theorem follows.
+\end{proof}
+
+If we replace \(Head\) with the \R/\W\ wait-free linearizable \MaxReg algorithm of Aspnes, Attiya, and Censor-Hillel~\cite{DBLP_journals_jacm_AspnesAC12}, whose step complexity is \(O(\log m)\), where \(m \ge 1\) is the maximum value that can be stored in the obj ect, the step complexity of \WFWSM is bounded wait-free with logarithmic step complexity too. In the resulting algorithm, at most $m$ tasks can be inserted; the actual value of m is application dependent.  Since the algorithm does not use \RAW synchronization patterns (as explained in the proof of Theorem~\ref{theo-wf-log}), the resulting algorithm does not uses those patterns either.
+
+\begin{theorem}\label{theo-wf-log}
+If $Head$ is an instance of the \R/\W\ wait-free linearizable \MaxReg algorithm of Aspness, Attiya, and Censor-Hillel~\cite{DBLP_journals_jacm_AspnesAC12}, \WFWSM is set-linearizable, fully \R/\W and \Take and \Steal have step complexity $O(\log m)$, where $m$ denotes the maximum number of tasks that can be inserted in an execution.  \MPR{Furthermore, no operation uses} \RAW synchronization patterns.
+\end{theorem}
+
+\begin{proof}
+The algorithm remains set-linearizable by the composability of set-linearizability~\cite{DBLP_journals_jacm_CastanedaRR18}.  While the step complexity of \Put is clearly $O(1)$, the step complexity of \Take and \Steal is $O(\log m)$ as the step complexity \MaxR and \MaxW of the \MaxReg algorithm~\cite{DBLP_journals_jacm_AspnesAC12} is $O(\log m)$.
+
+We now argue that \Take and \Steal do not use \RAW synchronization patterns.  The reason is that the \MaxReg algorithm does not use this synchronization mechanism.  Roughly speaking, the algorithm consists of a binary tree of height $O(\log m)$ with an atomic bit in each node.  When a process wants to perform \MaxR, it reads the bits in the path of the tree from the root to a leaf and then returns a value according to the leaf it reached; the next node in the path the process reads depends on the current node's value.  When a process wants to perform \MaxW, it reads the bits in a path from the root to a leaf, which is a function of the binary representation of the value the process wants to write; then, if the new value is larger than the current one, in a bottom-up manner, it writes 1 in every node in the path with 0 (for the algorithm to be linearizable, the writes should occur in this order, hence the algorithm is not fence-free).  Thus, we have that \MaxR consists of a sequence of reads, and \MaxW consists of a sequence of reads followed by a (possibly empty) sequence of writes.  Therefore, \Take/\Steal of \WFWSM consists of a sequence of reads followed by a (possibly empty) sequence of writes, and thus the operation does not use \RAW synchronization patterns.
+\end{proof}
+
+\section{\label{sec-ws-nc-mult}Work-Stealing with Weak Multiplicity}
+
+In practical settings, a logarithmic step complexity of the \Take{}~operation is prohibitive. Ideally, we would like to have constant step complexity, in all operations if possible, and to use simple synchronization mechanisms.  In this section, we propose a variant of work-stealing with multiplicity which admits fully \R/\W fence-free algorithms with constant step complexity in all its operations.  Intuitively, the variant requires that every task is extracted at least once, but now every process extracts a task \emph{at most once}, hence \Take/\Steal~operations returning the same task \emph{might not} be concurrent.  Therefore, the relaxation retains the property that the number of operations that can extract the same task is, at most, the number of processes in the system.  We call this relaxation \emph{weak multiplicity}.
+
+\begin{figure}[!ht]
+  \centering
+  \subfloat[\label{fig-state-weak}A schematic view of work-stealing
+  with weak multiplicity.] {
+    \includegraphics[width=0.45\textwidth]{contents/figures/IV_2_work_stealing}
+  }
+  \hfill
+  \subfloat[\label{fig-example-execution-weak}A sequential execution
+  of work-stealing with weak multiplicity.] {
+    \includegraphics[width=0.48\textwidth]{contents/figures/IV_3_work_stealing_weak_multiplicity}
+  }
+  \caption{\label{fig-weak-mult} Schematic view and sequential
+    execution of work-stealing with weak multiplicity.}
+\end{figure}
+
+
+
+Figure~\ref{fig-state-weak} depicts a schematic view of work stealing with weak multiplicity.  Intuitively, each process has its own \emph{virtual} queue of tasks at any state.  When the owner inserts a new task, it \emph{atomically} places the task in all virtual queues, as shown in the figure.  Therefore, for any pair of processes' virtual queues, one of them is a suffix of the other.  A \Take/\Steal operation can return any task from its virtual queue that is no ``beyond'' the first task of the \emph{shortest} virtual queue in the state. In the example depicted in the figure~\ref{fig-state-weak}, a \Steal operation of thief $p_1$, denoted $\Steal_1()$, can return only $x$, as $p_1$ has the shortest virtual queue in the state, while a \Take operation can return any task in its virtual queue, and removes all preceding tasks. E.g., if $w$ is returned, then $u$ and $v$ are removed from the virtual queue, which leaves the owner's virtual queue containing only $x$ and $z$. Note that tasks are extracted in FIFO order.  This property guarantees that every task is taken at least once.  In our algorithms, \emph{all} virtual queues are implemented using a single queue.  Figure~\ref{fig-example-execution-weak} shows an example of sequential execution of work-stealing with weak multiplicity. Note that \Take/\Steal operations are allowed to get the same task, although they are not concurrent.
+
+The next \emph{sequential} specification formally defines work-stealing with weak multiplicity.  Without loss of generality, the specification assumes that \(p_0\) is the owner and each invocation/response of thief \(p_i\) is subscripted with its index, which belongs to the set \(\{1, \hdots, n-1\}\).
+
+
+
+\begin{definition}[FIFO Work-Stealing with Weak Multiplicity\label{def-ws-nc-mult}]
+The universe of tasks that the owner can put is \(\mathbf{N} = \{ 1, 2, \hdots \}\), and the set of states \(Q\) is the infinite set of \(n\)-vectors of finite strings \(\mathbf{N}^* \times \hdots \times \mathbf{N}^*\), with the property that for any two pairs of strings in a \MP{vector/state}, one of them is a \emph{suffix of the other}.  The initial state is the vector with empty strings, \((\epsilon, \hdots, \epsilon)\).  The transitions are the following:
+
+
+{\def\OldComma{,}
+  \catcode`\,=13
+  \def,{%
+    \ifmmode%
+      \OldComma\discretionary{}{}{}%
+    \else%
+      \OldComma%
+    \fi%
+  }%
+\begin{enumerate}
+  \item \(
+    \forall (t_0,\ \hdots,\ t_{n-1}) \in Q,\ \delta((t_0,\ \hdots,\
+    t_{n-1}), \Put(x)) = ((t_0 \cdot x,\ \hdots,\ t_{n-1} \cdot x),
+    \langle \Put(x): \true \rangle)
+  \).
+  \item \(\forall (t_0,\ \hdots,\ t_{n-1}) \in Q\) such that \(t_0 =
+    x_1 \cdots x_j \cdot q \neq \epsilon \text{ with } j \geq 1\) and \MPR{\(t_j \cdot q\)} being the shortest string in the state \MPR{(possibly with
+    \(x_j \cdot q = \epsilon \cdot \epsilon = \epsilon\))}, \(\delta((t_0,\ \hdots,\ t_{n-1}),
+    \Take()) =  \{ ((\widehat t_0,\ t_1,\ \hdots,\ t_{n-1}), \langle
+    \Take():x_k \rangle) \}\), where \(k \in \{1,\ \hdots,~j\}\) and
+    \(\widehat t_0 = x_{k+1} \cdots x_j \cdot q\).
+  \item \(\forall (t_0,\ \hdots,\ t_{n-1}) \in Q\) such that \(t_i =
+    x_1 \cdots x_j \cdot q \neq \epsilon\) with \(j \geq 1\), \(i
+    \in \{1,\ \hdots,\ n-1\}\) and
+    \MPR{\(t_j \cdot q\)} being the shortest
+    string in the state \MPR{(possibly with
+    \(x_j \cdot q = \epsilon \cdot \epsilon = \epsilon\))},\ \(\delta((t_0,\ \hdots,\ t_{n-1}),\ \Steal_i())\) =
+    \(\{((t_0,\ \hdots,\ t_{i-1},\ \widehat{t_i},\ t_{i+1},\ \hdots,
+    t_{n-1})\), \( \langle \Steal_i():x_k \rangle) \}\), where \(k
+    \in \{1,\ \hdots,\ j\}\) and \(\widehat{t_i} = x_{k+1} \cdots x_j
+    \cdot q\).
+\end{enumerate}}
+\end{definition}
+
+Observe that the second and third items in Definition~\ref{def-ws-nc-mult} correspond to non-deterministic transitions in which a \Take/\Steal operation can extract any task in \(\{x_1, \hdots, x_j\}\) of the invoking process' virtual queue \MP{(and removes all preceding taks)}; the value returned value can be \(\epsilon\) when the shortest string in the state is \(\epsilon\) \MP{(\(x_j \cdot q = \epsilon \cdot \epsilon = \epsilon\) in the definition)}.  \MP{Moreover, note that if $x_1 \cdots x_j \cdot q = \epsilon$, and hence $x_1 \cdots x_j \cdot q$ is the shortest string in the state, then the operation is forced to return $\epsilon$.}  Furthermore, the definition guarantees that every task is extracted at least once because every \Take/\Steal operation can only return a task that is not ``beyond'' the first task in the shortest string of the state.
+
+The specification of work-stealing with concurrent weak multiplicity admits trivial solutions.  A simple solution is obtained by replacing \(Head\) in \WFWSM with one local persistent variable \(head\) per process (each initialized to 1); \Put remains the same and \Take and \Steal instead of reading from \(Head\), they locally read the current value of \(head\) and increment it whenever a task is taken. It is not hard to verify that the resulting algorithm is indeed linearizable.
+
+To avoid this kind of simple solution (which can be very inefficient in practice, as every process might execute every task), we restrict our attention to \textit{sequentially-exact} algorithms, namely, every sequential execution of the algorithm is a sequential execution of the specification of (FIFO) work-stealing.\footnote{Alternatively, work-stealing with weak multiplicity can be specified using the interval-linearizability formalism in~\cite{DBLP_journals_jacm_CastanedaRR18}, which allows us to specify that a \Take/\Steal operation can exhibit a non-exact behavior only in the presence of concurrency. Interval-linearizability would directly imply that any interval-linearizable solution provides an exact solution in sequential executions.  Roughly speaking, in interval-linearizability, operations are linearized at intervals that can overlap each other.}  It is easy to see that the algorithm described above does not have this property.
+
+Finally, we stress that, differently from work-stealing with multiplicity, two distinct non-concurrent \Take/\Steal operations can extract the same task in an execution, which can happen only if \emph{some} operations are concurrent in the execution, due to the sequentially-exact requirement.  Particularly, in our algorithms, this relaxed behavior can occur when processes are concurrently updating the head of the queue.
+
+
+\subsection{\label{sec-ws-mult-read-write}\R/\W Fence-Free Work-Stealing with Multiplicity}
+
+
+In this subsection we present \NCWSM, a \R/\W fence-free linearizable algorithm for work-stealing with weak multiplicity.  The algorithm is obtained by replacing the linearizable \MaxReg object in \WFWSM, $Head$, with a linearizable \RangeMaxReg object, a relaxation of \MaxReg with a \RMaxR operation that returns a value in a \emph{range} of values that have been written to the register; the range always includes the maximum value written so far.
+
+We present a \RangeMaxReg algorithm that is nearly trivial. However, it allows us to solve work-stealing with weak multiplicity in an efficient manner, with implementations exhibiting good performance in some practical settings, as we will see in Section~\ref{sec-experiments}.  As we have mentioned above, to avoid trivial solutions, we focus on sequentially-exact linearizable algorithms for \RangeMaxReg, i.e., each sequential execution of the algorithm is a sequential execution of \MaxReg.~\footnote{Again, this can be alternatively specified through interval-linearizability.}  When \NCWSM is combined with this algorithm, it becomes \R/\W, fence-free, linearizable, sequentially-exact and wait-free with constant step complexity.
+
+Intuitively, in \RangeMaxReg, each process has a \emph{private} \MaxReg and whenever it invokes \RMaxR, the result lies in the range defined by the value of its private \MaxReg and the maximum among the private {\MaxReg} values in the state.  In the sequential specification of \RangeMaxReg, each invocation/response of process $p_i$ is subscripted with its index $i$.
+
+
+
+\begin{definition}[\RangeMaxReg]
+{
+  \def\OldComma{,}
+  \catcode`\,=13
+  \def,{%
+    \ifmmode%
+      \OldComma\discretionary{}{}{}%
+    \else%
+      \OldComma%
+    \fi%
+  }%SD
+\label{def-range-max-reg} The set of states $Q$ is the infinite set of
+$n$-vectors with natural numbers, with vector $(1, \hdots, 1)$ being
+the initial state. $\forall\ q = (r_0, \hdots, r_{n-1}) \in Q$ and $i \in
+\{0, \hdots, n-1\}$, the transitions are the following:
+\begin{enumerate}
+
+  \item \textbf{If} $x > r_i$ \textbf{then} \\ \(\delta(q,
+    \RMaxW_i(x)) = ((r_0,\ \hdots,\ r_{i-1},\ x,\ r_{i+1},\ \hdots,\ r_{n-1}),
+      \langle \RMaxW_i(x): \true \rangle)\),\\
+      \textbf{otherwise}\\
+      \(\delta(q,\RMaxW(x)) =
+      (q, \langle \RMaxW(x): \true \rangle)\)
+  \item \(\delta(q, \RMaxR_i()) =  \{(q, \langle \RMaxR_i(): x \rangle)\}\),
+  \textbf{where} \(x \in \{r_i,\ r_i+1,\ \hdots,\ \max(r_0,\ \hdots,\
+    r_{n-1})\}\).
+\end{enumerate}}
+\end{definition}
+
+As already mentioned, \NCWSM is the algorithm obtained by replacing \(Head\) in \WFWSM with an atomic \RangeMaxReg object initialized to 1 (hence \MaxR and \MaxW are replaced by \RMaxR and \RMaxW, respectively).
+
+
+\begin{theorem}\label{theo-wf-nc}
+  \NCWSM is a sequentially-exact linearizable wait-free algorithm for work-stealing with weak multiplicity, using \R/\W instructions and a single sequentially-exact linearizable \RangeMaxReg object.  Moreover, all operations execute a constant number of \R/\W\ instructions, and invoke a constant number of operations of the \RangeMaxReg object, and \Put is \R/\W.
+\end{theorem}
+
+\begin{proof}
+
+Clearly, all operations of the algorithm are wait-free since the \RangeMaxReg object is assumed to be wait-free, and none of the operations executes a loop.  Note that \Put uses only \R/\W.
+
+As in the proof of Theorem~\ref{theo-wf}, it can be argued that thieves read values from \(Tasks\) that have been written by the owner.
+
+Consider any finite execution \(E\) of the algorithm.  Since the algorithm is wait-free, there is a finite extension of \(E\) in which all its operations are completed, and no new operations start. Thus, we can assume that there are no pending operations in \(E\).
+
+Proving that \(E\) is linearizable is quite straightforward. It is enough to observe that, at any step of \(E\), the state of the object is encoded in the state of \(Head\). Let \((r_0, \hdots, r_{n-1})\) be the state of \(Head\) at a given step of \(E\). Then, the state of the object is \((t_0, \hdots, t_{n-1})\) with each \(t_i\) being the finite sequence of tasks in the range \(Tasks[r_i, r_{i+1}, \hdots]\) (i.e. the sequence of non-\(\bot\) values written by the owner, in index-ascending order).  Thus, in a linearization of \(E\), a \(\Put(x)\) operation is linearized at its step \(Tasks[tail].\W(x)\) in Line~\ref{A02}, while a \Take/\Steal operation is linearized at its step \(Head.\RMaxR()\) in Line~\ref{A04}/Line~\ref{A12} (observe that the non-deterministic choice in a transition with a \Take/\Steal operation is resolved with the outcome of \RMaxR).  Therefore, we conclude that every execution of \NCWSM is linearizable, and thus the algorithm is linearizable too.
+
+Since $Head$ is assumed to be sequentially-exact, in sequential executions the algorithm behaves exactly as \WFWSM (exchanging \RMaxR and \RMaxW with \MaxR and \MaxW, respectively).  Thus, by Remark~\ref{remark-seq-exact-set-lin} and since \WFWSM is set-linearizable, the sequential executions of the algorithm are sequential executions of work-stealing.  Thus the algorithm is sequentially-exact.  The theorem follows.
+
+\end{proof}
+
+Figure~\ref{figure-algo-range-max-reg} contains a simple sequentially-exact linearizable wait-free algorithm for \RangeMaxReg.  All processes share a single \R/\W object \(R\), and each process has a local persistent variable \(r\).  The idea is very simple: each process locally stores in \(r\) the maximum value it is aware of; whenever it discovers a new largest value in \RMaxW, it writes it in \(r\) and \(R\), and since \(R\) might not have the largest value, it returns the maximum among \(r\) and \(R\) in \RMaxR.
+
+%==================================================================
+
+\begin{figure}[!ht]
+  \centering{
+    \fbox{
+      \begin{minipage}[t]{150mm} \small
+        \renewcommand{\baselinestretch}{2.5} \resetline
+        \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
+
+          {\bf Shared Variables:}\\
+          \> \> \(R\): atomic $\R/\W$ object initialized to 1\\
+
+          {\bf Local Variables of a Process:}\\
+          \> \> \(r \leftarrow 1\)\\ \\
+
+          {\bf Operation} \(\RMaxW(x)\): \\
+          \line{C01} \> \> \(r \leftarrow \max\{r, R.\R()\}\) \\
+          \line{C02} \> \> {\bf if \(x > r\) then} \\
+          \line{C03} \> \> \> \(\{r \leftarrow x, R.\W(x)\}\)\\
+          \line{C04} \> \> {\bf end if}\\
+          \line{C05} \> \> {\bf return } $\true$\\
+          {\bf end} $\RMaxW$ \\ \\
+
+          {\bf Operation} \(\RMaxR()\): \\
+          \line{C06} \> \> \(r \leftarrow \max\{r, R.\R()\}\)\\
+          \line{C07} \> \> {\bf return} \(r\)\\
+          {\bf end} $\RMaxR$
+
+        \end{tabbing}
+      \end{minipage} }
+    \caption{\label{figure-algo-range-max-reg}A linearizable wait-free
+      algorithm for $\RangeMaxReg$.}
+  }
+\end{figure}
+% =================================================================
+
+\begin{theorem}\label{theo-range-max-reg}
+  The algorithm in Figure~\ref{figure-algo-range-max-reg} is a sequentially-exact linearizable wait-free and fence-free algorithm for \RangeMaxReg using only \R/\W instructions and with constant step complexity in all its operations.
+\end{theorem}
+
+\begin{proof}
+It is clear from its pseudocode that the algorithm is \R/\W, wait-free and fence-free, and each operation has constant step complexity.
+
+Consider any finite execution \(E\) of the algorithm.  Since the algorithm is wait-free, there is a finite extension of \(E\) in which all its operations are completed, and no new operations start. Thus, we can assume that there are no pending operations in \(E\).
+
+To prove linearizability, it is enough to observe that at any step of \(E\), the state of the object is \((r_0, \hdots, r_{n-1})\), where \(r_i\) is the value stored in the local persistent variable \(r\) of process \(p_i\) at that moment.  Thus, a \RMaxW(x) operation with \(x > r\) (hence the condition in Line~\ref{C02} is {\sf \small true}) is linearized at its step \(R.\W(x)\) in Line~\ref{C03}; if \(x \leq r\), the operation is linearized at line~\ref{C01}, i.e., at the beginning of the operation.  A \RMaxR() operation is linearized at its step \(R.\R()\) in Line~\ref{C06}; note that the operation returns a value between the value in \(r\) and the maximum among the \(r\)'s local variables since that is the maximum value \(R\) can store at that time. Thus the algorithm is linearizable.
+
+Suppose now that \(E\) is sequential. By induction of the number of operations, it is easy to show that \(R\) always contains the maximum value.  Thus, \(E\) is indeed a sequential execution of \MaxReg, and therefore the algorithm is sequentially-exact. The theorem follows.
+\end{proof}
+
+We are now able to present our main result:
+
+\begin{theorem}\label{theo-wf-fully}
+If \(Head\) is replaced with an instance of the algorithm in Figure~\ref{figure-algo-range-max-reg}, \NCWSM is \R/\W, fence-free, wait-free, sequentially-exact, and linearizable with constant step complexity in all its operations.
+\end{theorem}
+
+\begin{proof}
+By composability of linearizability~\cite{DBLP_journals_toplas_HerlihyW90}, the algorithm remains linearizable when \(Head\) is replaced with an instance of the algorithm in Figure~\ref{figure-algo-range-max-reg}.  The algorithm is fully \R/\W and wait-free because \Put uses only \R/\W instructions and the \RangeMaxReg algorithm in Figure~\ref{figure-algo-range-max-reg} is fully \R/\W and wait-free, by Theorem~\ref{theo-range-max-reg}.  Clearly, the step complexity of \Put is $O(1)$.  The step complexity of \Take and \Steal is $O(1)$ too because the \RangeMaxReg algorithm in Figure~\ref{figure-algo-range-max-reg} has constant step complexity.  \MPE{It is not difficult to verify that the resulting} algorithm does not require any specific ordering among its steps beyond what is implied by data dependence. Therefore, it is fully fence-free.  The algorithm is sequentially-exact because the the algorithm in Figure~\ref{figure-algo-range-max-reg} is sequentially-exact.  The theorem follows.
+\end{proof}
+
+%==================================================================
+\begin{figure}[!ht] \centering{ \fbox{
+      \begin{minipage}[t]{150mm} \small
+        \renewcommand{\baselinestretch}{2.5} \resetline
+        \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
+
+          {\bf Shared Variables:}\\
+          \> \> \(Head\): atomic $\R/\W$ object initialized to 1\\
+          \> \> \(Tasks[1, 2, \hdots]\): array of atomic $\R/\W$ objects \\
+          \> \> \> \> \> \> \> with the first two objects initialized to \(\bot\)\\
+
+
+          {\bf Local Variables of the Owner:}\\
+          \> \> \(head \leftarrow 1\)\\
+          \> \> \(tail \leftarrow 0\)\\
+
+          {\bf Local Variables of a Thief:}\\
+          \> \> \(head \leftarrow 1\)\\ \\
+
+          {\bf Operation} \(\Put(x)\): \\
+          \line{B01} \> \> \(tail \leftarrow tail+1\)\\
+          \line{B02} \> \> \(\{Tasks[tail].\W(x),\ Tasks[tail + 2].\W(\bot)\}\)\\
+          \line{B03} \> \> {\bf return } $\true$ \\
+          {\bf end} $\Put$ \\ \\
+
+          {\bf Operation} \(\Take()\): \\
+          \line{B04} \> \> \(head \leftarrow \max\{head, Head.\R()\}\)\\
+          \line{B05} \> \> {\bf if \(head \leq tail\) then}\\
+          \line{B06} \> \> \> \(\{ x \leftarrow Tasks[head].\R(),Head.\W(head+1)\}\)\\
+          \line{B07} \> \> \> \(head \leftarrow head+1\)\\
+          \line{B08} \> \> \> {\bf return} \(x\)\\
+          \line{B09} \> \> {\bf end if}\\
+          \line{B10} \> \> {\bf return} $\epty$\\
+          {\bf end} $\Take$ \\ \\
+
+          {\bf Operation} \(\Steal()\): \\
+          \line{B11} \> \> \(head \leftarrow \max\{head, Head.\R()\}\)\\
+          \line{B12} \> \> \(x \leftarrow Tasks[head].\R()\) \\
+          \line{B13} \> \> {\bf if \(x \neq \bot\) then}\\
+          \line{B15} \> \> \> \(Head.\W(head+1)\)\\
+          \line{B14} \> \> \> \(head \leftarrow head+1\)\\
+          \line{B16} \> \> \> {\bf return} \(x\)\\
+          \line{B17} \> \> {\bf end if}\\
+          \line{B18} \> \> {\bf return} $\epty$\\
+          {\bf end} $\Steal$
+
+        \end{tabbing}
+      \end{minipage} }
+    \caption{\label{figure-w-mult}\NCWSM algorithm with the \RangeMaxReg
+      algorithm in Figure~\ref{figure-algo-range-max-reg} inlined.}
+  }
+\end{figure}
+% =================================================================
+
+
+Figure~\ref{figure-w-mult} contains an optimized \NCWSM algorithm with the \RangeMaxReg algorithm in Figure~\ref{figure-algo-range-max-reg} inlined.  Since \Take and \Steal first \RMaxR from and then \RMaxW to \MP{\(Head\)}, the algorithm remains sequentially exact when removing Line~\ref{C01} of \RMaxW in Figure~\ref{figure-algo-range-max-reg}.  Our experimental evaluation in Section~\ref{sec-experiments} tested implementations of this algorithm.
+
+
+
+\section{\label{sec-ws-mult}Work-Stealing with Multiplicity}
+
 Work-stealing with \emph{multiplicity} is a relaxation in which, roughly speaking, every task is extracted \emph{at least once}. If several operations extract it, they must be \emph{concurrent}.
 In the formal set-sequential specification below (and in its variant in the next section), tasks are inserted/extracted in FIFO order. The definition can be easily adapted to encompass other orders (e.g., LIFO). Figure~\ref{fig-example-execution} depicts an example of a set-sequential execution of the work stealing with multiplicity, where concurrent \Take/\Steal operations can extract the same task.
 
@@ -250,37 +697,11 @@ The universe of tasks that the owner can put is \(\mathbf{N} = \{ 1, 2, \hdots \
     \fi%
   }%
 \begin{enumerate}
-  \item \(
-    \forall (t_0, \hdots, t_{n-1}) \in Q, \delta((t_0, \hdots,
-    t_{n-1}), \Put(x)) = ((t_0 \cdot x, \hdots, t_{n-1} \cdot x),
-    \langle \Put(x): \true \rangle)
-  \).
-  \item \(\forall (t_0, \hdots, t_{n-1}) \in Q\) such that \(t_0 =
-    x_1 \cdots x_j \cdot q \neq \epsilon with j \geq 1\) and \(x_j
-    \cdot q\) being the shortest string in the state (possibly with
-    \(x_j \cdot q = \epsilon\)), \(\delta((t_0, \hdots, t_{n-1}),
-    \Take()) =  \{ ((\widehat t_0, t_1, \hdots, t_{n-1}), \langle
-    \Take():x_k \rangle) \}\), where \(k \in \{1, \hdots, j\}\) and
-    \(\widehat t_0 = x_{k+1} \cdots x_j \cdot q\).
-  \item \(\forall (t_0, \hdots, t_{n-1}) \in Q\) such that \(t_i =
-    x_1 \cdots x_j \cdot q \neq \epsilon\) with \(j \geq 1\), \(i
-    \in \{1, \hdots, n-1\}\) and \(x_j\ \cdot\ q\) being the shortest
-    string in the state (possibly with \(x_j\ \cdot\ q =
-    \epsilon\)),\ \(\delta((t_0, \hdots, t_{n-1}), \Steal_i())\) =
-    \(\{((t_0, \hdots, t_{i-1}, \widehat{t_i}, t_{i+1}, \hdots,
-    t_{n-1})\), \( \langle \Steal_i():x_k \rangle) \}\), where \(k
-    \in \{1, \hdots, j\}\) and \(\widehat{t_i} = x_{k+1} \cdots x_j
-    \cdot q\).
-  \item \(\forall (\epsilon, t_1, \hdots, t_{n-1}) \in Q\),
-    \(\delta((\epsilon, t_1, \hdots, t_{n-1}), \Take())\)=
-    \(((\epsilon, t_1, \hdots, t_{n-1}),\\ \langle \Take():\epsilon
-    \rangle)\).
-  \item \(\forall (t_0, \hdots, t_{i-1}, \epsilon, t_{i+1}, \hdots,
-    t_{n-1}) \in Q \) with i \(\in \{1, \hdots, n-1\}\),
-    \(\delta((t_0, \hdots, t_{i-1}, \epsilon, t_{i+1}, \hdots,
-    t_{n-1}), \Steal_i()) = ((t_0, \hdots, t_{i-1}, \epsilon,
-    t_{i+1}, \hdots, t_{n-1}),\\ \langle \Steal_i():\epsilon
-    \rangle)\).
+\item \( \forall (t_0, \hdots, t_{n-1}) \in Q, \delta((t_0, \hdots, t_{n-1}), \Put(x)) = ((t_0 \cdot x, \hdots, t_{n-1} \cdot x), \langle \Put(x): \true \rangle) \).
+\item \(\forall (t_0, \hdots, t_{n-1}) \in Q\) such that \(t_0 = x_1 \cdots x_j \cdot q \neq \epsilon with j \geq 1\) and \(x_j \cdot q\) being the shortest string in the state (possibly with \(x_j \cdot q = \epsilon\)), \(\delta((t_0, \hdots, t_{n-1}), \Take()) = \{ ((\widehat t_0, t_1, \hdots, t_{n-1}), \langle \Take():x_k \rangle) \}\), where \(k \in \{1, \hdots, j\}\) and \(\widehat t_0 = x_{k+1} \cdots x_j \cdot q\).
+\item \(\forall (t_0, \hdots, t_{n-1}) \in Q\) such that \(t_i = x_1 \cdots x_j \cdot q \neq \epsilon\) with \(j \geq 1\), \(i \in \{1, \hdots, n-1\}\) and \(x_j\ \cdot\ q\) being the shortest string in the state (possibly with \(x_j\ \cdot\ q = \epsilon\)),\ \(\delta((t_0, \hdots, t_{n-1}), \Steal_i())\) = \(\{((t_0, \hdots, t_{i-1}, \widehat{t_i}, t_{i+1}, \hdots, t_{n-1})\), \( \langle \Steal_i():x_k \rangle) \}\), where \(k \in \{1, \hdots, j\}\) and \(\widehat{t_i} = x_{k+1} \cdots x_j \cdot q\).
+\item \(\forall (\epsilon, t_1, \hdots, t_{n-1}) \in Q\), \(\delta((\epsilon, t_1, \hdots, t_{n-1}), \Take())\)= \(((\epsilon, t_1, \hdots, t_{n-1}),\\ \langle \Take():\epsilon \rangle)\).
+\item \(\forall (t_0, \hdots, t_{i-1}, \epsilon, t_{i+1}, \hdots, t_{n-1}) \in Q \) with i \(\in \{1, \hdots, n-1\}\), \(\delta((t_0, \hdots, t_{i-1}, \epsilon, t_{i+1}, \hdots, t_{n-1}), \Steal_i()) = ((t_0, \hdots, t_{i-1}, \epsilon, t_{i+1}, \hdots, t_{n-1}),\\ \langle \Steal_i():\epsilon \rangle)\).
 \end{enumerate}}
 \end{definition}
 
@@ -316,6 +737,7 @@ Intuitively, in \RangeMaxReg, each process has a \emph{private} \MaxReg, and whe
 $n$-vectors with natural numbers, with vector $(1, \hdots, 1)$ being
 the initial state. $\forall\ q = (r_0, \hdots, r_{n-1}) \in Q$ and $i \in
 \{0, \hdots, n-1\}$, the transitions are the following:
+
 \begin{enumerate}
 
   \item \textbf{If} $x > r_i$ \textbf{then} \\ \(\delta(q,
@@ -327,10 +749,6 @@ the initial state. $\forall\ q = (r_0, \hdots, r_{n-1}) \in Q$ and $i \in
   \item \(\delta(q, \RMaxR_i()) =  \{(q, \langle \RMaxR_i(): x \rangle)\}\),
   \textbf{where} \(x \in \{r_i, r_i+1, \hdots, \max(r_0, \hdots,
     r_{n-1})\}\).
-  %\todo[inline,color=green!40]{Wouldn't it be better \(x = \max(r_0,\
-  %  \hdots,\ r_{i-1},\ r_i,\ r_{i+1},\ \hdots,\ r_{n-1})\)?}
-  %AC: no, because the response must lie in the range defined by the
-  %register of p_i, i.e. r_1, and the maximum.
   \end{enumerate}}
 \end{definition}
 
