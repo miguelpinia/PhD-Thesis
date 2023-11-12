@@ -451,6 +451,15 @@ innerbottommargin=5pt]{cBox}
 \newcommand{\MP}[1]{{\textcolor{hanblue}{#1}}}
 \newcommand{\DISCUSS}[1]{{\textcolor{orange}{#1}}}
 \hyphenation{li-nea-ri-za-bi-li-ty}
+\hyphenation{li-nea-ri-za-ble}
+\hyphenation{set-li-nea-ri-za-bi-li-ty}
+\babelhyphenation[english]{li-nea-ri-za-bi-li-ty}
+
+\newenvironment{thesisproof}[1][\proofname]{%
+  \begin{proof}[#1]$ $\par\nobreak\ignorespaces
+}{%
+  \end{proof}
+}
 
 
 
