@@ -58,6 +58,7 @@
 \usetikzlibrary{matrix}
 \usetikzlibrary{arrows,automata,positioning,matrix}
 \usepackage{ifthen}
+\usepackage{float}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Draft, borrar cuando se entregue la versión final. %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
