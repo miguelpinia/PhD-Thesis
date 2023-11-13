@@ -1,4 +1,4 @@
-\chapter{\label{chapter:preliminaries}Preliminaries and Methodology}
+\chapter{\label{chapter:3_preliminaries}Preliminaries and Methodology}
 
 In this chapter, we will discuss all the necessary tools needed for this thesis. As we are considering asynchronous shared memory systems, the first section will cover the mathematical foundation for the computational model. This will include a formal description of concepts such as \emph{process},  \emph{algorithm}, and \emph{Linearizability~\cite{DBLP_journals_toplas_HerlihyW90}} in concurrent systems. In the following section, we delve into the hardware foundations of our concurrent systems. Specifically, we will explore concepts such as \emph{cache memory}, \emph{consistency memory model}, \emph{cache coherence}, and \emph{memory fences}, which are essential for implementing concurrent algorithms correctly. We will also discuss the concept of a memory model at the programming language level and examine the Java and C++ memory models that define the allowable behavior of multithreaded programs. Finally, we will conclude this chapter by discussing the statistical experiment methodology we will use to analyze program implementations.
 
@@ -276,7 +276,7 @@ directly accessible, and you must find another metric that can be measured
 directly.
 \end{itemize}
 
-We can combine those strategies with interval timers to measure how long it takes to execute the program or some section of code; this can also provide a time basis for sampling.
+We can combine those strategies with interval timers to measure how long it takes to execute the program or some section of code, providing a time basis for sampling.
 
 
 %\hl{To begin with a performance-analysis problem, three techniques can be used to find the desired solution:}
@@ -289,7 +289,7 @@ We can combine those strategies with interval timers to measure how long it take
 
 \subsection{\label{subsec:statistics}Statistic tools for experiments}
 
-As computer science researchers, we aim to measure and compare the performance of novel and existing algorithms. To evaluate the effectiveness of these algorithms, we need to establish an experimental methodology that allows us to measure their performance and throughput and determine whether they are competitive. In this thesis, we propose various versions of the same algorithm for different studies. We will divide our experiments into two categories. The first category is related to measuring the performance of the different algorithm versions.
+As computer science researchers, we aim to measure and compare the performance of novel and existing algorithms. To evaluate the effectiveness of these algorithms, we need to establish an experimental methodology that allows us to measure their performance and throughput and determine whether they are competitive. This thesis proposes various versions of the same algorithm for different studies. We will divide our experiments into two categories. The first category is related to measuring the performance of the different algorithm versions.
 In contrast, the second category is focused on comparing our best algorithm (or the two best) to other algorithms in the literature. To evaluate the performance of our algorithms, we will measure the time required to execute a set of operations over a given interval of time, i.e., this will help us determine how quickly the program can complete its execution. The technique used to measure the time of an event is the following:
 
 \begin{itemize}
