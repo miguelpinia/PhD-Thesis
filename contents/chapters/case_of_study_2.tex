@@ -4,14 +4,14 @@
 
 Concurrent multi-producer/multi-consumer FIFO queues are fundamental shared data structures ubiquitous in all sorts of systems. Several concurrent queue shared-memory implementations have been proposed for over three decades. Despite these efforts, even state-of-the-art concurrent queue algorithms scale poorly; namely, as the number of cores grows, the latency of queue operations grows at least linearly on the number of cores.
 
-One of main the reasons for the poor scalability is the high contention in the \emph{read-modify-write} (\RMW) instructions, such as \emph{compare-and-set} (\CAS) or \emph{fetch-and-increment} (\FAI), that manipulate the head and the tail~\cite{DBLP_conf_spaa_FatourouK11, DBLP_conf_ppopp_FatourouK12, basketqueue2007, DBLP_conf_ppopp_KoganP11, DBLP_journals_dc_Ladan-MozesS08, DBLP_conf_podc_MichaelS96, DBLP_journals_topc_Milman-SelaKLLP22, ppopp2013x86queues, scalingconcurrent2020, wfq-ppopp16}. The latency of any contended such instruction is linear in the number of contending cores since every instruction acquires exclusive ownership of its location’s cache line, and these acquisitions are serialized by the cache coherence protocol.  The best-known queue implementations~\cite{ppopp2013x86queues, wfq-ppopp16} exploit the semantics of the \FAI instruction, that \emph{do not fail} and hence \emph{always make progress}.  In many queue implementations, a queue operation \emph{retries} a failed \CAS until it succeeds~\cite{DBLP_conf_spaa_FatourouK11, DBLP_conf_ppopp_FatourouK12, DBLP_conf_ppopp_KoganP11, DBLP_journals_dc_Ladan-MozesS08, DBLP_conf_podc_MichaelS96, DBLP_journals_topc_Milman-SelaKLLP22}.  An approach that lies in the middle is that of the \emph{baskets queue}~\cite{basketqueue2007}, where a failed \CAS in an enqueue operation implies concurrency with other enqueue operations, and hence, the items of all these operations do not need to be ordered. Instead, they are stored in a \emph{basket}, where the items can be dequeued in any order.  To overcome this seemingly inherent bottleneck, it has been recently proposed a \CAS implementation from \emph{hardware transactional memory}, that exhibits better performance than the usual \CAS~\cite{scalingconcurrent2020}.
+One of main the reasons for the poor scalability is the high contention in the \emph{read-modify-write} (\RMW) instructions, such as \emph{compare-and-set} (\CAS) or \emph{fetch-and-increment} (\FAI), that manipulate the head and the tail~\cite{DBLP_conf_spaa_FatourouK11, DBLP_conf_ppopp_FatourouK12, basketqueue2007, DBLP_conf_ppopp_KoganP11, DBLP_journals_dc_Ladan-MozesS08, DBLP_conf_podc_MichaelS96, DBLP_journals_topc_Milman-SelaKLLP22, ppopp2013x86queues, scalingconcurrent2020, wfq-ppopp16}. The latency of any contended such instruction is linear in the number of contending cores since every instruction acquires exclusive ownership of its location’s cache line, and these acquisitions are serialized by the cache coherence protocol. The best-known queue implementations~\cite{ppopp2013x86queues, wfq-ppopp16} exploit the semantics of the \FAI instruction, that \emph{do not fail} and hence \emph{always make progress}.  In many queue implementations, a queue operation \emph{retries} a failed \CAS until it succeeds~\cite{DBLP_conf_spaa_FatourouK11, DBLP_conf_ppopp_FatourouK12, DBLP_conf_ppopp_KoganP11, DBLP_journals_dc_Ladan-MozesS08, DBLP_conf_podc_MichaelS96, DBLP_journals_topc_Milman-SelaKLLP22}.  An approach that lies in the middle is that of the \emph{baskets queue}~\cite{basketqueue2007}, where a failed \CAS in an enqueue operation implies concurrency with other enqueue operations, and hence, the items of all these operations do not need to be ordered. Instead, they are stored in a \emph{basket}, where the items can be dequeued in any order. To overcome this seemingly inherent bottleneck, it has been recently proposed a \CAS implementation from \emph{hardware transactional memory}, that exhibits better performance than the usual \CAS~\cite{scalingconcurrent2020}.
 
-In this ongoing project, we observe that \RMW instructions are not needed to manipulate the head or tail consistently. We believe this observation might open the possibility of concurrent queue implementations with better scalability.  Concretely, we present a \emph{modular} baskets queue algorithm based on a novel object that we call \emph{load-link/increment-conditional} (\LL/\IC) that suffices for manipulating the head and the tail of the queue.  \LL/\IC admits implementations that spread contention and use only simple \R/\W instructions.  \LL/\IC is similar to \LL/\SC, with the difference that \IC, if successful, only increments the current value of the linked register.  The modular baskets queue stands for its simplicity, with a simple correctness proof.
+In this ongoing project, we observe that \RMW instructions are not needed to manipulate the head or tail consistently. We believe this observation might open the possibility of concurrent queue implementations with better scalability. Concretely, we present a \emph{modular} baskets queue algorithm based on a novel object that we call \emph{load-link/increment-conditional} (\LL/\IC) that suffices for manipulating the head and the tail of the queue.  \LL/\IC admits implementations that spread contention and use only simple \R/\W instructions.  \LL/\IC is similar to \LL/\SC, with the difference that \IC, if successful, only increments the current value of the linked register. The modular baskets queue stands for its simplicity, with a simple correctness proof.
 
 \section{The modular basket queue}
 \label{sec-basket-queue}
 
-We consider the standard shared memory model~\cite{DBLP_journals_toplas_HerlihyW90} with $n \geq 2$ \emph{asynchronous} processes that communicate using \emph{atomic} instructions that modify the contents of the shared memory; the instructions range from simple \R and \W to more complex \RMW instructions such as \FAI and \CAS.  For simplicity, the baskets queue algorithm is presented using an infinite shared array~\footnote{An infinite array can be implemented using a linked list whose nodes contain arrays of finite size; the list grows on demand during execution, each node appended to the list using \CAS to maintain consistency.}.  We consider the \emph{wait-free}~\cite{DBLP_journals_toplas_Herlihy91} and \emph{lock-free}~\cite{DBLP_conf_opodis_HerlihyS11} progress conditions, and \emph{linearizability}~\cite{DBLP_journals_toplas_HerlihyW90} as consistency condition.
+We consider the standard shared memory model~\cite{DBLP_journals_toplas_HerlihyW90} with $n \geq 2$ \emph{asynchronous} processes that communicate using \emph{atomic} instructions that modify the contents of the shared memory; the instructions range from simple \R and \W to more complex \RMW instructions such as \FAI and \CAS. For simplicity, the baskets queue algorithm is presented using an infinite shared array~\footnote{An infinite array can be implemented using a linked list whose nodes contain arrays of finite size; the list grows on demand during execution, each node appended to the list using \CAS to maintain consistency.}. We consider the \emph{wait-free}~\cite{DBLP_journals_toplas_Herlihy91} and \emph{lock-free}~\cite{DBLP_conf_opodis_HerlihyS11} progress conditions, and \emph{linearizability}~\cite{DBLP_journals_toplas_HerlihyW90} as consistency condition.
 
 \begin{figure}[H] \centering{ \fbox{
   
@@ -56,7 +56,7 @@ We consider the standard shared memory model~\cite{DBLP_journals_toplas_HerlihyW
 }
 \end{figure}
 
-The modular baskets queue appears in Algorithm~\ref{basket-queue}.  It is based on two concurrent objects: baskets and \LL/\IC.  Roughly speaking, the baskets store groups of enqueued items that can be taken dequeued in any order, while two \LL/\IC objects store the head and the tail of the queue.
+The modular baskets queue appears in Algorithm~\ref{basket-queue}. It is based on two concurrent objects: baskets and \LL/\IC. Roughly speaking, the baskets store groups of enqueued items that can be taken dequeued in any order, while two \LL/\IC objects store the head and the tail of the queue.
 
 The sequential specification of a \emph{basket of capacity $K$}, or \emph{$K$-basket}, satisfies the following properties, assuming the state of the object is a pair $(S, C)$, initialized to $(\emptyset, 0)$:
 
@@ -65,7 +65,7 @@ The sequential specification of a \emph{basket of capacity $K$}, or \emph{$K$-ba
     \item $\Take()$. If $S \neq \emptyset$, then do $S = S \setminus \{x\}$ and return $x$, for some $x \in S$, else do $C = K$ and return \closed.
 \end{enumerate}
 
-The baskets in the original baskets queue~\cite{basketqueue2007} were defined only \emph{implicitly}. Recently, baskets were explicitly defined in~\cite{scalingconcurrent2020}.  Our basket specification provides stronger guarantees; the main difference is the following.  In~\cite{scalingconcurrent2020}, a {\sf basket\_empty} operation can return either \true or \false if the basket is not empty, i.e., it allows false negatives.  The \Take operation of our specification mixes the functionality of {\sf basket\_empty} and {\sf basket\_extract} as if it returns \closed, no item will ever be put or taken from the basket.
+The baskets in the original baskets queue~\cite{basketqueue2007} were defined only \emph{implicitly}. Recently, baskets were explicitly defined in~\cite{scalingconcurrent2020}. Our basket specification provides stronger guarantees; the main difference is the following. In~\cite{scalingconcurrent2020}, a {\sf basket\_empty} operation can return either \true or \false if the basket is not empty, i.e., it allows false negatives. The \Take operation of our specification mixes the functionality of {\sf basket\_empty} and {\sf basket\_extract} as if it returns \closed, no item will ever be put or taken from the basket.
 
 The specification of \LL/\IC satisfies the next properties, where the state of the object is an integer $R$, initialized to 0, and assuming that any process invokes \IC only if it has invoked \LL before:
 
@@ -81,21 +81,21 @@ then do $R = R + 1$; in any case return \ok.
 \end{theorem}
 
 \begin{proof}
-  Since all shared objects are wait-free, every implementation step is completed. Note that every time a \Deq/\Enq operation completes a while loop (hence without returning), an \Enq (resp. a \Deq) operation successfully puts (resp. takes) an item in (resp. from) a basket.  Thus, in an infinite execution, if a \Deq/\Enq operation takes infinitely many steps, infinitely many \Deq/\Enq operations terminate. Hence, the implementation is lock-free.
+  Since all shared objects are wait-free, every implementation step is completed. Note that every time a \Deq/\Enq operation completes a while loop (hence without returning), an \Enq (resp. a \Deq) operation successfully puts (resp. takes) an item in (resp. from) a basket. Thus, in an infinite execution, if a \Deq/\Enq operation takes infinitely many steps, infinitely many \Deq/\Enq operations terminate. Hence, the implementation is lock-free.
 
   We consider the aspect-oriented linearizability proof framework in~\cite{DBLP_conf_concur_HenzingerSV13} to prove that the algorithm is linearizable. Assuming that every item is enqueued at most once, it states that a queue implementation is linearizable if each of its finite executions is \emph{free} of four violations. We enumerate the violations and argue that every algorithm execution is free of them.
 
   VFresh: A \Deq operation returns an item not previously inserted by any \Enq operation.  \Deq operations return items once put in the baskets, and \Enq operations put items in the baskets. Thus, each execution is free of VFresh.
 
-  VRepeat: Two \Deq operations return the item inserted by the same \Enq operation.  The specification of the basket directly implies that every execution is free of VRepeat.
+  VRepeat: Two \Deq operations return the item inserted by the same \Enq operation. The specification of the basket directly implies that every execution is free of VRepeat.
 
-  VOrd: Two items are enqueued in a certain order, and a \Deq returns the later item before any \Deq of the earlier item starts.  \LL/\IC guarantees that if an \Enq operation enqueues an item, say $x$, and then a later \Enq operation enqueues another item, say $y$, then $x$ and $y$ are inserted in baskets $A[i]$ and $A[j]$, with $i < j$. Then, $x$ is dequeued first because \Deq operations scan $A$ in index-ascending order.  Thus, every execution is free of VOrd.
+  VOrd: Two items are enqueued in a certain order, and a \Deq returns the later item before any \Deq of the earlier item starts.  \LL/\IC guarantees that if an \Enq operation enqueues an item, say $x$, and then a later \Enq operation enqueues another item, say $y$, then $x$ and $y$ are inserted in baskets $A[i]$ and $A[j]$, with $i < j$. Then, $x$ is dequeued first because \Deq operations scan $A$ in index-ascending order. Thus, every execution is free of VOrd.
 
-  VWit: A \Deq operation returning \epty even though the queue is never logically empty during the execution of the \Deq operation.  An item is logically in the queue if it is in a basket $A[i]$ and $i < TAIL$.  When a \Deq operation returns \epty, there is a point in time where no basket in $A[0, 1, \hdots, TAIL-1]$ contains an item, and hence the queue is logically empty (it might, however, be the case that $A[TAIL]$
- does contain an item at that moment).  Hence, every execution is free of VWit.
+  VWit: A \Deq operation returning \epty even though the queue is never logically empty during the execution of the \Deq operation. An item is logically in the queue if it is in a basket $A[i]$ and $i < TAIL$. When a \Deq operation returns \epty, there is a point in time where no basket in $A[0, 1, \hdots, TAIL-1]$ contains an item, and hence the queue is logically empty (it might, however, be the case that $A[TAIL]$
+ does contain an item at that moment). Hence, every execution is free of VWit.
 \end{proof}
 
-The algorithm's scalability depends on the scalability of the concrete implementations of \LL/\IC and the basket with which it is instantiated.  We propose wait-free implementations of each of the objects.
+The algorithm's scalability depends on the scalability of the concrete implementations of \LL/\IC and the basket with which it is instantiated. We propose wait-free implementations of each of the objects.
 
 \paragraph{\LL/\IC implementations.} Let $p$ denote the process that invokes an operation.
 
@@ -107,7 +107,7 @@ The CAS-based \LL/\IC implementation just described is linearizable and wait-fre
 \end{theorem}
 
 \begin{proof}[Proof sketch.]
-  The algorithm is wait-free.  For the linearizability proof, consider any finite execution $E$ with no pending operations.  We define the following linearization points.  The linearization point of an \LL operation is when it reads $R$.  If an \IC operation performs a \CAS, it is linearized at that step. Otherwise, it is linearized when it reads $R$.  Let $S_t$ be the sequential execution induced by the first $t$ linearization points of $E$, reading its steps in index-ascending order.  By induction on $t$, it can be shown that $S_T$ is a sequential execution of \LL/\IC, where $T$ is the number of operations in $E$.  The main observation is that if there is a successful \CAS before the \CAS of an \IC operation of a process $p$, then the contents of $R$ are different from the value $p$ reads in its previous \LL operation.
+  The algorithm is wait-free. For the linearizability proof, consider any finite execution $E$ with no pending operations. We define the following linearization points. The linearization point of an \LL operation is when it reads $R$. If an \IC operation performs a \CAS, it is linearized at that step. Otherwise, it is linearized when it reads $R$. Let $S_t$ be the sequential execution induced by the first $t$ linearization points of $E$, reading its steps in index-ascending order. By induction on $t$, it can be shown that $S_T$ is a sequential execution of \LL/\IC, where $T$ is the number of operations in $E$. The main observation is that if there is a successful \CAS before the \CAS of an \IC operation of a process $p$, then the contents of $R$ are different from the value $p$ reads in its previous \LL operation.
 \end{proof}
 
 \paragraph{A \R/\W implementation.}
@@ -118,33 +118,33 @@ It uses a shared array $M$ with $n$ entries initialized to 0.  \LL first reads a
 \end{theorem}
 
 \begin{proof}[Proof sketch]
-The algorithm is obviously wait-free. We next argue that each of its executions is linearizable.
+The algorithm is wait-free. We next argue that each of its executions is linearizable.
 
-Consider any finite execution of the algorithm with no pending operations.  To simplify the argument, suppose that there is a \emph{fictitious} \IC operation that atomically writes 0 in all entries of $M$ at the beginning of the execution.
+Consider any finite execution of the algorithm with no pending operations. To simplify the argument, suppose that there is a \emph{fictitious} \IC operation that atomically writes 0 in all entries of $M$ at the beginning of the execution.
 
-Each \IC operation is linearized at its last step. Thus, an \IC that writes, is linearized at its \W step, and an \IC that does not write is linearized at its last \R step.  Let $MAX$ be the maximum value in the shared array $M$ at the end of the execution.  For every $R \in \{0,1, \hdots, MAX\}$, let $\IC_R$ be the \IC operation that writes $R$ for the first time in $M$.
+Each \IC operation is linearized at its last step. Thus, an \IC that writes is linearized at its \W step, and an \IC that does not write is linearized at its last \R step. Let $MAX$ be the maximum value in the shared array $M$ at the end of the execution. For every $R \in \{0,1, \hdots, MAX\}$, let $\IC_R$ be the \IC operation that writes $R$ for the first time in $M$.
 
-We will linearize every \LL operation that returns the value $R \in \{0, 1, \hdots, MAX-1\}$ at one of its steps and argue that this step is between $\IC_R$ and $\IC_{R+1}$.  This will induce a sequential execution that respects the real-time order and is a sequential execution of \LL/\IC, and hence a linearization.
+We will linearize every \LL operation that returns the value $R \in \{0, 1, \hdots, MAX-1\}$ at one of its steps and argue that this step is between $\IC_R$ and $\IC_{R+1}$. This will induce a sequential execution that respects the real-time order and is a sequential execution of \LL/\IC, hence a linearization.
 
-Let \op denote any \LL that returns $R \in \{0, 1, \hdots, MAX-1\}$ and let $e$ denote its \R step that reads $R$ for the first time.  Observe that $IC_R$ has been linearized when $e$ happens in the execution.  We have two cases:
+Let \op denote any \LL that returns $R \in \{0, 1, \hdots, MAX-1\}$ and let $e$ denote its \R step that reads $R$ for the first time. Observe that $IC_R$ has been linearized when $e$ happens in the execution. We have two cases:
 
 \begin{enumerate}
 \item If the shared memory $M$ does not contain a value $> R$ when $e$ occurs (hence no $IC_{R'}$ with $R' > R$ has been linearized when $e$ occurs), then \op is linearized at $e$.
 
-\item If the shared memory $M$ does contain a value $> R$ when $e$ occurs, then \op is linearized as follows.  Let $M[j]$ be the entry that is read at step $e$. Note that this case can happen if and only if some entries in the range $M[0, \hdots, j-1]$ contain values $> R$ when $e$ happens (and hence some $IC_{R'}$ with $R' > R$ have been linearized when $e$ occurs).  Moreover, it can be shown that the value $R+1$ is written in an entry in the range $M[0, \hdots, j-1]$ at some time between the invocation of \op and $e$.  Let $i \in \{0, \hdots, j-1\}$ be the index of the entry where it is written $R+1$ for the first time. Then, \op is linearized right before $R+1$ is written in $M[i]$ (and hence before $\IC_{R+1}$).
+\item If the shared memory $M$ does contain a value $> R$ when $e$ occurs, then \op is linearized as follows.  Let $M[j]$ be the entry read at step $e$. Note that this case can happen if and only if some entries in the range $M[0, \hdots, j-1]$ contain values $> R$ when $e$ happens (and hence some $IC_{R'}$ with $R' > R$ have been linearized when $e$ occurs). Moreover, it can be shown that the value $R+1$ is written in an entry in the range $M[0, \hdots, j-1]$ at some time between the invocation of \op and $e$. Let $i \in \{0, \hdots, j-1\}$ be the index of the entry where it is written $R+1$ for the first time. Then, \op is linearized right before $R+1$ is written in $M[i]$ (and hence before $\IC_{R+1}$).
 \end{enumerate}
 
 \end{proof}
 
 \paragraph{A mixed implementation.}
-It uses a shared array $M$ with $K < n$ entries initialized to 0.  \LL reads all entries of $M$ and stores the maximum value and its index in persistent variables $max_p$ and $indmax_p$ of $p$, and returns $max_p$.  \IC non-deterministically picks an index $pos \in \{0,1,\hdots,K-1\} \setminus \{indmax_p\}$.  If $M[pos]$ contains a value $x$ less than $max_p+1$, then it performs $\CAS(M[pos], x, max_p+1)$; if the \CAS is successful, it returns \ok.  Otherwise, it reads the value in $M[indmax_p]$, and if it is equal to $max_p$, then it performs $\CAS(M[indmax_p], max_p, max_p+1)$; in any it case returns~\ok.
+It uses a shared array $M$ with $K < n$ entries initialized to 0.  \LL reads all entries of $M$ and stores the maximum value and index in persistent variables $max_p$ and $indmax_p$ of $p$, and returns $max_p$.  \IC non-deterministically picks an index $pos \in \{0,1,\hdots,K-1\} \setminus \{indmax_p\}$.  If $M[pos]$ contains a value $x$ less than $max_p+1$, then it performs $\CAS(M[pos], x, max_p+1)$; if the \CAS is successful, it returns \ok. Otherwise, it reads the value in $M[indmax_p]$, and if it is equal to $max_p$, then it performs $\CAS(M[indmax_p], max_p, max_p+1)$; in any it case returns~\ok.
 
 \begin{theorem}
   The mixed implementation just described is linearizable and wait-free.
 \end{theorem}
 
 \begin{proof}[Proof sketch.]
-  The algorithm is obviously wait-free.  The linearizability proof is nearly the same as the one in the previous theorem proof; the only difference is that each \IC operation is linearized at its last step, either a \CAS (successful or not) or a \R.
+  The algorithm is wait-free. The linearizability proof is nearly the same as the one in the previous theorem proof; the only difference is that each \IC operation is linearized at its last step, either a \CAS (successful or not) or a \R.
 \end{proof}
 
 
@@ -232,13 +232,13 @@ It uses a shared array $M$ with $K < n$ entries initialized to 0.  \LL reads all
 \line{CBQ15} \> \> \> \(takes_p =  takes_p \setminus \{pos\}\) \\
 \line{CBQ16} \> \> \> {\bf if \(takes_p == \emptyset\) then \(\W(STATE, \closed)\) endif} \\
 \line{CBQ17} \> \> \> \( x = \compete(pos) \) \\
-\line{CBQ13} \> \> \> {\bf if \(x \neq \bot, \top \) then return \(x\)} \\
-\line{CBQ14} \> \> \> {\bf else if \(x == \bot\) then} \\
-\line{CBQ19} \> \> \> \> \( x = \compete(pos) \) \\
-\line{CBQ22} \> \> \> \> {\bf if \(x \neq \bot, \top \) then return \(x\) endif} \\
-\line{CBQ24} \> \> \>{\bf endif} \\
-\line{CBQ24} \> \> {\bf endif} \\
-\line{CBQ25} \> {\bf endwhile}\\
+\line{CBQ18} \> \> \> {\bf if \(x \neq \bot, \top \) then return \(x\)} \\
+\line{CBQ19} \> \> \> {\bf else if \(x == \bot\) then} \\
+\line{CBQ20} \> \> \> \> \( x = \compete(pos) \) \\
+\line{CBQ21} \> \> \> \> {\bf if \(x \neq \bot, \top \) then return \(x\) endif} \\
+\line{CBQ22} \> \> \>{\bf endif} \\
+\line{CBQ23} \> \> {\bf endif} \\
+\line{CBQ24} \> {\bf endwhile}\\
 {\bf end \Take}
 \end{tabbing}
 \end{minipage}}
@@ -247,11 +247,11 @@ It uses a shared array $M$ with $K < n$ entries initialized to 0.  \LL reads all
 \end{figure}
 
 \paragraph{Basket implementations.}
-The basket implementations appear in Algorithms~\ref{basket-1} and~\ref{basket-2}.  Both implementations have a shared array where the items are put and taken.  A \Put operation tries to put its item in a location, while a \Take operation either takes an item from a location or marks it as "canceled."  The first implementation follows an approach similar to that of the LCRQ algorithm~\cite{ppopp2013x86queues}, while the second implementation is reminiscent of locally linearizable generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
+The basket implementations appear in Algorithms~\ref{basket-1} and~\ref{basket-2}. Both implementations have a shared array where the items are put and taken. A \Put operation tries to put its item in a location, while a \Take operation either takes an item from a location or marks it as "canceled."  The first implementation follows an approach similar to that of the LCRQ algorithm~\cite{ppopp2013x86queues}, while the second implementation is reminiscent of locally linearizable generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
 
 In the first implementation, the processes use \FAI to guarantee that at most two "opposite" operations "compete" for the same location in the shared array, which can be resolved with a \SWAP; the idea of this algorithm is similar to the approach in the LCRQ algorithm~\cite{ppopp2013x86queues}.
 
-In the second implementation, each process has a dedicated location in the shared array where it tries to put its item when it invokes \Put. When a process invokes \Take, it first tries to take an item from its dedicated location, and if it does not succeed, it randomly picks a non-previously-picked location and does the same, and repeats until it takes an item or all locations have been canceled.  Since several operations might "compete" for the same location, \CAS is needed.  This implementation is reminiscent of \emph{locally linearizable} generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
+In the second implementation, each process has a dedicated location in the shared array where it tries to put its item when it invokes \Put. When a process invokes \Take, it first tries to take an item from its dedicated location, and if it does not succeed, it randomly picks a non-previously-picked location and does the same, and repeats until it takes an item or all locations have been canceled. Since several operations might "compete" for the same location, \CAS is needed. This implementation is reminiscent of \emph{locally linearizable} generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
 
 \begin{theorem}
 Algorithm~\ref{basket-1} is a wait-free linearizable implementation of a $K$-basket.
@@ -262,9 +262,9 @@ It is not hard to see that the algorithm is wait-free.
 
 For the linearizability proof, given an entry $A[i]$, we will say that a \Put operation \emph{successfully puts} its item in $A[i]$ if it gets $\bot$ when it performs \SWAP on $A[i]$, and that a \Take operation \emph{successfully cancels} $A[i]$ if it gets $\bot$ when it performs \SWAP on $A[i]$, otherwise (i.e. it gets a value distinct from $\bot$), we say that the \Take operation \emph{successfully takes} an item from $A[i]$.
 
-From the specification of \FAI, for every $A[i]$, at most one \Put operations tries to successfully put its item in $A[i]$, and at most one \Take operation tries to either successfully cancel $A[i]$ or successfully take an item from $A[i]$.  By the specification of \SWAP, if $A[i]$ is canceled, no \Put operation successfully puts an item in it, and no \Take operation successfully takes an item from it.
+From the specification of \FAI, for every $A[i]$, at most one \Put operations tries to put its item in $A[i]$ successfully, and at most one \Take operation tries to either successfully cancel $A[i]$ or successfully take an item from $A[i]$. By the specification of \SWAP, if $A[i]$ is canceled, no \Put operation successfully puts an item in it, and no \Take operation successfully takes an item from it.
 
-Given any execution of the algorithm, the operations are linearized as follows.  A \Put operation that successfully puts its item is linearized at its last \FAI instruction before returning.  A \Take operation that successfully takes an item from $A[i]$ is linearized right after the \Put operation that successfully puts its item in $A[i]$.  A \Put that returns \full is linearized at its return step, and, similarly, a \Take that returns \closed is linearized at its return step.  Note that, in both cases, at that moment of the execution, every entry of $A$ has been or will be either canceled or a \Take operation has or will successfully take an item from it.  It can be shown that these linearization points induce a valid linearization of the execution.
+Given any execution of the algorithm, the operations are linearized as follows. A \Put operation that successfully puts its item is linearized at its last \FAI instruction before returning. A \Take operation that successfully takes an item from $A[i]$ is linearized right after the \Put operation that successfully puts its item in $A[i]$. A \Put that returns \full is linearized at its return step, and similarly, a \Take that returns \closed is linearized at its return step. Note that, in both cases, at that moment of the execution, every entry of $A$ has been or will be either canceled or a \Take operation has or will successfully take an item from it. It can be shown that these linearization points induce a valid linearization of the execution.
 \end{proof}
 
 \begin{theorem}
@@ -274,14 +274,14 @@ Algorithm~\ref{basket-2} is a wait-free linearizable implementation of an $n$-ba
 \begin{proof}[Proof sketch]
 Clearly, \Put is wait-free. It is not difficult to see that \Take is wait-free too.
 
-For the linearizability proof, given an entry $A[i]$, we will say that a \Put operation of a process $p$, \emph{successfully puts} its item in $A[p]$ if its \CAS is successful.  A \Take operation \emph{successfully cancels} $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being $\bot$; and it \emph{successfully takes} an item from $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being distinct to $\bot$ and $\top$.
+For the linearizability proof, given an entry $A[i]$, we will say that a \Put operation of a process $p$, \emph{successfully puts} its item in $A[p]$ if its \CAS is successful. A \Take operation \emph{successfully cancels} $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being $\bot$; and it \emph{successfully takes} an item from $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being distinct to $\bot$ and $\top$.
 
-The linearizability proof is similar to the linearizability proof in the previous theorem, with the following main differences.  (1) If a \Put operation returns \full, it can be the case that some of the other entries of $A$ will never be canceled or store an item; the response of the \Put operation is, however, correct because the sequential specification of $n$-basket allows \Put to return \full in any state of the object.  (2) Several \Take operations might try to either cancel the same entry $A[i]$ or successfully take an item from it; this is not a problem because the specification of \CAS guarantees that, at most, one succeeds.
+The linearizability proof is similar to the linearizability proof in the previous theorem, with the following main differences. (1) If a \Put operation returns \full, it can be the case that some of the other entries of $A$ will never be canceled or store an item; the response of the \Put operation is, however, correct because the sequential specification of $n$-basket allows \Put to return \full in any state of the object. (2) Several \Take operations might try to cancel the same entry $A[i]$ or successfully take an item from it; this is not a problem because the specification of \CAS guarantees that, at most, one succeeds.
 
-Given any execution of the algorithm, the operations are linearized as follows.  A \Put operation that successfully puts its item is linearized at its (successful) \CAS.  A \Take operation that successfully takes an item from $A[i]$ is linearized right after the \Put operation that successfully puts its item in $A[i]$.  A \Put that returns \full is linearized at its return step, and, similarly, a \Take that returns \closed is linearized at its return step.  Note that at the moment of the execution, a \Take that returns \closed, every entry of $A$ has been either canceled or a \Take operation has successfully taken an item from it.  It can be shown that these linearization points induce a valid linearization of the execution.
+Given any execution of the algorithm, the operations are linearized as follows. A \Put operation that successfully puts its item is linearized at its (successful) \CAS. A \Take operation that successfully takes an item from $A[i]$ is linearized right after the \Put operation that successfully puts its item in $A[i]$. A \Put that returns \full is linearized at its return step, and similarly, a \Take that returns \closed is linearized at its return step. Note that at the execution, a \Take that returns \closed, every entry of $A$ has been either canceled, or a \Take operation has successfully taken an item from it. It can be shown that these linearization points induce a valid linearization of the execution.
 \end{proof}
 
-\section{Methodology}
+\section{Experiments}
 
 To evaluate the performance of our Queue, we design a set of experiments that allow us to know if the Queue is competitive against other queues in the literature. We divide our experiments into two classes: \emph{inner experiments} \sout{(this name could change in the future)} and \emph{outer experiments}. We used the internal experiments to know which one of our implementations (LL/IC object and Queue based on distinct variants of the LL/IC objects) has the best performance and throughput. Once the inner experiments and the best option are chosen, we evaluate the Queue against queues in state of the art. We compare our Queue against:
 
