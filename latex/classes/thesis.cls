@@ -412,8 +412,14 @@ innerbottommargin=5pt]{cBox}
 \newcommand{\RMW}{{\sf \small Read-Modify-Write}\xspace}
 \newcommand{\CAS}{{\sf \small Compare\&Swap}\xspace}
 \newcommand{\TAS}{{\sf \small Test\&Set}\xspace}
+\newcommand{\FAI}{{\sf \small FAI}\xspace}
+\newcommand{\LL}{{\sf \small LL}\xspace}
+\newcommand{\IC}{{\sf \small IC}\xspace}
+\newcommand{\SC}{{\sf \small SC}\xspace}
 \newcommand{\R}{{\sf \small Read}\xspace}
 \newcommand{\W}{{\sf \small Write}\xspace}
+\newcommand{\ok}{{\sf \small OK}\xspace}
+\newcommand{\closed}{{\sf \small CLOSED}\xspace}
 \newcommand{\MaxReg}{{\sf \small MaxRegister}\xspace}
 \newcommand{\RangeMaxReg}{{\sf \small RangeMaxRegister}\xspace}
 \newcommand{\abort}{{\sf \small abort}\xspace}
@@ -439,6 +445,9 @@ innerbottommargin=5pt]{cBox}
 \newcommand{\BNBWSM}{{\sf \small B-WS-MULT}\xspace}
 \newcommand{\BNCWSM}{{\sf \small B-WS-WMULT}\xspace}
 \newcommand{\BWFWSM}{{\sf \small B-WS-MULT}\xspace}
+\newcommand{\full}{{\sf \small FULL}\xspace}
+\newcommand{\open}{{\sf \small OPEN}\xspace}
+\newcommand{\compete}{{\sf \small compete}\xspace}
 
 \newcounter{linecounter}
 \newcommand{\linenumbering}{\ifthenelse{\value{linecounter}<10}{(0\arabic{linecounter})}{(\arabic{linecounter})}}
