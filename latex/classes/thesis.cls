@@ -412,7 +412,8 @@ innerbottommargin=5pt]{cBox}
 \newcommand{\RMW}{{\sf \small Read-Modify-Write}\xspace}
 \newcommand{\CAS}{{\sf \small Compare\&Swap}\xspace}
 \newcommand{\TAS}{{\sf \small Test\&Set}\xspace}
-\newcommand{\FAI}{{\sf \small FAI}\xspace}
+\newcommand{\FAI}{{\sf \small Fetch\&Increment}\xspace}
+\newcommand{\SWAP}{{\sf \small Swap}\xspace}
 \newcommand{\LL}{{\sf \small LL}\xspace}
 \newcommand{\IC}{{\sf \small IC}\xspace}
 \newcommand{\SC}{{\sf \small SC}\xspace}
@@ -423,7 +424,6 @@ innerbottommargin=5pt]{cBox}
 \newcommand{\MaxReg}{{\sf \small MaxRegister}\xspace}
 \newcommand{\RangeMaxReg}{{\sf \small RangeMaxRegister}\xspace}
 \newcommand{\abort}{{\sf \small abort}\xspace}
-\newcommand{\SWAP}{{\sf \small Swap}\xspace}
 \newcommand{\Enq}{{\sf \small Enqueue}\xspace}
 \newcommand{\Push}{{\sf \small Push}\xspace}
 \newcommand{\Pop}{{\sf \small Pop}\xspace}
