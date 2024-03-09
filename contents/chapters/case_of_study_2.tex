@@ -325,11 +325,11 @@ Distinct from the single-producer multi-consumer queue presented in Chapter~\ref
 \line{BQ14} \>\>\>\> \(Tail.CAS(lastTail, newSegment)\)\\
 \line{BQ15} \>\>\>\> {\bf return \ok}\\
 \line{BQ16} \>\>\> {\bf endif}\\
-\line{BQ17} \>\>\> {\bf if \(lastTail\rightarrow{}items[ticket].put(x) == \ok\)} \\
-\line{BQ18} \>\>\>\> \(lastTail\rightarrow{}TAIL.\IC()\) \\
-\line{BQ19} \>\>\>\> {\bf return \ok} \\
-\line{BQ20} \>\>\> {\bf endif} \\
-\line{BQ21} \>\> {\bf endif}\\
+\line{BQ17} \>\> {\bf endif}\\
+\line{BQ18} \>\> {\bf if \(lastTail\rightarrow{}items[ticket].put(x) == \ok\)} \\
+\line{BQ19} \>\>\> \(lastTail\rightarrow{}TAIL.\IC()\) \\
+\line{BQ20} \>\>\> {\bf return \ok} \\
+\line{BQ21} \>\> {\bf endif} \\
 \line{BQ22} \> {\bf endwhile}\\
 {\bf end \Enq} \\ \\
 
@@ -381,12 +381,13 @@ Distinct from the single-producer multi-consumer queue presented in Chapter~\ref
 \line{BQ36} \>\>\>\> {\bf if \(x \ne \closed\) then return \(x\) endif} \\
 \line{BQ37} \>\>\>\> \(lastHead\rightarrow{}HEAD.\IC()\) \\
 \line{BQ38} \>\>\> {\bf endif} \\
-\line{BQ39} \> \> $head' = HEAD.\LL()$ \\
-\line{BQ40} \> \> $tail' = TAIL.\LL()$\\
-\line{BQ41} \> \> {\bf if $head == head' == tail' == tail$ then return $\epty$ endif}\\
-\line{BQ42} \> \> $headTicket = head'$ \\
-\line{BQ43} \> \> $tailTicket = tail'$\\
-\line{BQ44S} \> {\bf endwhile}\\
+\line{BQ39} \>\>\> $head' = lastHead\rightarrow{}HEAD.\LL()$ \\
+\line{BQ40} \>\>\> $tail' = lastHead\rightarrow{}   TAIL.\LL()$\\
+\line{BQ41} \>\>\> {\bf if $head == head' == tail' == tail$ then return $\epty$ endif}\\
+\line{BQ42} \>\>\> $headTicket = head'$ \\
+\line{BQ43} \>\>\> $tailTicket = tail'$\\
+\line{BQ44} \>\> {\bf endwhile} \\
+\line{BQ4S} \> {\bf endwhile}\\
 {\bf end \Deq}
 \end{tabbing}
 \end{minipage} }
