@@ -149,8 +149,7 @@ Note that if only the first object in \(Tasks\) is initialized to \(\bot\) (and 
 \WFWSM (Figure~\ref{figure-max-reg-mult}) is a set-linearizable wait-free algorithm for work-stealing with multiplicity, using \R/\W instructions and a single instance of a linearizable \MaxReg object. Moreover, all operations execute a constant number of \R/\W instructions, invoke a constant number of operations of the \MaxReg object, and \Put is \R/\W.
 \end{theorem}
 
-\begin{thesisproof}
-
+\begin{proofT}
 The algorithm is wait-free since the \MaxReg object is assumed to be wait-free, and none of the operations executes a loop. Observe that \Put uses only \R/\W. Before proving that \WFWSM is set-linearizable, we first observe that at any time, the thieves read the range of \(Tasks\) that the owner has already initialized; more specifically, every \Steal operation reads from \(Tasks\) (in Line~\ref{A13}), a value that was written by the owner, either \(\bot\) or a task.
 
 In any given execution, the range \(Tasks[Head, Head+1, \hdots, ]\) contains a (possibly empty) sequence of tasks followed by at least one \(\bot\) value, considering the entries in index-ascending order. The claim is true initially as the first two entries if \(Tasks\) are initialized to \(\bot\). Every time the owner stores a new task, it initializes a new entry of \(Task\) to \(\bot\) (Line~\ref{A02}); hence the claim holds at any time, as \(Head\) is incremented only if the owner or a thief reads that \(Tasks[Head]\) contains a non-\(\bot\) value (Lines~\ref{A06} or~\ref{A16}).  Note that the order of the instructions in Line~\ref{A02} is irrelevant.
@@ -191,7 +190,7 @@ It only remains to be argued that any \Take/\Steal operation that returns \epty,
 Consider any \Take operation in \(E\) that returns \(\epty\).  Observe that this can happen only if the owner sees that \(head > tail\), namely, the conditional of Line~\ref{A05} is not satisfied. This is possible only when no task has been inserted, or all items have been extracted, and hence \(Tasks[Head, Head+1, \hdots]\) is empty. Consider any \Steal operation in \(E\) that returns \(\epty\).  This is possible only when the thief reads \(\bot\) from \(Tasks\) in Line~\ref{A13}, and since we already argued that the owner inserts tasks in ascending order, the sequence \(Tasks[Head, Head+1, \hdots]\) is empty.
 
 We conclude that \(\SetLin(E)\) is a valid set-sequential execution of work-stealing with multiplicity, and as it respects the partial order \(<_E\) of \(E\), we have that it is a set-linearization of \(E\), and therefore \WFWSM is set-linearizable. The theorem follows.
-\end{thesisproof}
+\end{proofT}
 
 If we replace \(Head\) with the \R/\W\ wait-free linearizable \MaxReg algorithm of Aspnes, Attiya, and Censor-Hillel~\cite{DBLP_journals_jacm_AspnesAC12}, whose step complexity is \(O(\log m)\), where \(m \ge 1\) is the maximum value that can be stored in the object, the step complexity of \WFWSM is bounded wait-free with logarithmic step complexity too. In the resulting algorithm, at most $m$ tasks can be inserted; the actual value of m is application-dependent. Since the algorithm does not use \RAW synchronization patterns (as explained in the proof of Theorem~\ref{theo-wf-log}), the resulting algorithm does not use those patterns either.
 
@@ -199,11 +198,11 @@ If we replace \(Head\) with the \R/\W\ wait-free linearizable \MaxReg algorithm 
 If $Head$ is an instance of the \R/\W\ wait-free linearizable \MaxReg algorithm of Aspness, Attiya, and Censor-Hillel~\cite{DBLP_journals_jacm_AspnesAC12}, \WFWSM is set-linearizable, fully \R/\W and \Take and \Steal have step complexity $O(\log m)$, where $m$ denotes the maximum number of tasks that can be inserted in an execution.  Furthermore, no operation uses \RAW synchronization patterns.
 \end{theorem}
 
-\begin{thesisproof}
+\begin{proofT}
 The algorithm remains set-linearizable by the composability of set-linearizability \cite{DBLP_journals_jacm_CastanedaRR18}. While the step complexity of \Put is $O(1)$, the step complexity of \Take and \Steal is $O(\log m)$ as the step complexity \MaxR and \MaxW of the \MaxReg algorithm~\cite{DBLP_journals_jacm_AspnesAC12} is $O(\log m)$.
 
 We now argue that \Take and \Steal do not use \RAW synchronization patterns. The reason is that the \MaxReg algorithm does not use this synchronization mechanism. Roughly speaking, the algorithm consists of a binary tree of height $O(\log m)$ with an atomic bit in each node.  When a process wants to perform \MaxR, it reads the bits in the path of the tree from the root to a leaf and then returns a value according to the leaf it reached; the next node in the path the process reads depends on the current node's value. When a process wants to perform \MaxW, it reads the bits in a path from the root to a leaf, which is a function of the binary representation of the value the process wants to write; then, if the new value is larger than the current one, in a bottom-up manner, it writes 1 in every node in the path with 0 (for the algorithm to be linearizable, the writes should occur in this order. Hence the algorithm is not fence-free). Thus, we have that \MaxR consists of a sequence of reads, and \MaxW consists of a sequence of reads followed by a (possibly empty) sequence of writes. Therefore, \Take/\Steal of \WFWSM consists of a sequence of reads followed by a (possibly empty) sequence of writes, and thus the operation does not use \RAW synchronization patterns.
-\end{thesisproof}
+\end{proofT}
 
 \section{\label{sec-ws-nc-mult}Work-Stealing with Weak Multiplicity}
 
@@ -326,8 +325,7 @@ As already mentioned, \NCWSM is the algorithm obtained by replacing \(Head\) in 
   \NCWSM is a sequentially-exact linearizable wait-free algorithm for work-stealing with weak multiplicity, using \R/\W instructions and a single sequentially-exact linearizable \RangeMaxReg object. Moreover, all operations execute a constant number of \R/\W\ instructions and invoke a constant number of operations of the \RangeMaxReg object, and \Put is \R/\W.
 \end{theorem}
 
-\begin{thesisproof}
-
+\begin{proofT}
 All algorithm operations are wait-free since the \RangeMaxReg object is assumed to be wait-free, and none of the operations executes a loop. Note that \Put uses only \R/\W.
 
 As in the proof of Theorem~\ref{theo-wf}, it can be argued that thieves read values from \(Tasks\) that have been written by the owner.
@@ -338,7 +336,7 @@ Proving that \(E\) is linearizable is quite straightforward. It is enough to obs
 
 Since $Head$ is assumed to be sequentially-exact, in sequential executions, the algorithm behaves exactly as \WFWSM (exchanging \RMaxR and \RMaxW with \MaxR and \MaxW, respectively). Thus, by Remark~\ref{remark-seq-exact-set-lin} and since \WFWSM is set-linearizable, the sequential executions of the algorithm are sequential executions of work-stealing. Thus, the algorithm is sequentially-exact. The theorem follows.
 
-\end{thesisproof}
+\end{proofT}
 
 Figure~\ref{figure-algo-range-max-reg} contains a simple sequentially-exact linearizable wait-free algorithm for \RangeMaxReg. All processes share a single \R/\W object \(R\), and each process has a local persistent variable \(r\). The idea is straightforward: each process locally stores in \(r\) the maximum value it is aware of; whenever it discovers a new largest value in \RMaxW, it writes it in \(r\) and \(R\), and since \(R\) might not have the largest value, it returns the maximum among \(r\) and \(R\) in \RMaxR.
 
@@ -382,7 +380,7 @@ Figure~\ref{figure-algo-range-max-reg} contains a simple sequentially-exact line
   The algorithm in Figure~\ref{figure-algo-range-max-reg} is a sequentially-exact linearizable wait-free and fence-free algorithm for \RangeMaxReg using only \R/\W instructions and with constant step complexity in all its operations.
 \end{theorem}
 
-\begin{thesisproof}
+\begin{proofT}
 It is clear from its pseudocode that the algorithm is \R/\W, wait-free and fence-free, and each operation has constant step complexity.
 
 Consider any finite execution \(E\) of the algorithm. Since the algorithm is wait-free, there is a finite extension of \(E\) in which all its operations are completed, and no new operations start. Thus, we can assume that there are no pending operations in \(E\).
@@ -390,7 +388,7 @@ Consider any finite execution \(E\) of the algorithm. Since the algorithm is wai
 To prove linearizability, it is enough to observe that at any step of \(E\), the state of the object is \((r_0, \hdots, r_{n-1})\), where \(r_i\) is the value stored in the local persistent variable \(r\) of process \(p_i\) at that moment.  Thus, a \RMaxW(x) operation with \(x > r\) (hence the condition in Line~\ref{C02} is {\sf \small true}) is linearized at its step \(R.\W(x)\) in Line~\ref{C03}; if \(x \leq r\), the operation is linearized at line~\ref{C01}, i.e., at the beginning of the operation.  A \RMaxR() operation is linearized at its step \(R.\R()\) in Line~\ref{C06}; note that the operation returns a value between the value in \(r\) and the maximum among the \(r\)'s local variables since that is the maximum value \(R\) can store at that time. Thus, the algorithm is linearizable.
 
 Suppose now that \(E\) is sequential. By induction of the number of operations, it is easy to show that \(R\) always contains the maximum value. Thus, \(E\) is a sequential execution of \MaxReg, and therefore the algorithm is sequentially-exact. The theorem follows.
-\end{thesisproof}
+\end{proofT}
 
 %==================================================================
 \begin{figure}[H] \centering{ \fbox{
@@ -452,9 +450,9 @@ We are now able to present our main result:
 If \(Head\) is replaced with an instance of the algorithm in Figure~\ref{figure-algo-range-max-reg}, \NCWSM is \R/\W, fence-free, wait-free, sequentially-exact, and linearizable with constant step complexity in all its operations.
 \end{theorem}
 
-\begin{thesisproof}
+\begin{proofT}
 By composability of linearizability~\cite{DBLP_journals_toplas_HerlihyW90}, the algorithm remains linearizable when \(Head\) is replaced with an instance of the algorithm in Figure~\ref{figure-algo-range-max-reg}. The algorithm is fully \R/\W and wait-free because \Put uses only \R/\W instructions and the \RangeMaxReg algorithm in Figure~\ref{figure-algo-range-max-reg} is fully \R/\W and wait-free, by Theorem~\ref{theo-range-max-reg}. The step complexity of \Put is $O(1)$. The step complexity of \Take and \Steal is $O(1)$ because the \RangeMaxReg algorithm in Figure~\ref{figure-algo-range-max-reg} has constant step complexity. It is not difficult to verify that the resulting algorithm does not require any specific ordering among its steps beyond what is implied by data dependence. Therefore, it is fully fence-free. The algorithm is sequentially-exact because the algorithm in Figure~\ref{figure-algo-range-max-reg} is sequentially-exact. The theorem follows.
-\end{thesisproof}
+\end{proofT}
 
 Figure~\ref{figure-w-mult} contains an optimized \NCWSM algorithm with the \RangeMaxReg algorithm in Figure~\ref{figure-algo-range-max-reg} inlined. Since \Take and \Steal first \RMaxR from and then \RMaxW to \(Head\), the algorithm remains sequentially exact when removing Line~\ref{C01} of \RMaxW in Figure~\ref{figure-algo-range-max-reg}. Our experimental evaluation in Section~\ref{sec-experiments} tested implementations of this algorithm.
 
@@ -538,13 +536,11 @@ In this section, we discuss the outcome of an experimental evaluation of \NCWSM 
 
 \subsubsection{\label{subsec:implementation}Platforms and Implementation}
 
-The experiments were conducted on a machine equipped with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. The algorithms were implemented in Java~17, which allowed us to ignore tasks such as garbage collection.  As mentioned, two versions of \NCWSM and \BNCWSM were implemented. The other tested algorithms, Cilk THE, Chase-Lev, and the three idempotent work-stealing, were implemented following their specification, i.e., inserting fences where required.; all these algorithms use resizable arrays to store tasks.
+The experiments were conducted on a machine with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. The algorithms were implemented in Java~17, which allowed us to ignore tasks such as garbage collection.  As mentioned, two versions of \NCWSM and \BNCWSM were implemented. The other tested algorithms, Cilk THE, Chase-Lev, and the three idempotent work-stealing, were implemented following their specification, i.e., inserting fences where required.; all these algorithms use resizable arrays to store tasks.
 
 \subsubsection{\label{subsec:methodology}Methodology}
 
-To analyze the performance of the algorithms, the experimental evaluation is divided into the following three benchmarks, where the first two have been used before~\cite{DBLP_conf_pldi_FrigoLR98, maged.vechev.2009, fencefreework} and the third is an application to a problem that naturally admits parallelization: (1)~\textit{Zero cost experiments}, (2)~\textit{Parallel spanning tree}, and (3) \textit{Parallel SAT}. Below, we briefly describe each benchmark.  Performance was measured using the statistically rigorous methodology by Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07}, described in Section~\ref{sec:stat-rigor-meth}.  Repeated work was measured in the second and third benchmarks using a more straightforward methodology.
-
-
+To analyze the performance of the algorithms, the experimental evaluation is divided into the following three benchmarks, where the first two have been used before~\cite{DBLP_conf_pldi_FrigoLR98, maged.vechev.2009, fencefreework} and the third is an application to a problem that naturally admits parallelization: (1)~\textit{Zero cost experiments}, (2)~\textit{Parallel spanning tree}, and (3) \textit{Parallel SAT}. Below, we briefly describe each benchmark.  Performance was measured using the statistically rigorous methodology by Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07}, described in Section~\ref{subsec:stat-rigor-meth}.  Repeated work was measured in the second and third benchmarks using a more straightforward methodology.
 
 \paragraph*{Zero cost experiments\label{zero-cost-experiment}}
 
@@ -571,28 +567,3 @@ It also measured the amount of repeated work in both relaxations of work-stealin
 We consider parallel SAT solvers (e.g.,~\cite{DBLP_journals_amai_BohmS96, DBLP_journals_entcs_FeldmanDH05, DBLP_books_sp_HS2018}). It was implemented as a simple single-producer multi-consumer solver with a single instance of one of the tested work-stealing algorithms. The implementation is straightforward: the processes test every possible binary assignment to determine if any of them satisfies a given formula. Each task in the work-stealing structure consists of a range of assignments to be evaluated.  The main process (i.e., the main thread in the Java program) is the owner of the work-stealing structure and generates all tasks at the beginning of the experiment. Once all tasks are generated, the main process and the rest of the processes collaborate to identify if there is a satisfying assignment.  The input to the experiment is an unsatisfiable formula in conjunctive normal form (CNF). The formula was generated from an SAT formula generator\footnote{https://cnfgen.readthedocs.io/en/latest/cnfgen.families.pigeonhole.html}.  The experiment is executed independently for each number of available threads.  Multiple size assignment ranges are tested independently: 50, 100, 250, 500, 1,000, and 2,500.
 
 It was also measured the amount of repeated work in each experiment.  In this case, it is easy to compute the exact number as there is a single work-stealing structure. It suffices to compare the total number of \Puts and the total number of successful \Takes/\Steals. These quantities are computed as in the previous benchmark, and, as before, the experiments for measuring repeated work were executed independently so as not to disturb performance measurements. Each experiment was run five times, from which average values were computed.
-
-
-\subsubsection{\label{sec:stat-rigor-meth}Statistically rigorous methodology}
-
-Measuring performance in programming languages like Java is far from trivial due to the many factors that can affect the computation, e.g., the garbage collector and heap size. We use the methodology proposed by Georges, Buytaert, and Eeckhout~\cite{DBLP_conf_oopsla_GeorgesBE07} to obtain statistically rigorous results. The methodology measures the \textit{steady-state} performance, which concerns long-running applications in which start-up is of less interest. The methodology is as follows for a given experiment:
-
-
-\begin{enumerate}
-\item First, the experiment is executed at most 30 times.
-  \begin{itemize}
-  \item Among the executions, it is determined the first one \(s_i\) where the steady-state performance is reached. This means that the \textit{coefficient of variation} (CoV)~\footnote{CoV is the standard deviation \(s\) divided by the mean \(\bar{x}\).} of the most recent five {executions} falls below an established threshold (0.02). If the CoV never drops below the threshold established for any five consecutive {executions}, it is considered the five consecutive {executions} with the lowest CoV.
-  \item The mean \(\bar{x}_i\) of the last five {executions} under steady-state is:
-    \begin{equation*}
-      \bar{x}_i = \frac{\sum^{s_i}_{j=s_i - k}x_{ij}}{5}
-    \end{equation*}
-  \end{itemize}
-\item Second, it is computed the confidence interval by performing 15 {executions} with \(95\%\) confidence interval over the \(\bar{x_i}\) measurements.
-
-\end{enumerate}
-
-Since the number of measurements is small, the confidence interval is computed under the assumption that the distribution of the transformed value \(t\) corresponds with:
-\begin{equation*}
-  t = \frac{\bar{x} - \mu}{s/\sqrt{n}}
-\end{equation*}
-where \(s\) is the sample standard deviation, \(\mu\) is the population mean and \(n\) is the number of measurements; the transformed value follows the \textit{Student's} \(t\)-distribution with \(n - 1\) degrees of freedom. The confidence intervals can be computed as described in Section~\ref{subsec:statistics} and in the work of Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07}.

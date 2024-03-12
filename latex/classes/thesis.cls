@@ -59,6 +59,9 @@
 \usetikzlibrary{arrows,automata,positioning,matrix}
 \usepackage{ifthen}
 \usepackage{float}
+
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Draft, borrar cuando se entregue la versión final. %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,15 +196,15 @@
 % Ajustes de matemáticas %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newtheoremstyle{ocrenumbox}% % titulo do teorema
+\newtheoremstyle{ocrenumbox}% % Theorem style name
 {0pt}% Space above
 {0pt}% Space below
 {\normalfont}% % Body font
 {}% Indent amount
-{\small\bf\sffamily\color{ocre}}% % Theorem head font
+{\small\bf\sffamily}% % Theorem head font
 {\;}% Punctuation after theorem head
 {0.25em}% Space after theorem head
-{\small\sffamily\color{ocre}\thmname{#1}\nobreakspace}% Theorem text
+{\small\sffamily\thmname{#1}\thmnumber{ #2}\thmnote{ \bfseries{(#3)}}\nobreakspace}% Theorem text
 % (e.g. Theorem 2.1)
 
 \newtheoremstyle{blacknumex}% Theorem style name
@@ -264,9 +267,9 @@
 \RequirePackage[framemethod=default]{mdframed} % Required for creating the theorem, definition, exercise and corollary boxes
 
 % Theorem box
-\newmdenv[skipabove=7pt,
-          skipbelow=7pt,
-          backgroundcolor=black!5,
+\newmdenv[skipabove=12pt,
+          skipbelow=5pt,
+          backgroundcolor=black!2.5,
           linecolor=ocre,
           innerleftmargin=5pt,
           innerrightmargin=5pt,
@@ -293,8 +296,8 @@
           linewidth=4pt]{eBox}
 
 % Definition box
-\newmdenv[skipabove=5pt,
-          skipbelow=5pt,
+\newmdenv[skipabove=14pt,
+          skipbelow=14pt,
           rightline=false,
           leftline=true,
           topline=false,
@@ -307,6 +310,21 @@
           rightmargin=0cm,
           linewidth=3pt,
           innerbottommargin=12pt]{dBox}
+
+% Proof box
+\newmdenv[skipabove=5pt,
+          skipbelow=10pt, 
+          rightline=false, 
+          leftline=true, 
+          topline=false, 
+          bottomline=false, 
+          linecolor=ocre, 
+          innerleftmargin=0.3cm, 
+          innerrightmargin=5pt,
+          innertopmargin=6pt,
+          leftmargin=0cm,
+          linewidth=3pt,
+          innerbottommargin=12pt]{dProof}
 
 % Corollary box
 \newmdenv[skipabove=7pt,
@@ -331,12 +349,15 @@ innerbottommargin=5pt]{cBox}
 
 % Creates an environment for each type of theorem and assigns it a theorem text style from the "Theorem Styles" section above and a colored box from above
 \newenvironment{theorem}{\begin{tBox}\begin{theoremeT}}{\end{theoremeT}\end{tBox}}
+\newenvironment{proofT}[1][{\small\sffamily\bf\itshape Proof:}]{\begin{dProof}\begin{proof}[#1]$ $\newline}{\end{proof}\end{dProof}}
 \newenvironment{exercise}{\begin{eBox}\begin{exerciseT}}{\hfill{\color{ocre}\tiny\ensuremath{\blacksquare}}\end{exerciseT}\end{eBox}}
 \newenvironment{definition}{\begin{dBox}\begin{definitionT}}{\end{definitionT}\end{dBox}}
 \newenvironment{desc}{\begin{dBox}\begin{descriptionT}}{\end{descriptionT}\end{dBox}}
 \newenvironment{example}{\begin{dBox}\begin{exampleT}}{\end{exampleT}\end{dBox}}
 \newenvironment{corollary}{\begin{cBox}\begin{corollaryT}}{\end{corollaryT}\end{cBox}}
 \newenvironment{mydescription}[1]{\begin{dBox}\textbf{#1}}{\end{dBox}\smartsmallskip}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Correcta silabación de palabras %
@@ -463,6 +484,9 @@ innerbottommargin=5pt]{cBox}
 \hyphenation{li-nea-ri-za-ble}
 \hyphenation{set-li-nea-ri-za-bi-li-ty}
 \babelhyphenation[english]{li-nea-ri-za-bi-li-ty}
+\babelhyphenation[english]{Thread-ri-pper}
+\babelhyphenation[english]{non-con-cu-rrent}
+\babelhyphenation[english]{con-cur-rent}
 
 \newenvironment{thesisproof}[1][\proofname]{%
   \begin{proof}[#1]$ $\par\nobreak\ignorespaces

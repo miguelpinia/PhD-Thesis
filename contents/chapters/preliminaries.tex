@@ -510,3 +510,27 @@ It is possible to split the observed total variation (SST) into a \emph{within} 
 \end{equation}
 
 ANOVA analysis quantifies whether there is a difference in variation across alternatives (SSA) compared to variation within each alternative (SSE) due to random measurement errors. One way to do this is to compare the fractions \(\frac{SSA}{SST}\) and \(\frac{SSE}{SST}\). A more rigorous approach is to use the F-test~\cite{lilja2005measuring}, which tests whether two variances are significantly different.  After conducting an ANOVA test, we may determine a significant difference between the alternatives, but the test does not specify which alternatives have a significant difference. Various techniques can be employed to determine between which alternatives there is or is not a statistically significant difference. We will describe the techniques we'll use for each of our specific case studies.
+
+\subsection{\label{subsec:stat-rigor-meth}Statistically rigorous methodology}
+
+Measuring performance in programming languages like Java is far from trivial due to the many factors that can affect the computation, e.g., the garbage collector and heap size. We use the methodology proposed by Georges, Buytaert, and Eeckhout~\cite{DBLP_conf_oopsla_GeorgesBE07} to obtain statistically rigorous results. The methodology measures the \textit{steady-state} performance, which concerns long-running applications in which start-up is of less interest. The methodology is as follows for a given experiment:
+
+
+\begin{enumerate}
+\item First, the experiment is executed at most 30 times.
+  \begin{itemize}
+  \item Among the executions, it is determined the first one \(s_i\) where the steady-state performance is reached. This means that the \textit{coefficient of variation} (CoV)~\footnote{CoV is the standard deviation \(s\) divided by the mean \(\bar{x}\).} of the most recent five {executions} falls below an established threshold (0.02). If the CoV never drops below the threshold established for any five consecutive {executions}, it is considered the five consecutive {executions} with the lowest CoV.
+  \item The mean \(\bar{x}_i\) of the last five {executions} under steady-state is:
+    \begin{equation*}
+      \bar{x}_i = \frac{\sum^{s_i}_{j=s_i - k}x_{ij}}{5}
+    \end{equation*}
+  \end{itemize}
+\item Second, it is computed the confidence interval by performing 15 {executions} with \(95\%\) confidence interval over the \(\bar{x_i}\) measurements.
+
+\end{enumerate}
+
+Since the number of measurements is small, the confidence interval is computed under the assumption that the distribution of the transformed value \(t\) corresponds with:
+\begin{equation*}
+  t = \frac{\bar{x} - \mu}{s/\sqrt{n}}
+\end{equation*}
+where \(s\) is the sample standard deviation, \(\mu\) is the population mean and \(n\) is the number of measurements; the transformed value follows the \textit{Student's} \(t\)-distribution with \(n - 1\) degrees of freedom. The confidence intervals can be computed as described in Section~\ref{subsec:statistics} and in the work of Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07}.
