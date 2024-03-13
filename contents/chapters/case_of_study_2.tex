@@ -134,6 +134,7 @@ Let $p$ denote the process that invokes an operation on the object. This impleme
 \end{figure}
 
 \begin{theorem}
+\label{theorem:cas-ll-ic}
 The \CAS-based \LL/\IC implementation from algorithm~\ref{alg:ll-ic-cas} is linearizable and wait-free.
 \end{theorem}
 
@@ -147,6 +148,7 @@ This implementation uses a shared array $M$ with $n$ entries initialized to 0.  
 
 
 \begin{theorem}
+\label{theorem:rw-ll-ic}
   The \R/\W-based \LL/\IC implementation from the algorithm~\ref{alg:ll-ic-read-write} is linearizable and wait-free.
 \end{theorem}
 
@@ -197,6 +199,7 @@ Let \op denote any \LL that returns $R \in \{0, 1, \hdots, MAX-1\}$ and let $e$ 
 It uses a shared array $M$ with $K < n$ entries initialized to 0.  \LL reads all entries of $M$ and stores the maximum value and index in persistent variables $max_p$ and $indmax_p$ of $p$, and returns $max_p$.  \IC non-deterministically picks an index $pos \in \{0,1,\hdots,K-1\} \setminus \{indmax_p\}$.  If $M[pos]$ contains a value $x$ less than $max_p+1$, then it performs $\CAS(M[pos], x, max_p+1)$; if the \CAS is successful, it returns \ok. Otherwise, it reads the value in $M[indmax_p]$, and if it is equal to $max_p$, then it performs $\CAS(M[indmax_p], max_p, max_p+1)$; in any it case returns~\ok.
 
 \begin{theorem}
+\label{theorem:mixed-ll-ic}
   The mixed implementation just described is linearizable and wait-free.
 \end{theorem}
 
@@ -211,7 +214,7 @@ The basket implementations appear in Algorithms~\ref{basket-1} and~\ref{basket-2
 
 For this implementation, the processes use \FAI to guarantee that at most two "opposite" operations "compete" for the same location in the shared array, which can be resolved with a \SWAP; the idea of this algorithm is similar to the approach in the LCRQ algorithm~\cite{ppopp2013x86queues}. We called \(K\)-basket to this implementation, which is shown in the Algorithm~\ref{basket-1}.
 
-\begin{theorem}
+\begin{theorem}\label{theorem:k-basket}
 Algorithm~\ref{basket-1} is a wait-free linearizable implementation of a $K$-basket.
 \end{theorem}
 
@@ -276,7 +279,7 @@ Given any execution of the algorithm, the operations are linearized as follows. 
 
 In the second implementation, each process has a dedicated location in the shared array where it tries to put its item when it invokes \Put. When a process invokes \Take, it first tries to take an item from its dedicated location. If it does not succeed, it randomly picks a non-previously-picked location, does the same, and repeats until it takes an item or all locations have been canceled. Since several operations might "compete" for the same location, \CAS is needed. This implementation is reminiscent of \emph{locally linearizable} generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}. We called \(N\)-basket to this implementation, which is shown in the Algorithm~\ref{basket-2}.
 
-\begin{theorem}
+\begin{theorem}\label{theorem:N-basket}
 Algorithm~\ref{basket-2} is a wait-free linearizable implementation of an $n$-basket.
 \end{theorem}
 
@@ -351,7 +354,7 @@ For the second implementation, we need to make more complex changes. Unlike the 
 
 This update defines a new data structure called \texttt{Segment}. It serves as a node that comprises a small segment of the infinite basket array, a pair of objects of type \LL/\IC that denote the Head and Tail similar to what is stated in Algorithm~\ref{alg:basket-queue} and a pointer to the next node. For simplicity, this node does not perform any type of circular assignment or deletion over the array as is done in LCRQ queue~\cite{ppopp2013x86queues}. This makes it easier to determine when the segment is full or marked as closed for memory management tasks, using only the state of \LL/\IC objects. Additionally, we have defined two auxiliary functions that help identify when a segment is full or closed.
 
-Besides the Segment structure defined, now the shared variables are pointers to nodes of type Segment that represent Head and Tail similar to those used in Michael-Scott's lock-free queue~\cite{DBLP_conf_podc_MichaelS96}. Now, we will prove that the queue defined in Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} is lock-free linearizable.
+Besides the Segment structure defined, now the shared variables are pointers to nodes of type Segment that represent Head and Tail similar to those used in Michael-Scott's lock-free queue~\cite{DBLP_conf_podc_MichaelS96}. We will prove that the queue defined in Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} is lock-free linearizable.
 
 
 \begin{theorem}
@@ -364,22 +367,37 @@ Besides the Segment structure defined, now the shared variables are pointers to 
   We begin analyzing the \Enq operation. A \Enq operation loops only if the condition in line~\ref{BQ03} is satisfied, the condition in line~\ref{BQ05} is satisfied, the condition in the line~\ref{BQ18} fails, or if the current segment is full and fails in the \CAS in the line~\ref{BQ13}. Now we will show that \Enq operation is lock-free by showing that a process loops beyond a finite number of times only if another process completes an \Enq on the queue.
 
   \begin{itemize}
-    \item The condition in line~\ref{BQ03} is satisfied only if the pointer to the Tail has changed, this means that another process update the reference to the segment, then another process must have succeeded in completing an enqueue operation.
-    \item The condition in line~\ref{BQ05} is satisfied only if, while reading the Tail, another process appends a new segment (being succeeded in inserting a new element), and the process still does not update the reference to the Tail. In such a case, we will try to help update the reference to the Tail segment and loop again.
-    \item The condition in line~\ref{BQ13} fails only if the \CAS cannot append a new segment, this means that another process appends its segment, begin succeeded in inserting a new element to the queue.
+    \item The condition in line~\ref{BQ03} is satisfied only if the pointer to the Tail has changed; this means that if another process updated the reference to the segment, then that process must have succeeded in completing an enqueue operation.
+    \item The condition in line~\ref{BQ05} is satisfied only if, while reading the Tail pointer, another process appends a new segment (being succeeded in inserting a new element), and the process still does not update the reference to the Tail pointer. In such a case, we will try to help update the reference to the Tail segment and loop again.
+    \item The condition in line~\ref{BQ13} fails only if the \CAS cannot append a new segment; this means that another process appends its segment and it succeeds in inserting a new element into the queue.
     \item The condition in line~\ref{BQ18} fails only if the operation cannot insert an element into the basket.
   \end{itemize}
 
-  A \Deq operation loops only if the condition in line~\ref{BQD04} is satified or the inner cycle defined between lines~\ref{BQD11} to~\ref{BQD22} is finished and it does not return anything. Similarly to the analysis for the \Enq operation, we will show that \Deq operation from the Algorithm~\ref{alg:basket-queue-linked-list-deq} is lock-free by showing that a process loop beyond a finite number of times only if another process completes a \Deq on the queue.
+  A \Deq operation loops only if the condition in line~\ref{BQD04} is satisfied, or the inner cycle defined between lines~\ref{BQD11} to~\ref{BQD22} is finished, and it does not return anything. We will show that the \Deq operation in Algorithm~\ref{alg:basket-queue-linked-list-deq} is lock-free by performing a similar analysis as we did for the \Enq operation. This will involve proving that a process will only loop beyond a finite number of times if another process successfully completes a \Deq operation on the queue.
 
   \begin{itemize}
-    \item The condition in line~\ref{BQD04} is satisfied if the pointer to \(lastHead\) is distinct from the current pointer to \(Head\), in such case we must loop again.
-    \item If the inner cycle from the line~\ref{BQD11} to the line~\ref{BQ22} does not returns anything, then, this suggest that one of the following situations could happened: (1) the segment \(lastHead\) is closed at the begin of the loop, (2) the element taken from the basket in line~\ref{BQD13} in each iteration is equals to the special value \closed until detect that the segment is closed, that means other processes are making progress by extract values or return the empty value.
+    \item The condition in line~\ref{BQD04} is satisfied if the pointer to \(lastHead\) is distinct from the current pointer to \(Head\); in such case, we must loop again.
+    \item If the inner cycle from the line~\ref{BQD11} to the line~\ref{BQ22} does not return anything. In that case, this suggests that one of the following situations could happen: (1) the segment \(lastHead\) is closed at the beginning of the loop, (2) the element taken from the basket in line~\ref{BQD13} in each iteration is equals to the special value \closed until detect that the segment is closed, that means other processes are making progress by extract values or return the empty value.
   \end{itemize}
 
-  Therefore, both \Enq and \Deq operations lock-free.
+  Therefore, both \Enq and \Deq operations are lock-free.
 
-  To prove linearizability, we will use the same strategy than the used in the Theorem~\ref{theorem:basket-queue} using the aspect-oriented linearizability proof framework~\cite{DBLP_conf_concur_HenzingerSV13} to prove that the algorithm is linearizable.
+  To prove linearizability, we will use the same strategy as the one used in the Theorem~\ref{theorem:basket-queue} using the aspect-oriented linearizability proof framework~\cite{DBLP_conf_concur_HenzingerSV13} to prove that the algorithm is linearizable. We assume that \LL/\IC objects and the baskets objects in the array of each segment are linearizable and wait-free\footnote{We proved there are linearizable and wait-free \LL/IC objects in Theorems~\ref{theorem:cas-ll-ic},~\ref{theorem:rw-ll-ic}, and~\ref{theorem:mixed-ll-ic}, as well as there are linearizable and wait-free basket implementations in Theorems~\ref{theorem:k-basket} and~\ref{theorem:N-basket}.}. Assuming that every item is enqueued at most once, it states that a queue implementation is linearizable if each of its finite executions is \emph{free} of four violations. The proof is almost the same as the one shown in the Theorem~\ref{theorem:basket-queue}. We enumerate the violations and argue that every algorithm execution is free of them.
+
+  \begin{itemize}
+    \item VFresh: A \Deq operations returns an item not previously inserted by any Enqueue operation. \Deq operations return items once put in the baskets, and \Enq operations put items in the baskets. Thus, each execution is free of VFresh.
+    \item VRepeat: Two \Deq operations return the item inserted by the same \Enq operation. The specification of the basket directly implies that every execution is free of VRepeat. 
+    \item VOrd: Two items are enqueued in a certain order, and a \Deq returns the later item before any \Deq of the earlier item starts. Now, we are dealing with segments and each segment has its own \LL/\IC objects for Head and Tail, we have 2 cases to analyze: 
+    
+    \begin{enumerate}
+      \item  Inserting elements in the same segment: \LL/\IC guarantees that if an \Enq operation enqueued an item, let us say \(x\), and then a later \Enq operation enqueued another item, let us say \(y\), then \(x\) and \(y\) are inserted in baskets \(items[i]\) and \(items[j]\), with \(i < j\). Then, \(x\) is dequeued first because the \Deq operation can scan the \(items\) array in index-ascending order. 
+      \item Inserting elements in distinct segments: Similarly to the prior analysis, when a \Enq operation inserts an item, let us say \(w\), in a segment, and then a later \Enq operation enqueues another item, say \(z\), in another distinct segment, the \Deq operation will first dequeue \(w\). This is because it first checks if the current reference to the Head segment is closed. Since this is still not the case, it extracts \(w\) and increments the Head \LL/\IC object of the segment. When another \Deq operation is executed, it detects that the pointer to the Head segment is closed and updates the pointer to the next. Now can extract \(z\) from the new segment.   
+    \end{enumerate}
+    Thus, every execution is free of VOrd.
+    \item vWit: A \Deq operation returning \epty even though the queue is never logically empty during the execution of the \Deq operation. An item is logically in the queue if it is in a basket \(items[i]\) and \(i < TAIL\). When a \Deq operation returns \epty, there is a point in the time where no basket in \(items[0, 1, \ldots, TAIL - 1]\) contains an item, and hence the queue is logically empty (it might, however, be the case that \(items[TAIL]\) does contain an item at that moment). Hence, every execution is free of VWit.
+  \end{itemize}
+
+  Therefore, Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} are a linearizable lock-free implementation of a concurrent queue.
 \end{proofT}
 
 \begin{figure}[H] \centering{ \fbox{
