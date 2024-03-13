@@ -14,7 +14,7 @@ We observe that \RMW instructions are unnecessary to manipulate the head or tail
 We consider the standard shared memory model~\cite{DBLP_journals_toplas_HerlihyW90} with $n \geq 2$ \emph{asynchronous} processes that communicate using \emph{atomic} instructions that modify the contents of the shared memory; the instructions range from simple \R and \W to more complex \RMW instructions such as \FAI and \CAS. For simplicity, the baskets queue algorithm is presented using an infinite shared array~\footnote{There are two common approaches to implement an infinite array, there are two common approaches. One is to use a circular dynamic array that can expand and shrink as needed. The other is to use a linked list where each node contains a finite-sized array. During execution, the list grows on demand, and each node is appended to the list using the Compare-And-Swap (\CAS) operation to maintain consistency.}. We consider the \emph{wait-free}~\cite{DBLP_journals_toplas_Herlihy91} and \emph{lock-free}~\cite{DBLP_conf_opodis_HerlihyS11} progress conditions, and \emph{linearizability}~\cite{DBLP_journals_toplas_HerlihyW90} as consistency condition.
 
 \begin{figure}[ht!] \centering{ \fbox{
-  
+
 \begin{minipage}[t]{180mm} \footnotesize
 \renewcommand{\baselinestretch}{2.5} \resetline
 \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
@@ -52,7 +52,7 @@ We consider the standard shared memory model~\cite{DBLP_journals_toplas_HerlihyW
 {\bf end \Deq}
 \end{tabbing}
 \end{minipage} }
-\caption{\label{alg:basket-queue}The modular basket queue algorithm.} 
+\caption{\label{alg:basket-queue}The modular basket queue algorithm.}
 }
 \end{figure}
 
@@ -81,7 +81,7 @@ The baskets in the original baskets queue algorithm~\cite{basketqueue2007} were 
 
 Taking into account these definitions about the baskets and the \LL/\IC objects, we state the following theorem about the algorithm~\ref{alg:basket-queue} that represents the modular basket queue algorithm.
 
-\begin{theorem}
+\begin{theorem}\label{theorem:basket-queue}
   In the Algorithm~\ref{alg:basket-queue}, if the objects in the array \(A\), \(HEAD\) and \(TAIL\) of type \LL/\IC are linearizable and wait-free, then the algorithm is a linearizable lock-free implementation of a concurrent queue.
 \end{theorem}
 
@@ -101,7 +101,7 @@ Taking into account these definitions about the baskets and the \LL/\IC objects,
 
 The algorithm's scalability depends on the scalability of the concrete implementations of \LL/\IC and the basket with which it is instantiated. Our proposed solution involves wait-free implementations of each of the objects. In section~\ref{subsec:ll-ic-implementations} we present the implementations of these objects, which include a \CAS-based operation, a \R/\W-based operation, and a mixed implementation.
 
-\subsection{\label{subsec:ll-ic-implementations}\LL/\IC implementations.} 
+\subsection{\label{subsec:ll-ic-implementations}\LL/\IC implementations.}
 
 \subsubsection{A \CAS-based implementation.}ppopp
 Let $p$ denote the process that invokes an operation on the object. This implementation uses a shared register $R$ initialized to 0.  \LL first reads $R$ and stores the value in a persistent variable $r_p$ of $p$, and then returns $r_p$.  \IC first reads $R$ and if that value is equal to $r_p$, then it performs $\CAS(R, r_p, r_p+1)$; in any it case returns \ok.
@@ -292,7 +292,7 @@ Given any execution of the algorithm, the operations are linearized as follows. 
 
 \begin{figure}[ht!]
 \centering{ \fbox{
-  
+
   \begin{minipage}[t]{180mm} \footnotesize
 \renewcommand{\baselinestretch}{2.5} \resetline
 \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
@@ -347,24 +347,43 @@ The previous construction was good for the analysis of properties that we desire
 
 The first implementation requires straightforward changes, which rely on a mechanism to double the array size and copy from one array to another. This will be similar to the strategy followed by the Idempotent Work-Stealing~\cite{maged.vechev.2009} algorithms presented in Chapter~\ref{chapter:4_work-stealing}. We believe the second implementation can perform better than this approach.
 
-For the second implementation, we need to make more complex changes. Unlike the single-producer multi-consumer queue used for work-stealing in Chapter~\ref{chapter:4_work-stealing}, we are now dealing with a multi-producer multi-consumer environment. This means we must incorporate a mechanism to ensure that node insertion in the queue is executed correctly.  Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} show the necessary changes to convert the Algorithm~\ref{alg:basket-queue} to a queue capable of handling long-run executions where the algorithm may be running.
+For the second implementation, we need to make more complex changes. Unlike the single-producer multi-consumer queue used for work-stealing in Chapter~\ref{chapter:4_work-stealing}, we are now dealing with a multi-producer multi-consumer environment. This means we must incorporate a mechanism to ensure that node insertion in the queue is executed correctly.  Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq}\footnote{We use the operator \(\rightarrow\) to denote the access to elements in a structure.} show the necessary changes to convert the Algorithm~\ref{alg:basket-queue} to a queue capable of handling long-run executions where the algorithm may be running.
 
-This update defines a new data structure called \texttt{Segment}. It serves as a node that comprises a small segment of the infinite basket array, a pair of objects of type \LL/\IC that denote the Head and Tail similar to what is stated in Algorithm~\ref{alg:basket-queue} and a pointer to the next node. For simplicity, this node does not perform any type of circular assignment or deletion over the array as is done in LCRQ queue~\cite{ppopp2013x86queues}. This makes it easier to determine when the segment is full or marked as closed for memory management tasks, using only the state of \LL/\IC objects. Additionally, we have defined two auxiliary functions that help identify when a segment is full or closed. 
+This update defines a new data structure called \texttt{Segment}. It serves as a node that comprises a small segment of the infinite basket array, a pair of objects of type \LL/\IC that denote the Head and Tail similar to what is stated in Algorithm~\ref{alg:basket-queue} and a pointer to the next node. For simplicity, this node does not perform any type of circular assignment or deletion over the array as is done in LCRQ queue~\cite{ppopp2013x86queues}. This makes it easier to determine when the segment is full or marked as closed for memory management tasks, using only the state of \LL/\IC objects. Additionally, we have defined two auxiliary functions that help identify when a segment is full or closed.
 
-Besides the Segment structure defined, now the shared variables are pointers to nodes of type Segment that represent Head and Tail similar to those used in Michael-Scott's lock-free queue~\cite{DBLP_conf_podc_MichaelS96}. Now, we will prove that the queue defined in Algorithms~\ref{alg:basket-queue-linked-list-enq}
- and~\ref{alg:basket-queue-linked-list-deq} is lock-free linearizable.
+Besides the Segment structure defined, now the shared variables are pointers to nodes of type Segment that represent Head and Tail similar to those used in Michael-Scott's lock-free queue~\cite{DBLP_conf_podc_MichaelS96}. Now, we will prove that the queue defined in Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} is lock-free linearizable.
+
+
 \begin{theorem}
     Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} are a linearizable lock-free implementation of a concurrent queue.
 \end{theorem}
 
 \begin{proofT}
-    To see that the queue algorithm composed of the Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} is lock-free, we must analyze the \Enq function shown in the Algorithm~\ref{alg:basket-queue-linked-list-enq} and the \Deq function shown in the Algorithm~\ref{alg:basket-queue-linked-list-deq} are both lock-free. 
+  To see that the queue algorithm composed of the Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} is lock-free, we must analyze the \Enq function shown in the Algorithm~\ref{alg:basket-queue-linked-list-enq} and the \Deq function shown in the Algorithm~\ref{alg:basket-queue-linked-list-deq} are both lock-free.
 
-    A \Enq operation loops only if the condition in line~\ref{BQ03} is satisfied, the condition in line~\ref{BQ05} is satisfied, the condition in the line~\ref{BQ18} fails, or if the current segment is full and fails in the \CAS in the line~\ref{BQ13}. A \Deq operation loops only if 
+  We begin analyzing the \Enq operation. A \Enq operation loops only if the condition in line~\ref{BQ03} is satisfied, the condition in line~\ref{BQ05} is satisfied, the condition in the line~\ref{BQ18} fails, or if the current segment is full and fails in the \CAS in the line~\ref{BQ13}. Now we will show that \Enq operation is lock-free by showing that a process loops beyond a finite number of times only if another process completes an \Enq on the queue.
+
+  \begin{itemize}
+    \item The condition in line~\ref{BQ03} is satisfied only if the pointer to the Tail has changed, this means that another process update the reference to the segment, then another process must have succeeded in completing an enqueue operation.
+    \item The condition in line~\ref{BQ05} is satisfied only if, while reading the Tail, another process appends a new segment (being succeeded in inserting a new element), and the process still does not update the reference to the Tail. In such a case, we will try to help update the reference to the Tail segment and loop again.
+    \item The condition in line~\ref{BQ13} fails only if the \CAS cannot append a new segment, this means that another process appends its segment, begin succeeded in inserting a new element to the queue.
+    \item The condition in line~\ref{BQ18} fails only if the operation cannot insert an element into the basket.
+  \end{itemize}
+
+  A \Deq operation loops only if the condition in line~\ref{BQD04} is satified or the inner cycle defined between lines~\ref{BQD11} to~\ref{BQD22} is finished and it does not return anything. Similarly to the analysis for the \Enq operation, we will show that \Deq operation from the Algorithm~\ref{alg:basket-queue-linked-list-deq} is lock-free by showing that a process loop beyond a finite number of times only if another process completes a \Deq on the queue.
+
+  \begin{itemize}
+    \item The condition in line~\ref{BQD04} is satisfied if the pointer to \(lastHead\) is distinct from the current pointer to \(Head\), in such case we must loop again.
+    \item If the inner cycle from the line~\ref{BQD11} to the line~\ref{BQ22} does not returns anything, then, this suggest that one of the following situations could happened: (1) the segment \(lastHead\) is closed at the begin of the loop, (2) the element taken from the basket in line~\ref{BQD13} in each iteration is equals to the special value \closed until detect that the segment is closed, that means other processes are making progress by extract values or return the empty value.
+  \end{itemize}
+
+  Therefore, both \Enq and \Deq operations lock-free.
+
+  To prove linearizability, we will use the same strategy than the used in the Theorem~\ref{theorem:basket-queue} using the aspect-oriented linearizability proof framework~\cite{DBLP_conf_concur_HenzingerSV13} to prove that the algorithm is linearizable.
 \end{proofT}
 
 \begin{figure}[H] \centering{ \fbox{
-  
+
 \begin{minipage}[t]{180mm} \footnotesize
 \renewcommand{\baselinestretch}{2.5} \resetline
 \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
@@ -393,15 +412,15 @@ Besides the Segment structure defined, now the shared variables are pointers to 
 \line{BQ03} \>\> {\bf if $lastTail \ne Tail$ then continue; endif} \\
 \line{BQ04} \>\> $lastNext = lastTail\rightarrow next$ \\
 \line{BQ05} \>\> {\bf if \(lastNext \ne \bot\) then}\\
-\line{BQ06} \>\>\> {\bf \(Tail.CAS(lastTail, lastNext)\); continue;} \\
+\line{BQ06} \>\>\> {\bf \(Tail.\CAS(lastTail, lastNext)\); continue;} \\
 \line{BQ07} \>\> {\bf endif}\\
 \line{BQ08} \>\> {\bf \(ticket = lastTail\rightarrow TAIL.\LL()\)} \\
 \line{BQ09} \>\> {\bf if \(isFull(lastTail)\) then} \\
 \line{BQ10} \>\>\> {\bf \(newSegment = new\ Segment()\)} \\
 \line{BQ11} \>\>\> {\bf \(newSegment\rightarrow{}items[0].put(val)\)};\\
 \line{BQ12} \>\>\> {\bf \(newSegment\rightarrow{}TAIL.\IC()\)}\\
-\line{BQ13} \>\>\> {\bf if \(lastTail\rightarrow{}next.CAS(\bot, newSegment)\) then}\\
-\line{BQ14} \>\>\>\> \(Tail.CAS(lastTail, newSegment)\)\\
+\line{BQ13} \>\>\> {\bf if \(lastTail\rightarrow{}next.\CAS(\bot, newSegment)\) then}\\
+\line{BQ14} \>\>\>\> \(Tail.\CAS(lastTail, newSegment)\)\\
 \line{BQ15} \>\>\>\> {\bf return \ok}\\
 \line{BQ16} \>\>\> {\bf endif}\\
 \line{BQ17} \>\> {\bf endif}\\
@@ -414,12 +433,12 @@ Besides the Segment structure defined, now the shared variables are pointers to 
 
 \end{tabbing}
 \end{minipage} }
-\caption{\label{alg:basket-queue-linked-list-enq}The modular baskets queue using linked-lists. Enqueue operation.} 
+\caption{\label{alg:basket-queue-linked-list-enq}The modular baskets queue using linked-lists. Enqueue operation.}
 }
 \end{figure}
 
 \begin{figure}[H] \centering{ \fbox{
-  
+
 \begin{minipage}[t]{180mm} \footnotesize
 \renewcommand{\baselinestretch}{2.5} \resetline
 \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
@@ -448,29 +467,29 @@ Besides the Segment structure defined, now the shared variables are pointers to 
 \line{BQD03} \>\> {\bf if \(lastHead \ne \bot\) then return \epty endif}\\
 \line{BQD04} \>\> {\bf if \(lastHead \ne Head\) then continue endif}\\
 \line{BQD05} \>\> {\bf if \(isClosed(lastHead)\) then}\\
-\line{BQ28} \>\>\> {\bf \(next = lastHead->next\)} \\
-\line{BQ29} \>\>\> \(Head.CAS(lastHead, next)\) \\
+\line{BQD06} \>\>\> {\bf \(next = lastHead->next\)} \\
+\line{BQD07} \>\>\> \(Head.\CAS(lastHead, next)\) \\
 \>\>\> {\textit{\# Memory reclamation can be performed after the previous instruction}}\\
-\line{BQ30} \> \> {\bf endif} \\
-\line{BQ31} \>\> \(tailTicket = lastHead\rightarrow{}TAIL.\LL()\) \\
-\line{BQ32} \>\> \(headTicket = lastHead\rightarrow{}HEAD.\LL()\) \\
-\line{BQ33} \>\> {\bf while \(\neg isClosed(lastHead)\) do} \\
-\line{BQ34} \>\>\> {\bf if \(headTicket < tailTicket\) then} \\
-\line{BQ35} \>\>\>\> \(x = lastHead\rightarrow{}items[headTicket].\Take()\) \\
-\line{BQ36} \>\>\>\> {\bf if \(x \ne \closed\) then return \(x\) endif} \\
-\line{BQ37} \>\>\>\> \(lastHead\rightarrow{}HEAD.\IC()\) \\
-\line{BQ38} \>\>\> {\bf endif} \\
-\line{BQ39} \>\>\> $head' = lastHead\rightarrow{}HEAD.\LL()$ \\
-\line{BQ40} \>\>\> $tail' = lastHead\rightarrow{}   TAIL.\LL()$\\
-\line{BQ41} \>\>\> {\bf if $head == head' == tail' == tail$ then return $\epty$ endif}\\
-\line{BQ42} \>\>\> $headTicket = head'$ \\
-\line{BQ43} \>\>\> $tailTicket = tail'$\\
-\line{BQ44} \>\> {\bf endwhile} \\
-\line{BQ4S} \> {\bf endwhile}\\
+\line{BQD08} \> \> {\bf endif} \\
+\line{BQD09} \>\> \(tailTicket = lastHead\rightarrow{}TAIL.\LL()\) \\
+\line{BQD10} \>\> \(headTicket = lastHead\rightarrow{}HEAD.\LL()\) \\
+\line{BQD11} \>\> {\bf while \(\neg isClosed(lastHead)\) do} \\
+\line{BQD12} \>\>\> {\bf if \(headTicket < tailTicket\) then} \\
+\line{BQD13} \>\>\>\> \(x = lastHead\rightarrow{}items[headTicket].\Take()\) \\
+\line{BQD14} \>\>\>\> {\bf if \(x \ne \closed\) then return \(x\) endif} \\
+\line{BQD15} \>\>\>\> \(lastHead\rightarrow{}HEAD.\IC()\) \\
+\line{BQD16} \>\>\> {\bf endif} \\
+\line{BQD17} \>\>\> $head' = lastHead\rightarrow{}HEAD.\LL()$ \\
+\line{BQD18} \>\>\> $tail' = lastHead\rightarrow{}   TAIL.\LL()$\\
+\line{BQD19} \>\>\> {\bf if $head == head' == tail' == tail \text{ and } head < N$ then return $\epty$ endif}\\
+\line{BQD20} \>\>\> $headTicket = head'$ \\
+\line{BQD21} \>\>\> $tailTicket = tail'$\\
+\line{BQD22} \>\> {\bf endwhile} \\
+\line{BQD23} \> {\bf endwhile}\\
 {\bf end \Deq}
 \end{tabbing}
 \end{minipage} }
-\caption{\label{alg:basket-queue-linked-list-deq}The modular baskets queue using linked-lists. Dequeue Operation} 
+\caption{\label{alg:basket-queue-linked-list-deq}The modular baskets queue using linked-lists. Dequeue Operation}
 }
 \end{figure}
 
@@ -480,12 +499,12 @@ Besides the Segment structure defined, now the shared variables are pointers to 
 
 This section outlines the methodology used to evaluate the performance of the queue developed in this chapter. Then, the experimental evaluation results will be shown in the Chapter~\ref{chapter:6_Results}.
 
-To evaluate the performance of our queue, we designed a set of experiments that allowed us to determine whether it is competitive with queues in the state-of-the-art literature. 
+To evaluate the performance of our queue, we designed a set of experiments that allowed us to determine whether it is competitive with queues in the state-of-the-art literature.
 We divide our experiments into two classes: \emph{inner experiments} and \emph{outer experiments}.
 Internal experiments evaluate the performance of the modular queue using \LL/\IC objects and baskets. These experiments allow us to evaluate which of our implementations (combinations of \LL/\IC objects, baskets to build the modular) has the best performance and throughput. Also, this allows us to know if the use of more relaxed objects can compete with the classical synchronization objects. Once the inner experiments have been evaluated and the best combination to build the queue is chosen, we evaluate the queue against state-of-the-art queues \emph{(outer experiments)} to evaluate its performance and throughput. The algorithms evaluated against our queue were: Wait-Free queue by Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}, Lock-Free LCRQ queue by Morrison and Afek~\cite{ppopp2013x86queues}, Lock-Free queue by Michael and Scott~\cite{DBLP_conf_podc_MichaelS96}, Lock-Free queue by Ramalhete~\cite{Ramalhete_Correia_MPMC_2016}, which was strongly inspired in the obstruction-free queue shown in the work of Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}, and the Lock-Free queue by Ostrovsky and Morrison~\cite{scalingconcurrent2020}\footnote{We implemented only the version using the simple \CAS}.
 
 \subsection{\label{subsec:queue-experimental-setup}Experimental Setup}
-\subsubsection{Platforms and Implementations} 
+\subsubsection{Platforms and Implementations}
 
 The experiments were conducted on a machine with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. A secondary evaluation was conducted on a machine that has an Intel i9-13980HX processor with 64 GB of memory and 24 cores. The processor has 8 performance cores, each capable of executing two hardware threads, and 16 efficient cores, each capable of executing 1 hardware thread. This gives a total of 32 hardware threads for the evaluation. In the rest of the chapter, hardware threads will be called processes. We implemented the algorithms and infrastructure for experimental evaluation using C++20. This allowed us to benefit from the new concurrency and parallelism features integrated with this version, including updates to atomics and synchronization facilities. In multiple algorithms~\cite{ DBLP_conf_podc_MichaelS96,ppopp2013x86queues, Ramalhete_Correia_MPMC_2016} (including our queue), we use hazard pointers~\cite{DBLP_conf_podc_Michael02} to reclaim memory during the evaluation of these experiments, and for the others~\cite{scalingconcurrent2020, DBLP_conf_ppopp_YangM16}, we used their memory reclamation algorithms, like epoch-based memory reclamation~\cite{DBLP_phd_ethos_Fraser04,mckenney2001read}.
 
@@ -499,7 +518,7 @@ To evaluate the performance of our distinct variants for the \LL/\IC objects and
 
 \begin{enumerate}
     \item For the case of the \LL/\IC object implementations, we measure the time for executing \(5 \cdot 10^6\) interspersed \LL - \IC calls to the same object by multiple threads, with a respective random work, i.e., each thread calls a \LL followed by \IC, and between each call to these methods, work of some length is executed to avoid artificial long-run scenarios (see for example~\cite{DBLP_conf_ppopp_YangM16}). This artificial work consists of spinning a small amount of time (approximately \(6\ \mu{}s\)) in an empty loop. The \emph{false sharing} problem~\cite{BoloskyMichael93} was taken into account in the array-based \LL/\IC implementations (i.e., \R/\W and the mixed one).
-    
+
     \item For the case of the combinations of \LL/\IC objects and baskets to build the modular queue, we did a similar evaluation to the previous, but testing interspersed calls to enqueue and dequeue in a shared queue by all the processes. We measure the time for executing \(5\cdot 10^6\) interspersed calls to enqueue and dequeue, and similar to the previous test, we perform some artificial work to avoid artificial long-run scenarios, using the same technique as described in the previous bullet. The combinations of \LL/\IC objects with baskets are the following:
     \begin{itemize}
         \item \LL/\IC{} \R/\W (with padding) with \(N\)-basket
