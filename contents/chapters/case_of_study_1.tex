@@ -156,7 +156,7 @@ In any given execution, the range \(Tasks[Head, Head+1, \hdots, ]\) contains a (
 
 We now prove that \WFWSM is set-linearizable. Consider any finite execution \(E\) of it. Since we already argued the algorithm is wait-free, there is a finite extension of \(E\) in which all its operations are completed, and no new operations start. Thus, we can assume that there are no pending operations in \(E\).
 
-First, note that the semantics of \MaxW implies that no pair of non-concurrent \Take/\Steal operations return the same task: if two operations are not concurrent, then the first one increments the value of \(Head\), the second operation cannot read the same tasks from \(Tasks\). Thus, we have:
+First, note that the semantics of \MaxW implies that no pair of non-concur-rent \Take/\Steal operations return the same task: if two operations are not concurrent, then the first one increments the value of \(Head\), the second operation cannot read the same tasks from \(Tasks\). Thus, we have:
 
 \begin{remark}\label{remark-concurrency}
 If a task is returned by more than one \Take/\Steal operation, these operations are pairwise concurrent. Thus, two distinct \Take operations cannot return the same task.
@@ -167,7 +167,7 @@ The main observation for the set-linearizability proof is that, at any time, the
 
 \begin{itemize}
 
-\item Every \Put operation is set-linearized \emph{alone} (i.e., in a concurrency class containing only that operation) placed at its step corresponding to \(Tasks[tail].\W(x)\) in \(E\) (Line~\ref{A02}).
+\item Every \Put operation is set-linearized \emph{alone} (i.e., in a concurrency class containing only that operation) placed at its step corresponding to \(Tasks[tail]\). \(\W(x)\) in \(E\) (Line~\ref{A02}).
 
 \item For every task returned by at least one \Take/\Steal operation, all operations returning the task are set-linearized in the same concurrency class placed at the first step \(e\) of \(E\) that corresponds to \(Head.\MaxW(head+1)\) (either Line~\ref{A06} or~\ref{A16}) among the steps of the operations. Note that \(e\) occurs between the invocation and response of every operation in the concurrency class. Since the operations return the same task, all of them execute the \MaxR steps in Lines~\ref{A04} or~\ref{A12} before \(e\), and, by definition, \(e\) appears in \(E\) before any other operation executes its step corresponding to \(Head.\MaxW(head+1)\). Observe that the order in which the instructions in Line~\ref{A06} are executed is irrelevant.
 
@@ -179,7 +179,7 @@ The main observation for the set-linearizability proof is that, at any time, the
 
 Every concurrency class of \(\SetLin(E)\) is placed at a step of \(E\) that lies between the invocation and response of each operation in the concurrency class, which immediately implies that \(\SetLin(E)\) respects the partial order \(<_E\) of~\(E\). Thus, to conclude that \(\SetLin(E)\) is a set-linearization of \(E\), we need to show that it is indeed a set-sequential execution of work-stealing with multiplicity.
 
-First, note that a task can be extracted by a \Take/\Steal operation only if the \Put operation that stores the task executes its step corresponding to \(Tasks[tail].\W(x)\) (in Line~\ref{A02}) before the \Take/\Steal operation reads the entry of \(Tasks\) where the task is stored. Thus, in \(\SetLin(E)\), every task is inserted before it is extracted.
+First, a task can be extracted by a \Take/\Steal operation only if the \Put operation that stores the task executes its step corresponding to \(Tasks[tail].\W(x)\) (in Line~\ref{A02}) before the \Take/\Steal operation reads the entry of \(Tasks\) where the task is stored. Thus, in \(\SetLin(E)\), every task is inserted before it is extracted.
 
 Now, \Put stores tasks in \(Tasks\) in index-ascending order. Due to the semantics of \MaxReg, \(Head\) never ``moves back'', i.e., it only increases by one at a time, and hence \Take and \Steal extract tasks in index-ascending order too. Tasks in \(\SetLin(E)\) are inserted/extracted in FIFO order.
 

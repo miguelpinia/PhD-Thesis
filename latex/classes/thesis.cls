@@ -268,7 +268,7 @@
 
 % Theorem box
 \newmdenv[skipabove=12pt,
-          skipbelow=5pt,
+          skipbelow=7pt,
           backgroundcolor=black!2.5,
           linecolor=ocre,
           innerleftmargin=5pt,
@@ -312,7 +312,7 @@
           innerbottommargin=12pt]{dBox}
 
 % Proof box
-\newmdenv[skipabove=5pt,
+\newmdenv[skipabove=7pt,
           skipbelow=10pt, 
           rightline=false, 
           leftline=true, 
@@ -487,6 +487,7 @@ innerbottommargin=5pt]{cBox}
 \babelhyphenation[english]{Thread-ri-pper}
 \babelhyphenation[english]{non-con-cu-rrent}
 \babelhyphenation[english]{con-cur-rent}
+\babelhyphenation[english]{stea-ling}
 
 \newenvironment{thesisproof}[1][\proofname]{%
   \begin{proof}[#1]$ $\par\nobreak\ignorespaces
