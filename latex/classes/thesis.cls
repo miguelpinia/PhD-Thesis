@@ -59,6 +59,9 @@
 \usetikzlibrary{arrows,automata,positioning,matrix}
 \usepackage{ifthen}
 \usepackage{float}
+\usepackage{lmodern}
+%\usepackage{palatino}
+%\usepackage{kpfonts}
 
 \renewcommand{\qedsymbol}{$\blacksquare$}
 
@@ -99,8 +102,6 @@
 \raggedbottom
 %\flushbottom
 \NewEnviron{abmn}{\marginnote{\BODY}}
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,6 +152,7 @@
     {\end{quote}\end{alwayssingle}}
 
 \newenvironment{resumen} {
+  \fontfamily{ppl}\selectfont
   \begin{alwayssingle} \pagestyle{empty}
     \cleardoublepage{}
     \begin{center}
@@ -162,6 +164,7 @@
 {\end{quote}\end{alwayssingle}}
 
 \newenvironment{agradecimientos} {
+  \fontfamily{ppl}\selectfont
   \pagestyle{empty}
   \begin{alwayssingle}
     \cleardoublepage{}
@@ -423,52 +426,52 @@ innerbottommargin=5pt]{cBox}
 \hyphenation{Reentrant-Read-Write-Lock Stamped-Lock}
 % \renewcommand{\lstlistlistingname}{Índice de códigos}%\lstlistingname
 % \setlist{itemsep=4pt,parsep=0pt}
-\newcommand{\Put}{{\sf \small Put}\xspace}
-\newcommand{\Take}{{\sf \small Take}\xspace}
-\newcommand{\Puts}{{\sf \small Puts}\xspace}
-\newcommand{\Takes}{{\sf \small Takes}\xspace}
-\newcommand{\Steal} {{\sf \small Steal}\xspace}
-\newcommand{\Steals} {{\sf \small Steals}\xspace}
-\newcommand{\RAW}{{\sf \small Read-After-Write}\xspace}
-\newcommand{\RMW}{{\sf \small Read-Modify-Write}\xspace}
-\newcommand{\CAS}{{\sf \small Compare\&Swap}\xspace}
-\newcommand{\TAS}{{\sf \small Test\&Set}\xspace}
-\newcommand{\FAI}{{\sf \small Fetch\&Increment}\xspace}
-\newcommand{\SWAP}{{\sf \small Swap}\xspace}
-\newcommand{\LL}{{\sf \small LL}\xspace}
-\newcommand{\IC}{{\sf \small IC}\xspace}
-\newcommand{\SC}{{\sf \small SC}\xspace}
-\newcommand{\R}{{\sf \small Read}\xspace}
-\newcommand{\W}{{\sf \small Write}\xspace}
-\newcommand{\ok}{{\sf \small OK}\xspace}
-\newcommand{\closed}{{\sf \small CLOSED}\xspace}
-\newcommand{\MaxReg}{{\sf \small MaxRegister}\xspace}
-\newcommand{\RangeMaxReg}{{\sf \small RangeMaxRegister}\xspace}
-\newcommand{\abort}{{\sf \small abort}\xspace}
-\newcommand{\Enq}{{\sf \small Enqueue}\xspace}
-\newcommand{\Push}{{\sf \small Push}\xspace}
-\newcommand{\Pop}{{\sf \small Pop}\xspace}
-\newcommand{\Deq}{{\sf \small Dequeue}\xspace}
-\newcommand{\op}{{\sf \small op}\xspace}
-\newcommand{\true}{{\sf \small true}\xspace}
-\newcommand{\false}{{\sf \small false}\xspace}
-\newcommand{\epty}{{\sf \small empty}\xspace}
-\newcommand{\NBWSM}{{\sf \small NB-WS-MULT}\xspace}
-\newcommand{\SetLin}{{\sf \small SetLin}\xspace}
-\newcommand{\WFWSM}{{\sf \small WS-MULT}\xspace}
-\newcommand{\MaxR}{{\sf \small MaxRead}\xspace}
-\newcommand{\MaxW}{{\sf \small MaxWrite}\xspace}
-\newcommand{\RMaxR}{{\sf \small RMaxRead}\xspace}
-\newcommand{\RMaxW}{{\sf \small RMaxWrite}\xspace}
-\newcommand{\NCWSM}{{\sf \small WS-WMULT}\xspace}
-\newcommand{\Lin}{{\sf \small Lin}\xspace}
-\newcommand{\ABWSM}{{\sf \small ABRT-WS-MULT}\xspace}
-\newcommand{\BNBWSM}{{\sf \small B-WS-MULT}\xspace}
-\newcommand{\BNCWSM}{{\sf \small B-WS-WMULT}\xspace}
-\newcommand{\BWFWSM}{{\sf \small B-WS-MULT}\xspace}
-\newcommand{\full}{{\sf \small FULL}\xspace}
-\newcommand{\open}{{\sf \small OPEN}\xspace}
-\newcommand{\compete}{{\sf \small compete}\xspace}
+\newcommand{\Put}{{\sf Put}\xspace}
+\newcommand{\Take}{{\sf Take}\xspace}
+\newcommand{\Puts}{{\sf Puts}\xspace}
+\newcommand{\Takes}{{\sf Takes}\xspace}
+\newcommand{\Steal} {{\sf Steal}\xspace}
+\newcommand{\Steals} {{\sf Steals}\xspace}
+\newcommand{\RAW}{{\sf Read-After-Write}\xspace}
+\newcommand{\RMW}{{\sf Read-Modify-Write}\xspace}
+\newcommand{\CAS}{{\sf Compare\&Swap}\xspace}
+\newcommand{\TAS}{{\sf Test\&Set}\xspace}
+\newcommand{\FAI}{{\sf Fetch\&Increment}\xspace}
+\newcommand{\SWAP}{{\sf Swap}\xspace}
+\newcommand{\LL}{{\sf LL}\xspace}
+\newcommand{\IC}{{\sf IC}\xspace}
+\newcommand{\SC}{{\sf SC}\xspace}
+\newcommand{\R}{{\sf Read}\xspace}
+\newcommand{\W}{{\sf Write}\xspace}
+\newcommand{\ok}{{\sf OK}\xspace}
+\newcommand{\closed}{{\sf CLOSED}\xspace}
+\newcommand{\MaxReg}{{\sf MaxRegister}\xspace}
+\newcommand{\RangeMaxReg}{{\sf RangeMaxRegister}\xspace}
+\newcommand{\abort}{{\sf abort}\xspace}
+\newcommand{\Enq}{{\sf Enqueue}\xspace}
+\newcommand{\Push}{{\sf Push}\xspace}
+\newcommand{\Pop}{{\sf Pop}\xspace}
+\newcommand{\Deq}{{\sf Dequeue}\xspace}
+\newcommand{\op}{{\sf op}\xspace}
+\newcommand{\true}{{\sf true}\xspace}
+\newcommand{\false}{{\sf false}\xspace}
+\newcommand{\epty}{{\sf empty}\xspace}
+\newcommand{\NBWSM}{{\sf NB-WS-MULT}\xspace}
+\newcommand{\SetLin}{{\sf SetLin}\xspace}
+\newcommand{\WFWSM}{{\sf WS-MULT}\xspace}
+\newcommand{\MaxR}{{\sf MaxRead}\xspace}
+\newcommand{\MaxW}{{\sf MaxWrite}\xspace}
+\newcommand{\RMaxR}{{\sf RMaxRead}\xspace}
+\newcommand{\RMaxW}{{\sf RMaxWrite}\xspace}
+\newcommand{\NCWSM}{{\sf WS-WMULT}\xspace}
+\newcommand{\Lin}{{\sf Lin}\xspace}
+\newcommand{\ABWSM}{{\sf ABRT-WS-MULT}\xspace}
+\newcommand{\BNBWSM}{{\sf B-WS-MULT}\xspace}
+\newcommand{\BNCWSM}{{\sf B-WS-WMULT}\xspace}
+\newcommand{\BWFWSM}{{\sf B-WS-MULT}\xspace}
+\newcommand{\full}{{\sf FULL}\xspace}
+\newcommand{\open}{{\sf OPEN}\xspace}
+\newcommand{\compete}{{\sf compete}\xspace}
 
 \newcounter{linecounter}
 \newcommand{\linenumbering}{\ifthenelse{\value{linecounter}<10}{(0\arabic{linecounter})}{(\arabic{linecounter})}}
