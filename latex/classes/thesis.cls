@@ -72,7 +72,7 @@
 \usepackage{ifdraft, blindtext}
 \ifoptiondraft{%
     \usepackage{draftwatermark}
-    \SetWatermarkText{\textsc{Draft}}
+    \SetWatermarkText{Draft}
     \SetWatermarkScale{4}
     \SetWatermarkColor[gray]{0.95}
     \setkeys{Gin}{draft=false}
@@ -316,13 +316,13 @@
 
 % Proof box
 \newmdenv[skipabove=7pt,
-          skipbelow=10pt, 
-          rightline=false, 
-          leftline=true, 
-          topline=false, 
-          bottomline=false, 
-          linecolor=ocre, 
-          innerleftmargin=0.3cm, 
+          skipbelow=10pt,
+          rightline=false,
+          leftline=true,
+          topline=false,
+          bottomline=false,
+          linecolor=ocre,
+          innerleftmargin=0.3cm,
           innerrightmargin=5pt,
           innertopmargin=6pt,
           leftmargin=0cm,
@@ -407,7 +407,7 @@ innerbottommargin=5pt]{cBox}
   stringstyle=\color{amber},
   breaklines=true,
   backgroundcolor=\color{backcolour},
-  keepspaces=true,  
+  keepspaces=true,
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
