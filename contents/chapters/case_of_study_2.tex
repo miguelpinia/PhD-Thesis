@@ -102,9 +102,9 @@ Taking into account these definitions about the baskets and the \LL/\IC objects,
 
 The algorithm's scalability depends on the scalability of the concrete implementations of \LL/\IC and the basket with which it is instantiated. Our proposed solution involves wait-free implementations of each of the objects. In section~\ref{subsec:ll-ic-implementations}, we present the implementations of these objects, which include a \CAS-based operation, a \R/\W-based operation, and a mixed implementation.
 
-\subsection{\label{subsec:ll-ic-implementations}\LL/\IC implementations.}
+\subsection{\label{subsec:ll-ic-implementations}LL/IC implementations.}
 
-\subsubsection{A \CAS-based implementation.}ppopp
+\subsubsection{A \CAS-based implementation.}
 Let $p$ denote the process that invokes an operation on the object. This implementation uses a shared register $R$ initialized to 0.  \LL first reads $R$ and stores the value in a persistent variable $r_p$ of $p$, and then returns $r_p$.  \IC first reads $R$ and if that value is equal to $r_p$, then it performs $\CAS(R, r_p, r_p+1)$; in any it case returns \ok.
 
 \begin{figure}[ht!]
