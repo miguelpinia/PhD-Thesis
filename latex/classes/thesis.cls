@@ -28,7 +28,7 @@
 \usepackage{color}
 \usepackage{xcolor}
 % \usepackage{setspace}
-\usepackage[hmarginratio=3:2]{geometry}
+\usepackage[hmarginratio=16:9]{geometry}
 \usepackage{mathtools}
 \usepackage{amsmath,amsfonts,amssymb,amsthm,thmtools}
 \usepackage{svg}
