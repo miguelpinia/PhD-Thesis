@@ -1,0 +1,16 @@
+\begin{table}[!ht]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrr}
+\toprule{} &  Chase-Lev &  Cilk THE &  Idempotent FIFO &  Idempotent LIFO &  Idempotent DEQUE &  WS WMult &  B. WS WMult &  WS WMult Lists &  B. WS WMult Lists \\
+\midrule
+\textbf{Intial zize 256:       } &      48.00 &     49.26 &            51.85 &            42.90 &             65.64 &      0.00 &        88.75 &           52.14 &              71.46 \\
+\textbf{Initial size 1,000,000: } &      45.48 &     46.82 &            48.73 &            41.77 &             62.34 &      0.00 &        87.83 &           40.41 &              65.45 \\
+\textbf{Initial size 10,000,000:} &      27.91 &     27.14 &            14.31 &            43.81 &             50.25 &      0.00 &        71.22 &           46.76 &              75.19 \\
+\bottomrule
+\end{tabular}}
+
+\caption{\label{puts-takes-percentage}
+Percentage improvement of $\sf \small WS\hbox{-}WMULT$ over all algorithms
+in the $\Puts$-$\Takes$ experiment.}
+%achieved by the best algorithm (WS WMult), compared to other algorithms in the Put-Takes experiments is shown in these values. Each row corresponds to different initial sizes.}
+\end{table}

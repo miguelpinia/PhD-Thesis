@@ -1,0 +1,771 @@
+\clearpage{}
+
+\chapter{Work-Stealing Results}
+\section{Results of Zero Cost Experiments}
+\label{sec:results-zero-cost}
+
+This appendix shows the results obtained by executing the zero-cost experiments following the methodology suggested by Georges, Buytaert, and Eeckout~\cite{DBLP_conf_oopsla_GeorgesBE07}. The data is divided in the case of the experiment of \Puts-\Takes and the case of \Puts-\Steals.
+
+\begin{table}[!ht]
+\centering\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrrrrrrrrrr}
+\toprule
+ & 1 & 4 & 8 & 12 & 16 & 20 & 24 & 28 & 32 & 36 & 40 & 44 & 48 & 52 & 56 & 60 & 64 \\
+\midrule
+\textbf{Lock-Free LCRQ Queue} & 403572408.43 & 187820883.50 & 116026264.60 & 94770156.63 & 84622830.50 & 93050854.37 & 97720927.97 & 95509834.43 & 99412632.57 & 101217631.23 & 108716588.03 & 113385554.47 & 116865624.87 & 122543525.30 & 126754099.80 & 127109938.03 & 126730354.90 \\
+\textbf{Obstruction-Free Fetch-and-Add Based Queue} & 351200027.63 & 169692112.77 & 121854879.07 & 88994036.27 & 74776242.40 & 78627962.80 & 79543299.43 & 71817559.87 & 67443713.50 & 63240889.47 & 65311551.40 & 63473601.93 & 62148500.10 & 64238033.60 & 66547657.57 & 65885871.70 & 65178512.30 \\
+\textbf{Lock-Free Castañeda-Piña Queue Array Based} & 487165396.30 & 1077150109.93 & 1490503277.57 & 1783321075.57 & 1867961323.20 & 2023925634.47 & 2120916067.10 & 2166062984.03 & 2236554396.10 & 2429715567.90 & 2420424604.93 & 2464267895.70 & 2523987255.27 & 2514987713.47 & 2540588509.17 & 2575744556.40 & 2607573629.43 \\
+\textbf{Lock-Free Michael\&Scott Queue} & 587248865.70 & 471544279.67 & 559538345.73 & 541606321.37 & 535908982.53 & 684008030.47 & 803985551.10 & 837462016.30 & 859154816.23 & 875829430.07 & 942633485.97 & 946151498.10 & 948736421.87 & 1024468571.63 & 1118652395.07 & 1140158428.23 & 1140572453.10 \\
+\textbf{Lock-Free Castañeda-Piña Queue} & 472555550.90 & 301829643.73 & 272038021.70 & 281703838.03 & 294978630.73 & 379995043.80 & 422919854.07 & 432414808.13 & 438538137.47 & 437121875.30 & 461605337.17 & 460308301.33 & 460302515.57 & 484756656.03 & 507507288.80 & 505315540.43 & 502870762.67 \\
+\textbf{Wait-Free Yang-Mellor Crumey Queue} & 377297171.80 & 197394522.23 & 122918448.70 & 87396589.83 & 70816962.53 & 67941366.37 & 66012273.80 & 59065987.40 & 53669770.97 & 48970421.20 & 48899447.00 & 46628124.97 & 46240439.33 & 47095151.57 & 47973167.30 & 46690629.67 & 43235588.63 \\
+\textbf{Lock-Free Castañeda-Piña Queue Segment Based} & 475511479.40 & 288435581.67 & 263046870.43 & 227342770.57 & 263256036.93 & 312408909.57 & 327654824.50 & 341570968.90 & 345087614.40 & 350204025.40 & 358781500.57 & 360854102.40 & 364872124.93 & 379651287.00 & 402499664.00 & 416756883.57 & 428069875.03 \\
+\textbf{Lock-Free Ostrovsky-Morrison Scalable Concurrent Queue} & 1146251708.13 & 3387292159.17 & 2259382162.50 & 2026162066.43 & 1723493401.93 & 1932146663.93 & 2037756243.03 & 1897402494.37 & 1720945612.37 & 1629208308.67 & 1678287663.47 & 1534113476.07 & 1451514990.13 & 1413332353.37 & 1402048064.73 & 1337866333.20 & 1295963945.30 \\
+\bottomrule
+\end{tabular}}
+\label{enq_deq_64}
+\caption{Mean times for Enqueue - Dequeue experiment for 64 threads}
+\end{table}
+
+\subsection{Puts-Takes}
+\label{sec:puts-takes}
+
+\input{contents/backmatter/evaluation/chart-puts-takes-256-10000000.tex}
+\input{contents/backmatter/evaluation/chart-puts-takes-1000000-10000000.tex}
+\input{contents/backmatter/evaluation/chart-puts-takes-10000000-10000000.tex}
+
+\subsection{Puts-Steals}
+\label{sec:puts-steals}
+
+\input{contents/backmatter/evaluation/chart-puts-steals-256-10000000.tex}
+\input{contents/backmatter/evaluation/chart-puts-steals-1000000-10000000.tex}
+\input{contents/backmatter/evaluation/chart-puts-steals-10000000-10000000.tex}
+
+\clearpage{}
+\section{Results of Parallel Spanning Tree experiments}
+\label{sec:results-irreg-graph}
+
+\subsection{\label{subsec:measures}Time measurements of Parallel Spanning Tree experiment}
+
+In this section, we report the measurements of the executions of the spanning tree experiment, which were carried out using rigorous statistical methodology and thus have reliable values. The executions are shown for the following graphs: Torus 2D, Torus 2D 60\%, Torus 3D, Torus 3D 40\%, and Random. Each one has a million vertices, and evaluations are made on its directed and undirected versions. In the experiments, for all instances of the work-stealing algorithms, an initial size of 256 and 1,000,000 elements to store was established. The order of these figures and tables is as follows:
+
+\begin{enumerate}
+    \item Directed and undirected Torus 2D with 256 and 1,000,000 of items for the starting size for work-stealing structures. Figure~\ref{fig:2d_torus_appendix}, and tables~\ref{graph-TORUS2D-Directed-256}, \ref{graph-TORUS2D-Directed-1000000}, \ref{graph-TORUS2D-Undirected-256} and~\ref{graph-TORUS2D-Undirected-1000000}.
+    \item Directed and undirected Torus 2D 60\% with 256 and 1,0000,000 of items for the starting size for work-stealing structures. Figure~\ref{fig:2d60_torus_appendix}, and tables~\ref{graph-TORUS2D60-Directed-256}, \ref{graph-TORUS2D60-Directed-1000000}, \ref{graph-TORUS2D60-Undirected-256}, and~\ref{graph-TORUS2D60-Undirected-1000000}.
+    \item Directed and undirected Torus 3D with 256 and 1,000,000 items for the starting size for work-stealing structures. Figure~\ref{fig:3d_torus_appendix}, and tables~\ref{graph-TORUS3D-Directed-256}, \ref{graph-TORUS3D-Directed-1000000}, \ref{graph-TORUS3D-Undirected-256}, and~\ref{graph-TORUS3D-Undirected-1000000}.
+    \item Directed and undirected Torus 3D 40\% with 256 and 1,000,000 items for the starting size for work-stealing structures. Figure~\ref{fig:3d40_torus_appendix}, and tables~\ref{graph-TORUS3D40-Directed-256}, \ref{graph-TORUS3D40-Directed-1000000}, \ref{graph-3D-Torus-40-undirected-256}, and \ref{graph-TORUS3D40-Undirected-1000000}.
+    \item Directed and undirected Random Graph with 256 and 1,000,000 items for the starting size for work-stealing structures. Figure~\ref{fig:random_appendix}, and tables~\ref{graph-RANDOM-Directed-256}, \ref{graph-RANDOM-Directed-1000000}, \ref{graph-RANDOM-Undirected-256}, and \ref{graph-RANDOM-Undirected-1000000}.
+\end{enumerate}
+
+\begin{figure}[ht!]
+  \subfloat[\label{fig:directed_torus2d_256} Mean times for the graph
+  application benchmark. These are the results for the 2D Torus
+  Directed graph. For each work-stealing algorithm's data structure,
+  it begins its execution with an initial size of 256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS2D-Directed-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:directed_torus2d_1M} Mean times for the graph
+  application benchmark. These are the results for the 2D Torus
+  Directed graph. For each work-stealing algorithm's data structure,
+  it begins its execution with an initial size of 1,000,000 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS2D-Directed-1000000.pdf}
+  }
+
+  \subfloat[\label{fig:undirected_torus2d_256} Mean times for the graph
+  application benchmark. These are the results for the 2D Torus
+  Undirected graph. For each work-stealing algorithm's data structure,
+  it begins its execution with an initial size of 256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS2D-Undirected-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:undirected_torus2d-1M} Mean times for the graph
+  application benchmark. These are the results for the 2D Torus
+  Undirected graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  1,000,000 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS2D-Undirected-1000000.pdf}
+  }
+  \caption{\label{fig:2d_torus_appendix} 2D Torus Directed and
+    Undirected Graph with 256 and 1,000,000 initial sizes respectively.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/mean-TORUS2D-Directed-256.tex}
+\input{contents/backmatter/evaluation/mean-TORUS2D-Directed-1000000.tex}
+\input{contents/backmatter/evaluation/mean-TORUS2D-Undirected-256.tex}
+\input{contents/backmatter/evaluation/mean-TORUS2D-Undirected-1000000.tex}
+
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:directed_torus2d60_256}  Mean times for the graph
+  application benchmark. These are the results of the 2D Torus 60\%
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS2D60-Directed-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:directed_torus2d60_1M} Mean times for the graph
+  application benchmark. These are the results of the 2D Torus 60\%
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  1,000,000 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS2D60-Directed-1000000.pdf}
+  }
+
+  \subfloat[\label{fig:undirected_torus2d60_256} Mean times for the graph
+  application benchmark. These are the results of the 2D Torus 60\%
+  Undirected graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS2D60-Undirected-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:undirected_torus2d60_1M} Mean times for the graph
+  application benchmark. These are the results of the 2D Torus 60\%
+  Undirected graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  1,000,000 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS2D60-Undirected-1000000.pdf}
+  }
+  \caption{\label{fig:2d60_torus_appendix} 2D Torus 60\% Directed and
+    Undirected Graph with 256 and 1,000,000 initial sizes respectively.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/mean-TORUS2D60-Directed-256.tex}
+\input{contents/backmatter/evaluation/mean-TORUS2D60-Directed-1000000.tex}
+\input{contents/backmatter/evaluation/mean-TORUS2D60-Undirected-256.tex}
+\input{contents/backmatter/evaluation/mean-TORUS2D60-Undirected-1000000.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:directed_torus3d_256} Mean times for the graph
+  application benchmark. These are the results of the 3D Torus
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS3D-Directed-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:directed_torus3d_1M} Mean times for the graph
+  application benchmark. These are the results of the 3D Torus
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  1,000,00 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS3D-Directed-1000000.pdf}
+  }
+
+  \subfloat[\label{fig:undirected_torus3d_256} Mean times for the graph
+  application benchmark. These are the results of the 3D Torus
+  Undirected graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS3D-Undirected-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:undirected_torus3d_1M} Mean times for the graph
+  application benchmark. These are the results of the 3D Torus
+  Undirected graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  1,000,000 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS3D-Undirected-1000000.pdf}
+  }
+  \caption{\label{fig:3d_torus_appendix} 3D Torus Directed and
+    Undirected Graph with 256 and 1,000,000 initial sizes respectively.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/mean-TORUS3D-Directed-256.tex}
+\input{contents/backmatter/evaluation/mean-TORUS3D-Directed-1000000.tex}
+\input{contents/backmatter/evaluation/mean-TORUS3D-Undirected-256.tex}
+\input{contents/backmatter/evaluation/mean-TORUS3D-Undirected-1000000.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:directed_torus3d40_256} Mean times for the graph
+  application benchmark. These are the results of the 3D Torus 40\%
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS3D40-Directed-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:directed_torus3d40_1M} Mean times for the graph
+  application benchmark. These are the results of the 3D Torus 40\%
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of the benchmark.
+  Each algorithm begins execution with an initial size of
+  1,000,000 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS3D40-Directed-1000000.pdf}
+  }
+
+  \subfloat[\label{fig:undirected_torus3d40_256} Mean times for the graph
+  application benchmark. These are the results of the 3D Torus 40\%
+  Undirected graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  the benchmark.  Each algorithm begins execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS3D40-Undirected-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:undirected_torus3d40_1M} Mean times for the graph
+  application benchmark. These are the results of the 3D Torus 40\%
+  Undirected graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  the benchmark.  Each algorithm begins execution with an initial size of
+  1,000,000 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-TORUS3D40-Undirected-1000000.pdf}
+  }
+  \caption{\label{fig:3d40_torus_appendix} 3D Torus 40\% Directed and
+    Undirected Graph with 256 and 1,000,000 initial sizes respectively.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/mean-TORUS3D40-Directed-256.tex}
+\input{contents/backmatter/evaluation/mean-TORUS3D40-Directed-1000000.tex}
+\input{contents/backmatter/evaluation/mean-TORUS3D40-Undirected-256.tex}
+\input{contents/backmatter/evaluation/mean-TORUS3D40-Undirected-1000000.tex}
+
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:directed_random_256} Mean times for the graph
+  application benchmark. These are the results of the Random
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  the benchmark.  Each algorithm begins execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-Random-Directed-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:directed_random_1M}  Mean times for the graph
+  application benchmark. These are the results of the Random
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  the benchmark.  Each algorithm begins execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-RANDOM-Directed-1000000.pdf}
+  }
+
+  \subfloat[\label{fig:undirected_random_256} Mean times for the graph
+  application benchmark. These are the results of the Random
+  Directed graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  the benchmark.  Each algorithm begins execution with an initial size of
+  256 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-Random-Undirected-256.pdf}
+  }
+  \qquad
+  \subfloat[\label{fig:undirected_random_1M}  Mean times for the graph
+  application benchmark. These are the results of the Random
+  Undirected graph. For each work-stealing algorithm's
+  data structure, it begins its execution with an initial size of
+  the benchmark.  Each algorithm begins execution with an initial size of
+  1,000,000 entries.] {
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mean-RANDOM-Undirected-1000000.pdf}
+  }
+  \caption{\label{fig:random_appendix} Random Directed and
+    Undirected Graph with 256 and 1,000,000 initial sizes
+    respectively.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/mean-Random-Directed-256.tex}
+\input{contents/backmatter/evaluation/mean-RANDOM-Directed-1000000.tex}
+\input{contents/backmatter/evaluation/mean-Random-Undirected-256.tex}
+\input{contents/backmatter/evaluation/mean-RANDOM-Undirected-1000000.tex}
+
+\clearpage
+
+\subsection{\label{subsec:repeated-work}Puts and takes performed in
+  the Paralled Spanning Tree experiment}
+
+This section reports the number of puts and takes performed during the
+execution of the parallel spanning tree. This evaluation was performed
+for each graph and all work-stealing algorithms. Additionally, the
+difference between the total number of puts and the total number of
+takes is calculated. Finally, the total surplus work is calculated as
+the difference between the total put and the total available work
+(number of vertices). For purposes of visualizing the amount of surplus
+work, this is displayed as a graph in terms of the percentage of total
+available work.
+
+\subsubsection{Directed Torus 2D. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-torus_2d_directed_256-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d_directed_256-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d_directed_256-3.tex}
+\clearpage
+\subsubsection{Directed Torus 2D. Initial size of 1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-torus_2d_directed_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d_directed_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d_directed_1m-3.tex}
+\clearpage
+\subsubsection{Undirected Torus 2D. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-torus_2d_undirected_256-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d_undirected_256-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d_undirected_256-3.tex}
+\clearpage
+\subsubsection{Undirected Torus 2D. Initial size of 1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-torus_2d_undirected_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d_undirected_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d_undirected_1m-3.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:surplustorus2ddirected-appx:256}Surplus work: Directed Torus 2D. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_2d_directed_256.pdf}
+  }
+  \subfloat[\label{fig:surplustorus2ddirected-appx:1000000}Surplus work: Directed Torus 2D. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_2d_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:surplustorus2dundirected-appx:256}Surplus work: Undirected Torus 2D. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_2d_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:surplustorus2dundirected:1000000}Surplus work: Undirected Torus 2D. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_2d_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:surplusgraphapplicationtorus2d} Surplus work
+    (percentage) of the experiments.  Surplus work: the difference between
+    the total number of \Puts and the number of puts in sequential executions
+    (i.e., $1,000,000$).}
+\end{figure}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:exec-surplustorus2ddirected-appx:256}Executed surplus work: Directed Torus 2D. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_2d_directed_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplustorus2ddirected-appx:1000000}Executed
+  surplus work: Directed Torus 2D. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_2d_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:exec-surplustorus2dundirected-appx:256}Executed
+  surplus work: Undirected Torus 2D. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_2d_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplustorus2dundirected:1000000}Executed surplus work: Undirected Torus 2D. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_2d_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:exec-surplusgraphapplicationtorus2d-appendix}
+    Executed surplus work (percentage) of the experiments.  Surplus
+    work: the difference between the total number of \Takes and the
+    number of takes in sequential executions (i.e., $1,000,000$).}
+\end{figure}
+
+\clearpage
+\subsubsection{Directed Torus 2D 60\%. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-torus_2d60_directed_256-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d60_directed_256-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d60_directed_256-3.tex}
+\clearpage
+\subsubsection{Directed Torus 2D 60\%. Initial size of  1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-torus_2d60_directed_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d60_directed_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d60_directed_1m-3.tex}
+\clearpage
+\subsubsection{Undirected Torus 2D 60\%. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-torus_2d60_undirected_256-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d60_undirected_256-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d60_undirected_256-3.tex}
+\clearpage
+\subsubsection{Undirected Torus 2D 60\%. Initial size of  1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-torus_2d60_undirected_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d60_undirected_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_2d60_undirected_1m-3.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:surplustorus2d60directed-appx:256}Surplus work: Directed Torus 2D 60\%. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_2d60_directed_256.pdf}
+  }
+  \subfloat[\label{fig:surplustorus2d60directed-appx:1000000}Surplus work: Directed Torus 2D 60\%. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_2d60_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:surplustorus2d60undirected-appx:256}Surplus work: Undirected Torus 2D 60\%. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_2d60_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:surplustorus2d60undirected:1000000}Surplus work: Undirected Torus 2D 60\%. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_2d60_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:surplusgraphapplicationtorus2d60} Surplus work
+    (percentage) of the experiments.  Surplus work: the difference between
+    the total number of \Puts and the number of puts in sequential executions
+    (i.e., $1,000,000$).}
+\end{figure}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:exec-surplustorus2d60directed-appx:256}Executed
+  surplus work: Directed Torus 2D 60\%. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_2d60_directed_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplustorus2d60directed-appx:1000000}Executed
+  surplus work: Directed Torus 2D 60\%. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_2d60_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:exec-surplustorus2d60undirected-appx:256}Executed
+  Surplus work: Undirected Torus 2D 60\%. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_2d60_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplustorus2d60undirected:1000000}Executed
+  surplus work: Undirected Torus 2D 60\%. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_2d60_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:exec-surplusgraphapplicationtorus2d60} Executed
+    surplus work (percentage) of the experiments.  Surplus work: the
+    difference between the total number of \Takes and the number of
+    takes in sequential executions (i.e., $1,000,000$).  }
+\end{figure}
+
+\clearpage
+\subsubsection{Directed Torus 3D. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-torus_3d_directed_256-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d_directed_256-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d_directed_256-3.tex}
+\clearpage
+\subsubsection{Directed Torus 3D. Initial size of  1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-torus_3d_directed_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d_directed_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d_directed_1m-3.tex}
+\clearpage
+\subsubsection{Undirected Torus 3D. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-torus_3d_undirected_256-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d_undirected_256-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d_undirected_256-3.tex}
+\clearpage
+\subsubsection{Undirected Torus 3D. Initial size of  1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-torus_3d_undirected_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d_undirected_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d_undirected_1m-3.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:surplustorus3ddirected-appx:256}Surplus work: Directed Torus 3D. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_3d_directed_256.pdf}
+  }
+  \subfloat[\label{fig:surplustorus3ddirected-appx:1000000}Surplus work: Directed Torus 3D. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_3d_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:surplustorus3dundirected-appx:256}Surplus work: Undirected Torus 3D. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_3d_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:surplustorus3dundirected:1000000}Surplus work: Undirected Torus 3D. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_3d_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:surplusgraphapplicationtorus3d} Surplus work
+    (percentage) of the experiments.  Surplus work: the difference
+    between the total number of \Puts and the number of puts in
+    sequential executions (i.e., $1,000,000$).}
+\end{figure}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:exec-surplustorus3ddirected-appx:256}Executed surplus work: Directed Torus 3D. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_3d_directed_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplustorus3ddirected-appx:1000000}Executed
+  surplus work: Directed Torus 3D. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_3d_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:exec-surplustorus3dundirected-appx:256}Executed
+  surplus work: Undirected Torus 3D. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_3d_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplustorus3dundirected:1000000}Executed surplus work: Undirected Torus 3D. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_3d_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:exec-surplusgraphapplicationtorus3d} Executed
+    surplus work (percentage) of the experiments.  Surplus work: the
+    difference between the total number of \Takes and the number of
+    takes in sequential executions (i.e., $1,000,000$).}
+\end{figure}
+
+\clearpage{}
+
+\subsubsection{Directed Torus 3D 40\%. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-torus_3d40_directed_256-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d40_directed_256-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d40_directed_256-3.tex}
+\clearpage
+\subsubsection{Directed Torus 3D 40\%. Initial size of  1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-torus_3d40_directed_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d40_directed_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d40_directed_1m-3.tex}
+\clearpage
+\subsubsection{Undirected Torus 3D 40\%. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-torus_3d40_undirected_256-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d40_undirected_256-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d40_undirected_256-3.tex}
+\clearpage
+\subsubsection{Undirected Torus 3D 40\%. Initial size of  1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-torus_3d40_undirected_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d40_undirected_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-torus_3d40_undirected_1m-3.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:surplustorus3d40directed-appx:256}Surplus work: Directed Torus 3D 40\%. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_3d40_directed_256.pdf}
+  }
+  \subfloat[\label{fig:surplustorus3d40directed-appx:1000000}Surplus work: Directed Torus 2D 60\%. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_3d40_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:surplustorus3d40undirected-appx:256}Surplus work: Undirected Torus 3D 40\%. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_3d40_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:surplustorus3d40undirected:1000000}Surplus work: Undirected Torus 3D 40\%. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-torus_3d40_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:surplusgraphapplicationtorus3d40} Surplus work
+    (percentage) of the experiments.  Surplus work: the difference
+    between the total number of \Puts and the number of puts in
+    sequential executions (i.e., $1,000,000$).}
+\end{figure}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:exec-surplustorus3d40directed-appx:256}Executed
+  surplus work: Directed Torus 3D 40\%. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_3d40_directed_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplustorus3d40directed-appx:1000000}Executed
+  surplus work: Directed Torus 2D 60\%. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_3d40_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:exec-surplustorus3d40undirected-appx:256}Executed
+  surplus work: Undirected Torus 3D 40\%. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_3d40_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplustorus3d40undirected:1000000}Executed
+  surplus work: Undirected Torus 3D 40\%. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-torus_3d40_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:surplusgraphapplicationtorus3d40} Executed
+    surplus work (percentage) of the experiments.  Surplus work: the
+    difference between the total number of \Takes and the number of
+    takes in sequential executions (i.e., $1,000,000$).}
+\end{figure}
+
+\clearpage
+\subsubsection{Directed Random. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-random_directed_256-1.tex}
+\input{contents/backmatter/evaluation/mult-random_directed_256-2.tex}
+\input{contents/backmatter/evaluation/mult-random_directed_256-3.tex}
+\clearpage
+\subsubsection{Directed Random. Initial size of  1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-random_directed_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-random_directed_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-random_directed_1m-3.tex}
+\clearpage
+\subsubsection{Undirected Random. Initial size of 256 items.}
+\input{contents/backmatter/evaluation/mult-random_undirected_256-1.tex}
+\input{contents/backmatter/evaluation/mult-random_undirected_256-2.tex}
+\input{contents/backmatter/evaluation/mult-random_undirected_256-3.tex}
+\clearpage
+\subsubsection{Undirected Random. Initial size of  1,000,000 items.}
+\input{contents/backmatter/evaluation/mult-random_undirected_1m-1.tex}
+\input{contents/backmatter/evaluation/mult-random_undirected_1m-2.tex}
+\input{contents/backmatter/evaluation/mult-random_undirected_1m-3.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:surplusrandomdirected-appx:256}Surplus work: Directed Random Graph. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-random_directed_256.pdf}
+  }
+  \subfloat[\label{fig:surplusrandomirected-appx:1000000}Surplus work: Directed Random Graph. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-random_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:surplusrandomundirected-appx:256}Surplus work: Undirected Random Graph. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-random_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:surplusrandomundirected:1000000}Surplus work: Undirected Random Graph. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-random_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:surplusgraphapplicationrandom} Surplus work
+    (percentage) of the experiments.  Surplus work: the difference
+    between the total number of \Puts and the number of puts in
+    sequential executions (i.e., $1,000,000$).}
+\end{figure}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:exec-surplusrandomdirected-appx:256}Executed surplus work: Directed Random Graph. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-random_directed_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplusrandomirected-appx:1000000}Executed
+  surplus work: Directed Random Graph. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-random_directed_1m.pdf}
+  }
+
+  \subfloat[\label{fig:exec-surplusrandomundirected-appx:256}Executed surplus work: Undirected Random Graph. Initial size of 256 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-random_undirected_256.pdf}
+  }
+  \subfloat[\label{fig:exec-surplusrandomundirected:1000000}Executed surplus work: Undirected Random Graph. Initial size of 1,000,000 items]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/mult-exec-random_undirected_1m.pdf}
+  }
+
+  \caption{\label{fig:surplusgraphapplicationrandom} Executed surplus
+    work (percentage) of the experiments.  Surplus work: the
+    difference between the total number of \Takes and the number of
+    takes in sequential executions (i.e., $1,000,000$).  }
+\end{figure}
+
+\clearpage{}
+
+\section{\label{sec:sat-appendix}Results of SAT experiment}
+
+This section presents the measurements from the parallel SAT experiment. Shows the results for the different ranges with which the parallel job was tested. Measurements were made using rigorous statistical methodology. This evaluation was performed for all work-stealing algorithms. Additionally, the percentage of repeated work is shown as the number of takes plus steals made. This is easily measurable because there is only one work-stealing structure with a single producer and multiple consumers. The owner of the structure calls the take method every time it is going to process a task, and the other workers call the steal method. Therefore, the number of puts is always fixed, while the sum of takes and puts is at least the total amount of work that was inserted via the put method.
+
+\begin{figure}[!ht]
+
+  \subfloat[\label{fig:sat:50:1:appendix}Range assigment size 50.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-50-1.pdf}
+  }
+  \subfloat[\label{fig:sat:50:2:appendix}Ranges assignment size
+  50. Zoom into the number of processes 32 to 64.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-50-2.pdf}
+  }
+
+  \caption{\label{fig:satapplication:50} Mean times of the Parallel
+    SAT benchmark for range assignment 50.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/sat-50-1.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:sat:100:1}Range assignment size 100.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-100-1.pdf}
+  }
+  \subfloat[\label{fig:sat:100:2}Ranges assignment size 100. Zoom into
+  the number of processes 32 to 64.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-100-2.pdf}
+  }
+
+  \caption{\label{fig:satapplication:100} Mean times of the Parallel
+    SAT benchmark for range assignment 100.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/sat-100-1.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:sat:250:1:appendix}Range assignment size 250.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-250-1.pdf}
+  }
+  \subfloat[\label{fig:sat:250:2:appendix}Ranges assignment size 250. Zoom into
+  the number of processes 32 to 64.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-250-2.pdf}
+  }
+
+  \caption{\label{fig:satapplication:250} Mean times of the Parallel
+    SAT benchmark for range assignment 250.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/sat-250-1.tex}
+
+\begin{figure}[!ht]
+
+  \subfloat[\label{fig:sat:500:1}Range assignment size 500]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-500-1.pdf}
+  }
+  \subfloat[\label{fig:sat:500:2}Ranges assignment size 500. Zoom into
+  the number of processes 32 to 64.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-500-2.pdf}
+  }
+
+  \caption{\label{fig:satapplication:500} Mean times of the Parallel
+    SAT benchmark for range assignment 500.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/sat-500-1.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:sat:1000:1:appendix}Range assignment size 1000.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-1000-1.pdf}
+  }
+  \subfloat[\label{fig:sat:1000:2:appendix}Ranges assignment size 1000. Zoom into
+  the number of processes 32 to 64.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-1000-2.pdf}
+  }
+  \caption{\label{fig:satapplication:1000} Mean times of the Parallel
+    SAT benchmark for range assignment 1000.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/sat-1000-1.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:sat:2500:1}Range assignment size 2500.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-2500-1.pdf}
+  }
+  \subfloat[\label{fig:sat:2500:2}Ranges assignment size 2500. Zoom into
+  the number of processes 32 to 64.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-2500-2.pdf}
+  }
+
+  \caption{\label{fig:satapplication:2500} Mean times of the Parallel
+    SAT benchmark for range assignment 2500.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/sat-2500-1.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:sat:5000:1}Range assignment size 5000.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-5000-1.pdf}
+  }
+  \subfloat[\label{fig:sat:5000:2}Ranges assignment size 5000. Zoom into
+  the number of processes 32 to 64.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-5000-2.pdf}
+  }
+  \caption{\label{fig:satapplication:5000} Mean times of the Parallel
+    SAT benchmark for range assignment 5000.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/sat-5000-1.tex}
+
+\begin{figure}[!ht]
+  \subfloat[\label{fig:sat:50:3}Percentage of repeated work by
+  algorithm.\\ Tasks with a range of 50 assignments.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-50-3.pdf}
+  }
+  \subfloat[\label{fig:sat:100:3}Percentage of repeated work by
+  algorithm.\\ Tasks with a range of 100 assignments.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-100-3.pdf}
+  }
+
+  \subfloat[\label{fig:sat:250:3}Percentage of repeated work by
+  algorithm.\\ Tasks with a range of 250 assignments.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-250-3.pdf}
+  }
+  \subfloat[\label{fig:sat:500:3}Percentage of repeated work by
+  algorithm.\\ Tasks with a range of 500 assignments.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-500-3.pdf}
+  }
+
+  \subfloat[\label{fig:sat:1000:3}Percentage of repeated work by
+  algorithm.\\ Tasks with a range of 1000 assignments.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-1000-3.pdf}
+  }
+  \subfloat[\label{fig:sat:2500:3}Percentage of repeated work by
+  algorithm.\\ Tasks with a range of 2500 assignments.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-2500-3.pdf}
+  }
+
+  \subfloat[\label{fig:sat:5000:3}Percentage of repeated work by
+  algorithm.\\ Tasks with a range of 5000 assignments.]{
+    \includegraphics[width=0.48\textwidth]{contents/backmatter/evaluation/sat-5000-3.pdf}
+  }
+
+
+  \caption{\label{fig:repeatedworksat} percentage of repeated work
+    performed by each algorithm when the range of assignments
+    varies. This percentage is the number of repeated tasks concerning
+    the total of tasks. Tested ranges of (50, 100, 250, 500, 1000, 2500, 5000).}
+\end{figure}
+
+
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End:

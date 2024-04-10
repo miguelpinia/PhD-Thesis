@@ -1,0 +1,30 @@
+\begin{table}[!ht]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrrrrrrrrrrrrr}
+\toprule
+\textbf{Algorithm} & \multicolumn{4}{l}{Chase-Lev} & \multicolumn{4}{l}{Cilk THE} & \multicolumn{4}{l}{Idempotent LIFO} & \multicolumn{4}{l}{Idempotent DEQUE} & \multicolumn{4}{l}{Idempotent FIFO} \\
+\textbf{Operation} &       Puts &      Takes & Difference (\%) & Surplus (\%) &       Puts &      Takes & Difference (\%) & Surplus (\%) &            Puts &      Takes & Difference (\%) & Surplus (\%) &             Puts &      Takes & Difference (\%) & Surplus (\%) &            Puts &      Takes & Difference (\%) & Surplus (\%) \\
+\textbf{Processes} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{}\\ \midrule
+\textbf{1 } & 1000000.00 & 1000000.00 &           0.00 &        0.00 & 1000000.00 & 1000000.00 &           0.00 &        0.00 &      1000000.00 & 1000000.00 &           0.00 &        0.00 &       1000000.00 & 1000000.00 &           0.00 &        0.00 &      1000000.00 & 1000000.00 &           0.00 &        0.00 \\
+\textbf{8 } & 1010972.00 & 1000014.20 &           1.08 &        1.09 & 1003617.80 & 1000009.20 &           0.36 &        0.36 &      1009566.40 & 1002906.80 &           0.66 &        0.95 &       1013092.00 & 1003388.60 &           0.96 &        1.29 &      1000047.20 & 1000039.20 &           0.00 &        0.00 \\
+\textbf{16} & 1009884.40 & 1000030.40 &           0.98 &        0.98 & 1004682.40 & 1000028.80 &           0.46 &        0.47 &      1007973.80 & 1002418.80 &           0.55 &        0.79 &       1011237.40 & 1003333.40 &           0.78 &        1.11 &      1000109.00 & 1000090.60 &           0.00 &        0.01 \\
+\textbf{24} & 1039995.00 & 1000052.00 &           3.84 &        3.85 & 1011143.80 & 1000056.00 &           1.10 &        1.10 &      1036845.60 & 1010304.40 &           2.56 &        3.55 &       1026754.80 & 1006000.00 &           2.02 &        2.61 &      1000125.40 & 1000091.00 &           0.00 &        0.01 \\
+\textbf{28} & 1044321.40 & 1000043.40 &           4.24 &        4.24 & 1014743.20 & 1000049.00 &           1.45 &        1.45 &      1033028.60 & 1009013.40 &           2.32 &        3.20 &       1036250.40 & 1008419.00 &           2.69 &        3.50 &      1000163.60 & 1000115.40 &           0.00 &        0.02 \\
+\textbf{32} & 1056481.80 & 1000054.80 &           5.34 &        5.35 & 1019167.00 & 1000057.20 &           1.88 &        1.88 &      1049470.80 & 1012449.80 &           3.53 &        4.71 &       1052996.60 & 1012604.80 &           3.84 &        5.03 &      1000177.80 & 1000119.20 &           0.01 &        0.02 \\
+\textbf{40} & 1069169.40 & 1000073.60 &           6.46 &        6.47 & 1021383.60 & 1000066.80 &           2.09 &        2.09 &      1054736.60 & 1012277.00 &           4.03 &        5.19 &       1062180.80 & 1014550.00 &           4.48 &        5.85 &      1000191.40 & 1000114.80 &           0.01 &        0.02 \\
+\textbf{48} & 1081696.80 & 1000078.00 &           7.55 &        7.55 & 1020685.80 & 1000083.60 &           2.02 &        2.03 &      1091483.80 & 1020718.40 &           6.48 &        8.38 &       1085018.00 & 1017446.00 &           6.23 &        7.84 &      1000244.00 & 1000151.00 &           0.01 &        0.02 \\
+\textbf{56} & 1115203.20 & 1000117.20 &          10.32 &       10.33 & 1033933.60 & 1000101.20 &           3.27 &        3.28 &      1109457.80 & 1023300.40 &           7.77 &        9.87 &       1127022.00 & 1026420.80 &           8.93 &       11.27 &      1001294.40 & 1000152.00 &           0.11 &        0.13 \\
+\textbf{64} & 1125126.20 & 1000147.20 &          11.11 &       11.12 & 1032473.00 & 1000106.00 &           3.13 &        3.15 &      1124086.80 & 1031452.20 &           8.24 &       11.04 &       1133354.60 & 1025677.80 &           9.50 &       11.77 &      1001170.60 & 1000225.00 &           0.09 &        0.12 \\
+\bottomrule
+\end{tabular}}
+\label{difference-Torus_3D_40_undirected-1000000-CHASELEV-CILK-IDEMPOTENT_LIFO-IDEMPOTENT_DEQUE-IDEMPOTENT_FIFO}
+\caption{The number of puts and takes performed during the
+    spanning tree experiment on a Torus 3D 40 undirected graph with an initial size
+    of 1000000 items is provided. The table presents data on the
+    following algorithms: Chase-Lev, Cilk THE, Idempotent LIFO, Idempotent DEQUE, and
+    Idempotent FIFO. Furthermore, we present the percentage difference
+    between the number of puts and takes for each available thread,
+    relative to the total number of puts. Finally, also we show the
+    "surplus" work, which is the difference of the scheduled tasks and
+    the total work avalaible (total of vertices).}
+\end{table}

@@ -1,0 +1,34 @@
+\begin{table}[!ht]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrrrrrrrr}
+\toprule
+\textbf{Algorithm} & \multicolumn{5}{l}{B. WS WMult} & \multicolumn{5}{l}{WS WMult Lists} & \multicolumn{5}{l}{B. WS WMult Lists} \\
+\textbf{Operation} &        Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) &           Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) &              Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) \\
+\textbf{Processes} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{}\\ \midrule
+\textbf{1 } &  1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 &     1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 &        1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 \\
+\textbf{8 } &  1000013.60 & 1000006.00 &           0.00 &        0.00 &                 0.00 &     1000014.00 & 1000007.20 &           0.00 &        0.00 &                 0.00 &        1000013.40 & 1000006.40 &           0.00 &        0.00 &                 0.00 \\
+\textbf{16} &  1000022.60 & 1000015.60 &           0.00 &        0.00 &                 0.00 &     1000026.20 & 1000012.00 &           0.00 &        0.00 &                 0.00 &        1000026.00 & 1000014.80 &           0.00 &        0.00 &                 0.00 \\
+\textbf{24} &  1000244.20 & 1000152.20 &           0.01 &        0.02 &                 0.02 &     1000830.40 & 1000105.00 &           0.07 &        0.08 &                 0.01 &        1000042.40 & 1000020.80 &           0.00 &        0.00 &                 0.00 \\
+\textbf{28} &  1000964.20 & 1000503.40 &           0.05 &        0.10 &                 0.05 &     1003826.40 & 1000623.40 &           0.32 &        0.38 &                 0.06 &        1003124.00 & 1001179.60 &           0.19 &        0.31 &                 0.12 \\
+\textbf{32} &  1005632.20 & 1002692.80 &           0.29 &        0.56 &                 0.27 &     1003712.40 & 1000352.40 &           0.33 &        0.37 &                 0.04 &        1001447.40 & 1000502.40 &           0.09 &        0.14 &                 0.05 \\
+\textbf{40} &  1018807.80 & 1007936.60 &           1.07 &        1.85 &                 0.79 &     1017450.80 & 1002580.40 &           1.46 &        1.72 &                 0.26 &        1018311.00 & 1006735.00 &           1.14 &        1.80 &                 0.67 \\
+\textbf{48} &  1053572.40 & 1018307.40 &           3.35 &        5.08 &                 1.80 &     1037995.20 & 1006740.60 &           3.01 &        3.66 &                 0.67 &        1033461.40 & 1009894.40 &           2.28 &        3.24 &                 0.98 \\
+\textbf{56} &  1035705.00 & 1012473.60 &           2.24 &        3.45 &                 1.23 &     1077590.60 & 1013753.00 &           5.92 &        7.20 &                 1.36 &        1039675.60 & 1011814.60 &           2.68 &        3.82 &                 1.17 \\
+\textbf{64} &  1084255.60 & 1027541.80 &           5.23 &        7.77 &                 2.68 &     1076885.20 & 1013112.00 &           5.92 &        7.14 &                 1.29 &        1076659.60 & 1022538.00 &           5.03 &        7.12 &                 2.20 \\
+\bottomrule
+\end{tabular}}
+\label{difference-Random_undirected-1000000-B_WS_NC_MULT_OPT-WS_NC_MULT_LA_OPT-B_WS_NC_MULT_LA_OPT}
+\caption{The number of puts and takes performed during the
+    spanning tree experiment on a Random undirected graph with an initial size
+    of 1000000 items is provided. The table presents data on the
+    following algorithms: B. WS WMult, WS WMult Lists, and
+    B. WS WMult Lists. Furthermore, we present the percentage difference
+    between the number of puts and takes for each available thread,
+    relative to the total number of puts. Finally, also we show the
+    "surplus" work, which is the difference of the total number of
+    \Puts (Work to be scheduled) and the total number of \Puts in
+    sequential executions (i.e., 1,000,000), and the "executed surplus
+    work", which is the difference between the total number of \Takes
+    (actual work executed) and the total of \Takes in sequential
+    executions.}
+\end{table}

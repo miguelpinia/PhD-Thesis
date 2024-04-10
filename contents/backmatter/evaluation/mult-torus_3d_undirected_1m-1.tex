@@ -1,0 +1,34 @@
+\begin{table}[!ht]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrrrrrrrr}
+\toprule
+\textbf{Algorithm} & \multicolumn{5}{l}{Chase-Lev} & \multicolumn{5}{l}{Cilk THE} & \multicolumn{5}{l}{Idempotent LIFO} \\
+\textbf{Operation} &       Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) &       Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) &            Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) \\
+\textbf{Processes} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{}\\ \midrule
+\textbf{1 } & 1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 & 1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 &      1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 \\
+\textbf{8 } & 1007042.80 & 1000047.20 &           0.69 &        0.70 &                 0.00 & 1002218.40 & 1000051.20 &           0.22 &        0.22 &                 0.01 &      1004675.40 & 1001251.40 &           0.34 &        0.47 &                 0.12 \\
+\textbf{16} & 1004167.80 & 1000118.60 &           0.40 &        0.42 &                 0.01 & 1001520.40 & 1000105.20 &           0.14 &        0.15 &                 0.01 &      1004673.20 & 1001481.20 &           0.32 &        0.47 &                 0.15 \\
+\textbf{24} & 1035109.00 & 1000155.00 &           3.38 &        3.39 &                 0.02 & 1008261.00 & 1000124.40 &           0.81 &        0.82 &                 0.01 &      1026903.20 & 1006133.40 &           2.02 &        2.62 &                 0.61 \\
+\textbf{28} & 1031260.40 & 1000129.40 &           3.02 &        3.03 &                 0.01 & 1015662.00 & 1000117.40 &           1.53 &        1.54 &                 0.01 &      1027101.20 & 1006384.60 &           2.02 &        2.64 &                 0.63 \\
+\textbf{32} & 1059586.40 & 1000160.20 &           5.61 &        5.62 &                 0.02 & 1025879.80 & 1000162.80 &           2.51 &        2.52 &                 0.02 &      1032898.80 & 1007668.40 &           2.44 &        3.19 &                 0.76 \\
+\textbf{40} & 1073014.20 & 1000190.40 &           6.79 &        6.80 &                 0.02 & 1024220.60 & 1000202.20 &           2.35 &        2.36 &                 0.02 &      1036169.20 & 1007405.40 &           2.78 &        3.49 &                 0.74 \\
+\textbf{48} & 1083288.40 & 1000192.80 &           7.67 &        7.69 &                 0.02 & 1025092.00 & 1000183.00 &           2.43 &        2.45 &                 0.02 &      1087383.00 & 1019444.60 &           6.25 &        8.04 &                 1.91 \\
+\textbf{56} & 1117937.00 & 1000232.20 &          10.53 &       10.55 &                 0.02 & 1034225.00 & 1000243.00 &           3.29 &        3.31 &                 0.02 &      1082462.20 & 1017152.00 &           6.03 &        7.62 &                 1.69 \\
+\textbf{64} & 1119506.60 & 1000232.60 &          10.65 &       10.67 &                 0.02 & 1032297.00 & 1000199.00 &           3.11 &        3.13 &                 0.02 &      1104746.20 & 1019559.20 &           7.71 &        9.48 &                 1.92 \\
+\bottomrule
+\end{tabular}}
+\label{difference-Torus_3D_undirected-1000000-CHASELEV-CILK-IDEMPOTENT_LIFO}
+\caption{The number of puts and takes performed during the
+    spanning tree experiment on a Torus 3D undirected graph with an initial size
+    of 1000000 items is provided. The table presents data on the
+    following algorithms: Chase-Lev, Cilk THE, and
+    Idempotent LIFO. Furthermore, we present the percentage difference
+    between the number of puts and takes for each available thread,
+    relative to the total number of puts. Finally, also we show the
+    "surplus" work, which is the difference of the total number of
+    \Puts (Work to be scheduled) and the total number of \Puts in
+    sequential executions (i.e., 1,000,000), and the "executed surplus
+    work", which is the difference between the total number of \Takes
+    (actual work executed) and the total of \Takes in sequential
+    executions.}
+\end{table}

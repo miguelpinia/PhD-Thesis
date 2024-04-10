@@ -1,0 +1,21 @@
+\begin{table}[!ht]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrr}
+\toprule{} &    Chase-Lev &     Cilk THE &  Idempotent FIFO &  Idempotent LIFO &  Idempotent DEQUE &     WS WMult &  B. WS WMult &  WS WMult Lists &  B. WS WMult Lists \\
+\midrule
+\textbf{Mean               } & 188742815.65 & 285389986.59 &     204578776.35 &     219054343.94 &      294326647.21 & 105862001.14 & 946421899.22 &    179108873.00 &       359239862.76 \\
+\textbf{Low Limit          } & 188321766.63 & 284765322.59 &     204200829.72 &     218248707.65 &      293747378.70 & 105465468.28 & 927800797.17 &    177966882.72 &       343069305.85 \\
+\textbf{High Limit         } & 189163864.67 & 286014650.59 &     204956722.98 &     219859980.23 &      294905915.72 & 106258534.00 & 965043001.27 &    180250863.28 &       375410419.67 \\
+\textbf{Confidence Interval} &    842098.03 &   1249328.01 &        755893.26 &       1611272.57 &        1158537.02 &    793065.71 &  37242204.11 &      2283980.57 &        32341113.83 \\
+\bottomrule
+\end{tabular}}
+\label{zero-ps-1000000-10000000-1}
+\caption{The values shown in the table were calculated under
+    the methodology suggested
+    in~\cite{DBLP_conf_oopsla_GeorgesBE07}. These values in
+    nanoseconds, are the mean time, the confidence interval limits
+    (high and low) and the size region of the confidence interval. The
+    zero cost experiment for puts and steals was performed with an
+    initial structure size of 1000000 items for each worker. The
+    amount of operations to perform was of 10000000 operations.}
+\end{table}

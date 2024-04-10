@@ -1,0 +1,34 @@
+\begin{table}[!ht]
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrrrrrrrr}
+\toprule
+\textbf{Algorithm} & \multicolumn{5}{l}{Idempotent DEQUE} & \multicolumn{5}{l}{Idempotent FIFO} & \multicolumn{5}{l}{WS WMult} \\
+\textbf{Operation} &             Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) &            Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) &       Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) \\
+\textbf{Processes} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{}\\ \midrule
+\textbf{1 } &       1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 &      1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 & 1000000.00 & 1000000.00 &           0.00 &        0.00 &                 0.00 \\
+\textbf{8 } &       1025842.00 & 1005123.20 &           2.02 &        2.52 &                 0.51 &      1000123.00 & 1000039.00 &           0.01 &        0.01 &                 0.00 & 1000301.40 & 1000149.60 &           0.02 &        0.03 &                 0.01 \\
+\textbf{16} &       1046681.40 & 1010157.60 &           3.49 &        4.46 &                 1.01 &      1000450.80 & 1000107.60 &           0.03 &        0.05 &                 0.01 & 1000686.20 & 1000285.40 &           0.04 &        0.07 &                 0.03 \\
+\textbf{24} &       1058272.40 & 1009314.40 &           4.63 &        5.51 &                 0.92 &      1001161.20 & 1000237.00 &           0.09 &        0.12 &                 0.02 & 1000730.80 & 1000249.80 &           0.05 &        0.07 &                 0.02 \\
+\textbf{28} &       1073096.00 & 1014384.00 &           5.47 &        6.81 &                 1.42 &      1001102.80 & 1000202.00 &           0.09 &        0.11 &                 0.02 & 1001206.00 & 1000391.20 &           0.08 &        0.12 &                 0.04 \\
+\textbf{32} &       1078527.80 & 1012209.60 &           6.15 &        7.28 &                 1.21 &      1001080.00 & 1000165.80 &           0.09 &        0.11 &                 0.02 & 1001670.00 & 1000495.80 &           0.12 &        0.17 &                 0.05 \\
+\textbf{40} &       1100400.40 & 1018060.60 &           7.48 &        9.12 &                 1.77 &      1001490.60 & 1000242.40 &           0.12 &        0.15 &                 0.02 & 1001779.40 & 1000504.00 &           0.13 &        0.18 &                 0.05 \\
+\textbf{48} &       1122020.80 & 1018072.80 &           9.26 &       10.88 &                 1.78 &      1002240.80 & 1000358.80 &           0.19 &        0.22 &                 0.04 & 1002334.00 & 1000691.00 &           0.16 &        0.23 &                 0.07 \\
+\textbf{56} &       1135747.60 & 1023634.80 &           9.87 &       11.95 &                 2.31 &      1002077.40 & 1000340.60 &           0.17 &        0.21 &                 0.03 & 1002878.00 & 1000802.40 &           0.21 &        0.29 &                 0.08 \\
+\textbf{64} &       1143298.40 & 1018276.20 &          10.94 &       12.53 &                 1.79 &      1002330.80 & 1000346.40 &           0.20 &        0.23 &                 0.03 & 1002949.40 & 1001015.80 &           0.19 &        0.29 &                 0.10 \\
+\bottomrule
+\end{tabular}}
+\label{difference-Torus_2D_60_directed-1000000-IDEMPOTENT_DEQUE-IDEMPOTENT_FIFO-WS_NC_MULT_OPT}
+\caption{The number of puts and takes performed during the
+    spanning tree experiment on a Torus 2D 60 directed graph with an initial size
+    of 1000000 items is provided. The table presents data on the
+    following algorithms: Idempotent DEQUE, Idempotent FIFO, and
+    WS WMult. Furthermore, we present the percentage difference
+    between the number of puts and takes for each available thread,
+    relative to the total number of puts. Finally, also we show the
+    "surplus" work, which is the difference of the total number of
+    \Puts (Work to be scheduled) and the total number of \Puts in
+    sequential executions (i.e., 1,000,000), and the "executed surplus
+    work", which is the difference between the total number of \Takes
+    (actual work executed) and the total of \Takes in sequential
+    executions.}
+\end{table}
