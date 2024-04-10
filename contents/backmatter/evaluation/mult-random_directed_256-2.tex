@@ -1,7 +1,5 @@
-\begin{table}[!ht]
-\centering
-\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrrrrrrrr}
-\toprule
+\begin{table}[!ht] \centering
+ \resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrrrrrrrrrrr} \toprule
 \textbf{Algorithm} & \multicolumn{5}{l}{Idempotent DEQUE} & \multicolumn{5}{l}{Idempotent FIFO} & \multicolumn{5}{l}{WS WMult} \\
 \textbf{Operation} &             Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) &            Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) &       Puts &      Takes & Difference (\%) & Surplus (\%) & Executed Surplus (\%) \\
 \textbf{Processes} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{} & \multicolumn{4}{l}{}\\ \midrule
@@ -17,8 +15,7 @@
 \textbf{64} &       1133525.00 & 1030556.20 &           9.08 &       11.78 &                 2.97 &      1118209.20 & 1015841.20 &           9.15 &       10.57 &                 1.56 & 1170370.40 & 1065732.40 &           8.94 &       14.56 &                 6.17 \\
 \bottomrule
 \end{tabular}}
-\label{difference-Random_undirected-256-IDEMPOTENT_DEQUE-IDEMPOTENT_FIFO-WS_NC_MULT_OPT}
-\caption{The number of puts and takes performed during the
+\caption{\label{difference-Random_directed-256-IDEMPOTENT_DEQUE-IDEMPOTENT_FIFO-WS_NC_MULT_OPT}The number of puts and takes performed during the
     spanning tree experiment on a Random undirected graph with an initial size
     of 256 items is provided. The table presents data on the
     following algorithms: Idempotent DEQUE, Idempotent FIFO, and
