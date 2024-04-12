@@ -60,6 +60,7 @@
 \usepackage{ifthen}
 \usepackage{float}
 \usepackage{lmodern}
+%\usepackage[framed]{ntheorem}
 %\usepackage{palatino}
 %\usepackage{kpfonts}
 
@@ -491,6 +492,7 @@ innerbottommargin=5pt]{cBox}
 \babelhyphenation[english]{non-con-cu-rrent}
 \babelhyphenation[english]{con-cur-rent}
 \babelhyphenation[english]{stea-ling}
+\babelhyphenation[english]{obs-truc-tion---free}
 
 \newenvironment{thesisproof}[1][\proofname]{%
   \begin{proof}[#1]$ $\par\nobreak\ignorespaces
