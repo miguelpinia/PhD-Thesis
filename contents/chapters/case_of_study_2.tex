@@ -212,7 +212,7 @@ Let \op denote any \LL that returns $R \in \{0, 1, \hdots, MAX-1\}$ and let $e$ 
 %\end{proofT}
 
 \subsection{\label{subsec:basket-implementation}Basket implementations.}
-The basket implementations appear in Algorithms~\ref{basket-1} and~\ref{basket-2}. Both implementations have a shared array where the items are put and taken. A \Put operation tries to put its item in a location, while a \Take operation either takes an item from a location or marks it as "canceled."  The first implementation follows an approach similar to that of the LCRQ algorithm~\cite{ppopp2013x86queues}, while the second implementation is reminiscent of locally linearizable generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
+The basket implementations appear in Algorithms~\ref{basket-1} and~\ref{basket-2}. Both implementations have a shared array where the items are put and taken. A \Put operation tries to put its item in a location, while a \Take operation either take an item from a location or marks it as "canceled."  The first implementation follows an approach similar to that of the LCRQ algorithm~\cite{ppopp2013x86queues}, while the second implementation is reminiscent of locally linearizable generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
 
 \subsubsection{K-Basket}
 
@@ -290,7 +290,7 @@ Algorithm~\ref{basket-2} is a wait-free linearizable implementation of an $n$-ba
 \end{theorem}
 
 \begin{proofT}
-Clearly, \Put is wait-free. It is not difficult to see that \Take is wait-free too.
+Clearly, \Put is wait-free. It is not difficult to see that \Take is wait-free because the number of iterations is limited by the size of the set \(takes_p\).
 
 For the linearizability proof, given an entry $A[i]$, we will say that a \Put operation of a process $p$, \emph{successfully puts} its item in $A[p]$ if its \CAS is successful. A \Take operation \emph{successfully cancels} $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being $\bot$; and it \emph{successfully takes} an item from $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being distinct to $\bot$ and $\top$.
 
@@ -346,7 +346,7 @@ Given any execution of the algorithm, the operations are linearized as follows. 
 {\bf end \Take}
 \end{tabbing}
 \end{minipage}}
-\caption{\label{basket-2}$n$-basket from \CAS. Let $p$ denote the invoking process.}
+\caption{\label{basket-2}$N$-basket from \CAS. $p$ denote the invoking process.}
 }
 \end{figure}
 
@@ -517,7 +517,7 @@ Besides the Segment structure defined, now the shared variables are pointers to 
   Therefore, Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} are a linearizable lock-free implementation of a concurrent queue.
 \end{proofT}\footnotetext{We proved that there are linearizable and wait-free \LL/\IC objects in Theorems~\ref{theorem:cas-ll-ic}, and~\ref{theorem:rw-ll-ic}, as well as linearizable and wait-free basket implementations in Theorems~\ref{theorem:k-basket} and~\ref{theorem:N-basket}.}
 
-Another issue in practical settings is memory management. This issue can be delegated to the garbage collector in languages like Java. However, a safe and efficient concurrent memory reclamation protocol should be implemented in programming languages without automatic memory garbage collection. We implemented all the algorithms and the infrastructure for experimental evaluation using C++20. Popular protocols for memory reclamation are Hazard Pointers~\cite{DBLP_conf_podc_Michael02} and Epoch-based reclamation~\cite{DBLP_phd_ethos_Fraser04,mckenney2001read}.
+Another issue in practical settings is memory management. This issue can be delegated to the garbage collector in languages like Java. However, a safe and efficient concurrent memory reclamation protocol should be implemented in programming languages without automatic memory garbage collection. We implemented all the algorithms and the infrastructure for experimental evaluation using C++20. We use popular protocols for memory reclamation are Hazard Pointers~\cite{DBLP_conf_podc_Michael02} and Epoch-based reclamation~\cite{DBLP_phd_ethos_Fraser04,mckenney2001read} according to each algorithm specification of the queues implemented in our experimental evaluation.
 
 
 
@@ -578,4 +578,4 @@ To evaluate the performance of our distinct variants for the \LL/\IC objects and
 
 After selecting the best combination of \LL/\IC objects and their respective basket, this implementation will compete against the following queues:  Wait-Free queue by Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16},  Lock-Free LCRQ queue by Morrison and Afek~\cite{ppopp2013x86queues}, Lock-Free queue by Michael and Scott~\cite{DBLP_conf_podc_MichaelS96}, Lock-Free queue by Ramalhete~\cite{Ramalhete_Correia_MPMC_2016}, inspired in the obstruction-free queue shown in the work of Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}, Lock-Free queue by Ostrovsky and Morrison~\cite{scalingconcurrent2020}.
 
-To evaluate all the queues, we adopt a benchmark similar to that used by Ostrovsky and Morrison~\cite{scalingconcurrent2020}. This benchmark consists of three workloads: producer-only, consumer-only, and a mixed producer/consumer workload. During the experimental evaluation, each process can have the role either of a producer, which calls the \Enq function, or a consumer, which calls the \Deq function. Similar to the experiments performed in the section~\ref{subsubsec:queue-experiments-inner-experiments}, we measure the time it takes until all processes complete \(1\cdot 10^6\) operations. We use the statistically rigorous methodology as described in the section~\ref{subsec:stat-rigor-meth} and by the work of Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07} for the evaluation.
+To evaluate all the queues, we adopt a benchmark similar to that used by Ostrovsky and Morrison~\cite{scalingconcurrent2020}. This benchmark consists of three workloads: producer-only, consumer-only, and a mixed producer/consumer workload. During the experimental evaluation, each process can have the role either of a producer, which calls the \Enq function, or a consumer, which calls the \Deq function. Similar to the experiments performed in the section~\ref{subsubsec:queue-experiments-inner-experiments}, we measure the time it takes until all processes complete \(1\cdot 10^6\) operations. We use the statistically rigorous methodology as described in the section~\ref{subsec:stat-rigor-meth} that follows the methodology of Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07} for the experimental evaluation.
