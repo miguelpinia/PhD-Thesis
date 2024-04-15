@@ -17,7 +17,7 @@ First, we present a summary of the experimental evaluation results from the Case
 
 The following subsections explain the results of the experiments in detail.
 
-\subsubsection{Zero Cost Experiment}
+\subsection{Zero Cost Experiment}
 
 
 The outcome of the \Puts{}-\Takes{} experiment appears in Figures~\ref{fig:putstakes:256}, \ref{fig:putstakes:1000000} and \ref{fig:putstakes:10000000}.  Overall, the absence of fences in \NCWSM derived an improvement over idempotent algorithms that range between 9\% to 65\%. Table~\ref{puts-takes-percentage} contains the percentage improvement of \NCWSM over all algorithms. In all cases, \BNCWSM and \BNCWSM Lists performed worst. This is arguably attributed to the extra array of boolean flags used for bounding multiplicity.~\footnote{Implementations where the two arrays are consolidated in a single array of objects with two entries, a task, and a flag, performed even worse. Hence, these implementations were discarded.}  It was also observed that the data structure's initial size impacts performance. When the initial size exceeds the number of operations in the experiment (Figure~\ref{fig:putstakes:10000000}), no resizes are needed, \BNCWSM's performance improved considerably. Still, it was affected by the use of two distinct arrays. The outcome of the \Puts{}-\Steal{}{} experiment is similar, and shown in Figures~\ref{fig:putssteals:256}, \ref{fig:putssteals:1000000} and \ref{fig:putssteals:10000000}, and Table~\ref{puts-steals-percentage}. %\ref{sec:results-zero-cost} contains the detailed measurements of each algorithm in each experiment.
@@ -54,7 +54,7 @@ The outcome of the \Puts{}-\Takes{} experiment appears in Figures~\ref{fig:putst
 \end{figure}
 
 
-\subsubsection{Parallel Spanning Tree}
+\subsection{Parallel Spanning Tree}
 
 
 Except for the case of Random graphs, where practically all algorithms performed equally, in general, \NCWSM{} outperformed all algorithms.  \NCWSM Lists and idempotent FIFO overall performed second and third best. The improvement of \NCWSM{} over \NCWSM Lists and idempotent FIFO was small, between 0.5\% and 4\%, depending on the graph. Thus, the absence of fences in \NCWSM{} resulted in a minor improvement over idempotent FIFO. It merits mentioning that \BNCWSM and its lists-based version generally showed a competitive performance, in some cases close to the first three algorithms. Usually, Cilk THE and Chase-Lev performed worst, which is expected as they use costly synchronization mechanisms, although this is not the only factor (more on this below).  \NCWSM outperformed Cilk THE by a margin between $1\%$ and $21\%$, and Chase-Lev by a margin between $0.14\%$ and $32\%$.  The lowest margins occurred in the case of Random graphs, where, as mentioned, all algorithms performed almost equally. Figure~\ref{fig:graphapplication} depicts the result of the experiment in some representative cases. In a few cases (e.g., Directed 2D Torus), Chase-Lev, Cilk THE, and idempotent LIFO performed best with few processes. This seems to be related to the topology of the graph and the insert/extract task policy of the algorithms (the owner follows LIFO).
@@ -166,7 +166,7 @@ In all algorithms, not all tasks are executed. Processes are constantly checking
   \caption{\label{fig:satapplication} Mean times of the Parallel SAT benchmark for range assignment sizes 50, 250, and 1,000.}
 \end{figure}
 
-\subsubsection{Parallel SAT}
+\subsection{Parallel SAT}
 
 The outcomes for range assignment sizes 50, 250, and 1,000 are depicted in Figures~\ref{fig:sat:50:1},~\ref{fig:sat:250:1}, and~\ref{fig:sat:1000:1}, respectively. All algorithms speeded up sequential computation by 70\%, and generally, all performed similarly. However, repeated work (the difference between the number of \Puts and the number of successful \Takes/\Steals) slightly impacted the performance of \NCWSM. Contrary to previous benchmarks, whose tasks are simple, tasks in this benchmark require more computation; hence, repeated work is costly. In the experiment with range size 50, \NCWSM's repeated work was more significant than all other algorithms, and this tendency becomes more pronounced as the number of processes increases. This happens because (1) a small range size increases the possibilities of concurrent \Puts/\Takes and (2) interleavings of \Puts/\Takes of \NCWSM, where multiplicity arises, are arguably not too complex. However, repeated work was always low, less than $1\%$. Still, the small amount of repeated work had some minor impact on \NCWSM's performance.  (see Figure~\ref{fig:sat:50:2}).  For larger range sizes, 250 and 1,000, the amount of repeated work of \NCWSM decreased to almost zero (as concurrent \Puts/\Takes are less likely to happen), and hence its impact became negligible (see Figures~\ref{fig:sat:250:2} and~\ref{fig:sat:1000:2}). In contrast, idempotent algorithms had low amounts of repeated work in all cases (always close to zero), which happened because the interleaving where the relaxation appears is less likely to occur. All algorithms performed similarly when the range sizes are more significant, 250 and 1,000. It is worth stressing those insert/extract policies did not affect performance, as all tasks were generated at the beginning of the experiment; hence, every \Take/\Steal had to read from the main memory in each of these operations.
 
@@ -184,3 +184,11 @@ First, we present a summary of the experimental evaluation results from the Case
     \end{itemize}
     \item \textit{Outer experiments (Queue comparison)}:
 \end{itemize}
+
+\subsection{Inner Experiments - LL/IC Performance}
+
+The outcome of the \LL/\IC performance experiments appears in the figure
+
+\subsection{Inner Experiments - Modular Queue Variants}
+\subsection{Outer Experiments}
+ 
