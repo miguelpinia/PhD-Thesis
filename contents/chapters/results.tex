@@ -187,37 +187,40 @@ First, we present a summary of the experimental evaluation results from the Case
 
 \subsection{Inner Experiments - LL/IC Performance}
 
-The outcome of the \LL/\IC performance experiments for 64 processes appears in Figure~\ref{fig:llic-times}, with their respective percentage improvement shown in Table~\ref{table:llic-percentages}. In these experiments, the only real competitor for the \FAI instruction in terms of performance, was the \LL/\IC{} object \CAS-based implementation, where, in some moments, the range of improvement was over 0.46\% to 3.49\% taking as reference the execution using the same number of processes. Nonetheless, when the number of threads was low, it showed  no improvement. The Read/Write versions show a negative improvement, ranging from -3.54\% to -47.57\%. This result is expected due to additional instructions needed to execute the \LL/\IC operations. For further information about the results, refer to Appendix~\ref{sec:appendix-llic-performance} for a more detailed insight.
+The outcome of the \LL/\IC performance experiments for 64 processes appears in Figure~\ref{fig:llic-times}, with their respective percentage improvement shown in Table~\ref{table:llic-percentages}. In these experiments, the only real competitor for the \FAI instruction in terms of performance, was the \LL/\IC{} object \CAS-based implementation, where, in some moments, the range of improvement was over 0.46\% to 3.49\% taking as reference the execution using the same number of processes. Nonetheless, when the number of threads was low, it showed  no improvement. The Read/Write versions show a negative improvement, ranging from -3.54\% to -47.57\%. This result is expected due to additional instructions needed to execute the \LL/\IC operations. For further information about the results, refer to Appendix~\ref{sec:appendix-llic-performance} for a more detailed insight. Considering these results, we decided to test the modular queue's performance using the \CAS-based version and the \R/\W-based version with 16 and 64 bytes of padding for each entry. The latter's results are shown in the Section~\ref{subsec:inner-experiments}.
 
-% \input{contents/chapters/evaluation/V_llic_times.tex}
-\input{contents/chapters/evaluation/V_llic_percentages.tex}
-
-\begin{figure}[ht]
+\begin{figure}[ht!]
   \centering
   \includegraphics[width=0.9\textwidth]{contents/figures/V_llic_64_insert_extract.pdf}
   \caption{\label{fig:llic-times} Mean times for LL/IC experiment. 1,000,000 interspersed calls to \Take and \Put for 64 threads}
 \end{figure}
 
+\input{contents/chapters/evaluation/V_llic_percentages.tex}
+% \input{contents/chapters/evaluation/V_llic_times.tex}
 
-\subsection{Inner Experiments - Modular Queue Variants}
+\subsection{\label{subsec:inner-experiments}Inner Experiments - Modular Queue Variants}
 
 
-The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears in Figure~\ref{fig:64-inner-enq-deq}, with their respective dataset in Table~\ref{table:64-inner-enq-deq-times} and their respective percentage improvement shown in Table~\ref{table:64-inner-enq-deq-percentages}.
+The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears in Figure~\ref
+{fig:64-inner-enq-deq}, and their respective percentage improvement shown in Table~\ref{table:64-inner-enq-deq-percentages}. In these experiments, we observe that our best version of the modular queue is the combination conformed by \LL/\IC object \CAS-based and the \(K\)-basket. In particular, all the queue versions tested based on the \(N\)-basket performed worse than those based on the \(K\)-basket. For example, taking the best version of the \(N\)-basket, which is the one that uses \LL/\IC object \CAS-based, they have a lousy performance concerning the version conformed by \LL/\IC object \CAS-based and the \(K\)-basket ranging from -1.74\% using one thread to -1229.5\% using 64 threads. The queue based on the \(N\)-basket does not scale well. We observe a similar behavior in the queue based on \(N\)-basket with \R/\W \LL/\IC objects (with 16 and 64 bytes of padding). They also range from -0.89\% to -1356.19\% of bad performance respect to the performance of the queue that use \(K\)-basket and \CAS-based \LL/\IC objects.
 
-\input{contents/chapters/evaluation/V_64_inner_enq_deq_times.tex}
-\input{contents/chapters/evaluation/V_64_inner_enq_deq_percentages.tex}
+For the case of the queue with \(K\)-basket \R/\W-based \LL/\IC objects, they also performed worse than the they had performed not so bad as the previous. They performance range from -0.79\% to -281.49\%. Considering these results, we decided to test the modular queue that use \(K\)-basket and \CAS-based \LL/\IC objects against the state-of-the-art queues listed in the Section~\ref{subsubsec:queue-experiments-outer-experiments}. The latter's results will be shown in Section~\ref{subsec:outer-experiments}.
 
-\begin{figure}[ht]
+\begin{figure}[ht!]
   \centering
   \includegraphics[width=0.9\textwidth]{contents/figures/V_64_inner_enq_deq_all.pdf}
   \caption{\label{fig:64-inner-enq-deq} Mean times for Enqueue - Dequeue in inner experiments. 1,000,000 interspersed calls to \Enq and \Deq  for 64 threads}
 \end{figure}
 
-\subsection{Outer Experiments}
+%\input{contents/chapters/evaluation/V_64_inner_enq_deq_times.tex}
+\input{contents/chapters/evaluation/V_64_inner_enq_deq_percentages.tex}
 
-The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears in Figure~\ref{fig:64-outer--enq-deq}, with their respective dataset in Table~\ref{table:64-outer-enq-deq-times} and their respective percentage improvement shown in Table~\ref{table:64-outer-enq-deq-percentages}.
 
-\input{contents/chapters/evaluation/V_64_outer_enq_deq_times.tex}
+\subsection{\label{subsec:outer-experiments}Outer Experiments}
+
+The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears in Figure~\ref{fig:64-outer--enq-deq}, and their respective percentage improvement shown in Table~\ref{table:64-outer-enq-deq-percentages}.
+
+%\input{contents/chapters/evaluation/V_64_outer_enq_deq_times.tex}
 \input{contents/chapters/evaluation/V_64_outer_enq_deq_percentages.tex}
 
 \begin{figure}[ht]
@@ -225,3 +228,8 @@ The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears i
   \includegraphics[width=0.9\textwidth]{contents/figures/V_64_outer_enq_deq_all.pdf}
   \caption{\label{fig:64-outer--enq-deq} Mean times for Enqueue - Dequeue in outer experiments. 1,000,000 interspersed calls to \Enq and \Deq  for 64 threads}
 \end{figure}
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../../main"
+%%% End:
