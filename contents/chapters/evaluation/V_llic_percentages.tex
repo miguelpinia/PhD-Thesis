@@ -1,0 +1,19 @@
+\begin{table}[!ht]
+\centering\resizebox{\textwidth}{!}{\begin{tabular}{lrrrrrr}
+\toprule
+ & Fetch and Increment & CAS LL/IC & RW LL/IC 64 padding & RW LL/IC 16 padding & RW LL/IC 32 padding & RW LL/IC no padding \\
+\midrule
+\textbf{1} & 0.00 & -5.81 & -9.76 & -10.70 & -12.23 & -10.91 \\
+\textbf{8} & 0.00 & -22.76 & -33.34 & -27.24 & -32.77 & -25.41 \\
+\textbf{16} & 0.00 & -12.59 & -25.75 & -25.80 & -28.05 & -27.46 \\
+\textbf{24} & 0.00 & -1.96 & -6.00 & -2.10 & -6.47 & -6.61 \\
+\textbf{32} & 0.00 & 1.73 & -11.61 & -6.71 & -10.84 & -14.91 \\
+\textbf{40} & 0.00 & 2.86 & -11.66 & -28.41 & -15.19 & -9.38 \\
+\textbf{48} & 0.00 & -1.48 & -8.85 & -19.53 & -7.78 & -28.75 \\
+\textbf{56} & 0.00 & -0.05 & -5.30 & -3.68 & -7.88 & -10.23 \\
+\textbf{64} & 0.00 & 1.33 & -12.25 & -3.54 & -7.44 & -15.80 \\
+\bottomrule
+\end{tabular}}
+\caption{Percentage improvement of LL/IC objects respect to \FAI from 1 to 64 threads of execution.}
+\label{table:llic-percentages}
+\end{table}

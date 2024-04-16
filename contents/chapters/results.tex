@@ -187,8 +187,41 @@ First, we present a summary of the experimental evaluation results from the Case
 
 \subsection{Inner Experiments - LL/IC Performance}
 
-The outcome of the \LL/\IC performance experiments appears in the figure
+The outcome of the \LL/\IC performance experiments for 64 processes appears in Figure~\ref{fig:llic-times}, with their respective percentage improvement shown in Table~\ref{table:llic-percentages}. In these experiments, the only real competitor for the \FAI instruction in terms of performance, was the \LL/\IC{} object \CAS-based implementation, where, in some moments, the range of improvement was over 0.46\% to 3.49\% taking as reference the execution using the same number of processes. Nonetheless, when the number of threads was low, it showed  no improvement. The Read/Write versions show a negative improvement, ranging from -3.54\% to -47.57\%. This result is expected due to additional instructions needed to execute the \LL/\IC operations. For further information about the results, refer to Appendix~\ref{sec:appendix-llic-performance} for a more detailed insight.
+
+% \input{contents/chapters/evaluation/V_llic_times.tex}
+\input{contents/chapters/evaluation/V_llic_percentages.tex}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{contents/figures/V_llic_64_insert_extract.pdf}
+  \caption{\label{fig:llic-times} Mean times for LL/IC experiment. 1,000,000 interspersed calls to \Take and \Put for 64 threads}
+\end{figure}
+
 
 \subsection{Inner Experiments - Modular Queue Variants}
+
+
+The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears in Figure~\ref{fig:64-inner-enq-deq}, with their respective dataset in Table~\ref{table:64-inner-enq-deq-times} and their respective percentage improvement shown in Table~\ref{table:64-inner-enq-deq-percentages}.
+
+\input{contents/chapters/evaluation/V_64_inner_enq_deq_times.tex}
+\input{contents/chapters/evaluation/V_64_inner_enq_deq_percentages.tex}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{contents/figures/V_64_inner_enq_deq_all.pdf}
+  \caption{\label{fig:64-inner-enq-deq} Mean times for Enqueue - Dequeue in inner experiments. 1,000,000 interspersed calls to \Enq and \Deq  for 64 threads}
+\end{figure}
+
 \subsection{Outer Experiments}
- 
+
+The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears in Figure~\ref{fig:64-outer--enq-deq}, with their respective dataset in Table~\ref{table:64-outer-enq-deq-times} and their respective percentage improvement shown in Table~\ref{table:64-outer-enq-deq-percentages}.
+
+\input{contents/chapters/evaluation/V_64_outer_enq_deq_times.tex}
+\input{contents/chapters/evaluation/V_64_outer_enq_deq_percentages.tex}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.9\textwidth]{contents/figures/V_64_outer_enq_deq_all.pdf}
+  \caption{\label{fig:64-outer--enq-deq} Mean times for Enqueue - Dequeue in outer experiments. 1,000,000 interspersed calls to \Enq and \Deq  for 64 threads}
+\end{figure}
