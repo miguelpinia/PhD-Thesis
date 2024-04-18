@@ -350,7 +350,7 @@ Given any execution of the algorithm, the operations are linearized as follows. 
 }
 \end{figure}
 
-\section{Coping with realistic assumptions}
+\section{\label{sec:coping-with-realistic-assumptions}Coping with realistic assumptions}
 
 The previous construction was suitable for the analysis of properties that we desired in our concurrent queue. However, a realistic implementation will not rely on infinite arrays~\footnote{We refer to the infinite basket array of the queue.}. As noted in a previous footnote, two common approaches for implementing arrays can be considered ``infinity''. The first approach involves using circular dynamic arrays, which can expand or shrink as needed. The second approach uses linked lists, where each node contains a finite-sized array that grows on demand during execution. To maintain consistency, each node is appended to the list using a \CAS operation.
 
@@ -536,13 +536,17 @@ algorithms against which we evaluate our chosen queue are:
     \item Lock-Free LCRQ queue by Morrison and Afek~\cite{ppopp2013x86queues}.
     \item Lock-Free queue by Michael and Scott~\cite{DBLP_conf_podc_MichaelS96}.
     \item Lock-Free queue by Ramalhete~\cite{Ramalhete_Correia_MPMC_2016}, which was strongly inspired by the obstruction\hyp{}free queue shown in the work of Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}
-    \item Lock-Free queue by Ostrovsky and Morrison~\cite{scalingconcurrent2020}\footnote{We implemented only the version using the simple \CAS}.
+    \item Lock-Free queue by Ostrovsky and Morrison~\cite{scalingconcurrent2020}\footnote{We implemented only the version that use simple \CAS}.
 \end{itemize}
 
 \subsection{\label{subsec:queue-experimental-setup}Experimental Setup}
 \subsubsection{Platforms and Implementations}
 
-The experiments were conducted on a machine with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. A secondary evaluation was conducted on a machine that has an Intel i9-13980HX processor with 64 GB of memory and 24 cores. The processor is composed of eight performance cores, each capable of executing two hardware threads, and 16 efficient cores, each capable of executing one hardware thread. This gives a total of 32 hardware threads for the evaluation. We have developed the algorithms and infrastructure to carry out experimental evaluation using the C++20 programming language. This allows us to benefit from the new concurrency and parallelism features integrated with this version, including updates to atomics and synchronization facilities. In multiple algorithms~\cite{ DBLP_conf_podc_MichaelS96,ppopp2013x86queues, Ramalhete_Correia_MPMC_2016} (including our queue), we use hazard pointers~\cite{DBLP_conf_podc_Michael02} to reclaim memory during the evaluation of these experiments, and for the others~\cite{scalingconcurrent2020, DBLP_conf_ppopp_YangM16}, we used their memory reclamation algorithms, like epoch-based memory reclamation~\cite{DBLP_phd_ethos_Fraser04,mckenney2001read}.
+The experiments were conducted on a machine with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. A secondary evaluation was conducted on a machine that has an Intel i9-13980HX processor with 64 GB of memory and 24 cores. The processor is composed of eight performance cores, each capable of executing two hardware threads, and 16 efficient cores, each capable of executing one hardware thread. This gives a total of 32 hardware threads for the evaluation. We have developed the algorithms and infrastructure to carry out experimental evaluation using the C++20 programming language. This allows us to benefit from the new concurrency and parallelism features integrated with this version, including updates to atomics and synchronization facilities.
+
+For the \textit{inner experiments}, we do not add any sophisticated memory reclamation protocol for implementing the queue variants; we only add basic memory reclamation after each evaluation. In these experiments, the implementation of the queue variants follows only the specification described in Section~\ref{sec-basket-queue}.
+
+For the \textit{outer experiments}, in multiple algorithms~\cite{ DBLP_conf_podc_MichaelS96,ppopp2013x86queues, Ramalhete_Correia_MPMC_2016} (including our queue) we use Hazard Pointers~\cite{DBLP_conf_podc_Michael02} to reclaim memory during the evaluation of these experiments, and for the others~\cite{scalingconcurrent2020, DBLP_conf_ppopp_YangM16}, we used their memory reclamation algorithms, like epoch-based memory reclamation~\cite{DBLP_phd_ethos_Fraser04,mckenney2001read}. We implemented the modular queue for these experiments using the specifications for dynamic arrays and the list of the arrays described in Section~\ref{sec:coping-with-realistic-assumptions} and compared these implementations to the prior queues.
 
 \subsubsection{\label{subsubsec:queues-experiment-methodology}Methodology}
 
@@ -561,7 +565,7 @@ To evaluate the performance of our distinct variants for the \LL/\IC objects and
         \item \R/\W-based implementation with no padding.
     \end{itemize}
 
-    \item For the case of the combinations of \LL/\IC objects and baskets to build the modular queue, we did a similar evaluation to the previous, but testing interspersed calls to enqueue and dequeue in a shared queue by all threads. We measure the time for executing \(5\cdot 10^6\) interspersed calls to enqueue and dequeue, and similar to the previous test, we perform some artificial work to avoid artificial long-run scenarios, using the same technique as described in the last bullet. The combinations of \LL/\IC objects with baskets are the following:
+  \item For the case of the combinations of \LL/\IC objects and baskets to build the modular queue, we did a similar evaluation to the previous, but testing interspersed calls to enqueue and dequeue in a shared queue by all threads. We measure the time for executing \(5\cdot 10^6\) interspersed calls to enqueue and dequeue, and similar to the previous test, we perform some artificial work to avoid artificial long-run scenarios, using the same technique as described previously. From the following combinations we will choose one from the experimental evalution to compete against the state-of-the-art queue listed in the Section~\ref{subsubsec:queue-experiments-outer-experiments}. The combinations of \LL/\IC objects with baskets are the following:
     \begin{itemize}
         \item \LL/\IC{} \R/\W (with padding) with \(N\)-basket
         \item \LL/\IC{} \CAS with \(N\)-basket
@@ -576,7 +580,7 @@ To evaluate the performance of our distinct variants for the \LL/\IC objects and
 
 \subsubsection{\label{subsubsec:queue-experiments-outer-experiments}Outer Experiments}
 
-After selecting the best combination of \LL/\IC objects and their respective basket, this implementation will compete against the following queues:  Wait-Free queue by Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16},  Lock-Free LCRQ queue by Morrison and Afek~\cite{ppopp2013x86queues}, Lock-Free queue by Michael and Scott~\cite{DBLP_conf_podc_MichaelS96}, Lock-Free queue by Ramalhete~\cite{Ramalhete_Correia_MPMC_2016}, inspired in the obstruction-free queue shown in the work of Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}, Lock-Free queue by Ostrovsky and Morrison~\cite{scalingconcurrent2020}.
+After selecting the best combination of \LL/\IC object and its respective basket of the modular queue, three versions (original implementation, dynamic array, and the list of arrays) will be evaluated against the following queues: Wait-Free queue by Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16},  Lock-Free LCRQ queue by Morrison and Afek~\cite{ppopp2013x86queues}, Lock-Free queue by Michael and Scott~\cite{DBLP_conf_podc_MichaelS96}, Lock-Free queue by Ramalhete~\cite{Ramalhete_Correia_MPMC_2016}, inspired in the obstruction-free queue shown in the work of Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}, Lock-Free queue by Ostrovsky and Morrison~\cite{scalingconcurrent2020}.
 
 To evaluate all the queues, we adopt a benchmark similar to that used by Ostrovsky and Morrison~\cite{scalingconcurrent2020}. This benchmark consists of three workloads: producer-only, consumer-only, and a mixed producer/consumer workload. During the experimental evaluation, each process can have the role either of a producer, which calls the \Enq function, or a consumer, which calls the \Deq function. Similar to the experiments performed in the section~\ref{subsubsec:queue-experiments-inner-experiments}, we measure the time it takes until all threads complete \(1\cdot 10^6\) operations. We use the statistically rigorous methodology as described in the section~\ref{subsec:stat-rigor-meth} that follows the methodology of Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07} for the experimental evaluation.
 
