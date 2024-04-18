@@ -172,7 +172,7 @@ The outcomes for range assignment sizes 50, 250, and 1,000 are depicted in Figur
 
 The outcomes of the rest of the experiments, for range assignment sizes 100, 500, and 2,500, are similar.  %~\ref{sec:sat-appendix} contains all results of the benchmark.
 
-\section{Modular Basket Queues}
+\section{\label{sec:results-modular-basket-queue}Modular Basket Queues}
 
 First, we present a summary of the experimental evaluation results from the Case Of Study presented in Chapter~\ref{chapter:5_modular-basket-queues}.
 
@@ -218,21 +218,22 @@ The queue with \(K\)-basket and \R/\W-based \LL/\IC objects also performed worse
 
 \subsection{\label{subsec:outer-experiments}Outer Experiments}
 
-The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears in Figure~\ref{fig:64-outer--enq-deq}, and their respective percentage improvement is shown in Table~\ref{table:64-outer-enq-deq-percentages}. In these experiments, we observe that Yang and Mellor-Crummey's queue performed best in almost every execution, followed closely by Ramalhete's \FAI queue (\FAI-queue) and the LCRQ queue.
+The outcome of the Enqueue - Dequeue Outer Experiment for 64 processes appears in Figure~\ref{fig:64-outer--enq-deq}, and their respective percentage improvement is shown in Table~\ref{table:64-outer-enq-deq-percentages}. In these experiments, we observe that Yang-Mellor Crummey's queue performed best in almost every execution, followed closely by Ramalhete's \FAI queue (\FAI-queue) and the LCRQ queue.
 
 
-Their graphs look very similar; however, for executions using few cores occasionally, LCRQ and the FAA queue have some improvements over the performance of Yang and Mellor-Crummey's queue. The \FAI-queue in some executions has an improvement ranging from 0.87\% to 6.92\%, but after 16 threads, its improvements begin to descend, ranging from -5.59\% to -50.75\%. LCRQ's negative improvement ranged from -6.96\% to -193.12\%. In some moments, its improvement grows up to 5.61\%.
+Their graphs look very similar; however, for executions using few cores occasionally, LCRQ and the FAA queue have some improvements over the performance of Yang-Mellor Crummey's queue. The \FAI-queue in some executions has an improvement ranging from 0.87\% to 6.92\%, but after 16 threads, its improvements begin to descend, ranging from -5.59\% to -50.75\%. LCRQ's negative improvement ranged from -6.96\% to -193.12\%. In some moments, its improvement grows up to 5.61\%.
 
 
-The queues that followed in terms of performance were the Castañeda-Piña list-of-arrays and its classic versions. In terms of the global view, they have a similar performance, but the list-of-arrays version performs better than the classic version. We can observe that the negative improvement for the classic version ranges from -25.25\% to -1063.06\% in the case of maximum concurrency, while the list-of-array ranges from -26.03\% to -890.09\% in the case of maximum concurrency, both queues with respect to Yang and Mellor-Crummey's queue. They perform worse than Yang and Mellor-Crummey's queue but better than the following reported queues, as is shown in Figure~\ref{fig:64-outer--enq-deq}.
+The queues that followed in terms of performance were the Castañeda-Piña list of arrays and its classic versions. In terms of the global view, they have a similar performance, but the list-of-arrays version performs better than the classic version. We can observe that the negative improvement for the classic version ranges from -25.25\% to -1063.06\% in the case of maximum concurrency, while the list-of-array ranges from -26.03\% to -890.09\% in the case of maximum concurrency, both queues with respect to Yang-Mellor Crummey's queue. They perform worse than Yang-Mellor Crummey's queue but better than the following reported queues, as is shown in Figure~\ref{fig:64-outer--enq-deq}.
 
 %\input{contents/chapters/evaluation/V_64_outer_enq_deq_times.tex}
 \input{contents/chapters/evaluation/V_64_outer_enq_deq_percentages.tex}
 
-Michael-Scott's and Ostrovsky-Morrison's queues performed worse than previous queues. For Michael-Scott's queue, performance ranges from -55.65\% to -2,538.04\% with respect to the Yang and Mellor-Crummey's queue, but these increments are consistent with number of threads increasing. For Ostrovsky, we observe that for for a few threads its performance becomes worse and when the number of threads increase, its performance begin to decrease, but still being enough bad, for example, the performance for one thread is close to -55\% with respect to Yang and Mellor Crummey's queue using one thread too, but in the case of 4 to 32  threads, we observe a degration ranging grom -1738\% to -3106\%. After this number of threads, the improvement begins to decay until to a value close to -2807\% with respect the performance of Yang and Mellor-Crummey's for the same number of threads.
+It has been observed that the Michael-Scott and Ostrovsky-Morrison queues have underperformed compared to the previous queues. In the case of Michael-Scott's queue, we noticed a decline in performance ranging from -55.65\% to -2,538.04\% in comparison to Yang-Mellor Crummey's queue. However, the decline in performance is consistent with the increase in the number of threads.
 
-The queue with the worst performance overall queue was the Castañeda-Piña using dynamic arrays. It show a non-scalable performance, only increasing the time whenever the number of threads increasing. It ranges from -29.12\% to -5931.08\%.
+Similarly, for Ostrovsky-Morrison's queue, the performance begins to deteriorate as the number of threads increases. For instance, the performance for one thread was found to be close to -55\% as compared to Yang-Mellor Crummey's queue using one thread as well. However, when the number of threads increased from 4 to 32, we observed a further decline in performance ranging from -1738\% to -3106\%. After this number of threads, the performance improvement began to reduce until it reached a value close to -2807\% in comparison to the performance of Yang-Mellor Crummey's queue for the same number of threads.
 
+The Castañeda-Piña queue using dynamic arrays had the worst performance overall queues, exhibiting a non-scalable behavior that only increases the time as the number of threads increases, ranging from -29.12\% to -5931.08\%.
 
 \begin{figure}[ht]
   \centering
