@@ -1,6 +1,10 @@
 \chapter{\label{chapter:3_preliminaries}Preliminaries and Methodology}
 
-In this chapter, we will discuss all the necessary tools needed for this thesis. As we are considering asynchronous shared memory systems, the first section will cover the mathematical foundation for the computational model. This will include a formal description of concepts such as \emph{process},  \emph{algorithm}, and \emph{Linearizability~\cite{DBLP_journals_toplas_HerlihyW90}} in concurrent systems. In the following section, we delve into the hardware foundations of our concurrent systems. Specifically, we will explore concepts such as \emph{cache memory}, \emph{consistency memory model}, \emph{cache coherence}, and \emph{memory fences}, which are essential for implementing concurrent algorithms correctly. We will also discuss the concept of a memory model at the programming language level and examine the Java and C++ memory models that define the allowable behavior of multithreaded programs. Finally, we will conclude this chapter by discussing the statistical experiment methodology we will use to analyze program implementations.
+In this chapter, we will cover all the necessary tools required for the thesis. As we are considering asynchronous shared memory systems, the first section will describe the mathematical foundation for the computational model. This will describe formally concepts such as \emph{process}, \emph{algorithm}, and \emph{Linearizability}~\cite{DBLP_journals_toplas_HerlihyW90} in concurrent systems.
+
+In the following section, we will explore the hardware foundations of concurrent systems. Specifically, we will discuss concepts such as \emph{cache memory}, \emph{consistency memory model}, \emph{cache coherence}, and \emph{memory fences}, which are crucial for correctly implementing concurrent algorithms. We will also discuss the concept of a memory model at the programming language level and examine the Java and C++ memory models that define the allowable behavior of multithreaded programs.
+
+Finally, we will conclude this chapter by discussing the statistical experimental methodologyused to analyze program implementations and compare performance between them.
 
 \section{\label{sec:chapter-3:computation-model}Computation Model}
 
