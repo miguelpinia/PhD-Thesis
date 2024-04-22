@@ -55,6 +55,19 @@ A \emph{set-sequential specification} of a concurrent object differs from a sequ
 
 Given a set-sequential execution S of a set-sequential object, the partial order \(<_S\) on the operations of \(S\) is defined as above: \(op <_S op'\) if and only if \(res(op)\) precedes \(inv(op')\) in \(S\), namely, the concurrency class of \(op\) appears before of the concurrency class of \(op'\).
 
+\begin{figure}[!ht]
+  \centering
+  \subfloat[\label{fig-example-linear}Linearizability]{
+    {\includegraphics[width=0.47\textwidth]{contents/figures/III_1_linearizability}}
+  }\hfill
+  \subfloat[\label{fig-example-set-linear}Set-Linearizability]{
+    {\includegraphics[width=0.47\textwidth]{contents/figures/III_1_set_linearizability}}
+  }
+  \caption{\label{fig-example-linear-and-set-linear}Graphical
+    description of linearizability and set-linearizability.
+}
+\end{figure}
+
 
 \begin{definition}[Set-linearizability~\cite{DBLP_journals_jacm_CastanedaRR18, DBLP_conf_podc_Neiger94}]
     Let be \(\mathcal{A}\) an implementation of a concurrent object \(T\). A finite execution \(E\) of \(\mathcal{A}\) is \emph{set-linearizable with respect to} \(T\), or just \emph{set-linearizable} if \(T\) is clear from the context, if there is a set-sequential execution \(S\) of \(T\) and \(E\) can be extended to an execution \(E'\) by appending zero or more responses such that:
@@ -65,7 +78,9 @@ Given a set-sequential execution S of a set-sequential object, the partial order
     \end{enumerate}
 
     We say that \(\mathcal{A}\) is \emph{set-linearizable with respect to} \(T\), or just \emph{set-linearizable} if \(T\) is clear from the context if each of its executions is set-linearizable.
-\end{definition}
+  \end{definition}
+
+A comparison between Linearizability and Set-Linearizability can be found in Figures~\ref{fig-example-linear} and~\ref{fig-example-set-linear} respectively.
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
@@ -100,6 +115,17 @@ It is important to consider cache coherence protocols when dealing with caching 
 \end{enumerate}
 
 To ensure that the \texttt{SWMR} and \emph{data value} invariants are always maintained, we use a distributed system consisting of a collection of \emph{coherence controllers}. Such controllers are finite state machines associated with each storage structure (cache and memory). These coherence controllers exchange messages with each other to ensure that invariants are upheld for each structure. The coherence protocol specifies the interaction between these finite-state machines and moving from one state to another based on the conditions of the data and the cache memory.
+
+
+The role of coherence controllers involves several important responsibilities. They are responsible for providing service requests from two sources. On the ``Core side'', the cache controller interfaces with the processor core, accepting loads and stores from the core and returning load values to the core. Additionally, the cache controller initiates coherence transactions by issuing a coherence request in the case of a cache miss. This coherence request is sent to one or more coherence controllers across the interconnection network. On the cache controller's ``network side'', the cache controller interfaces with the rest of the system through the interconnection network. The controller receives requests and coherence responses that it must process. A coherence controller is illustrated in Figure~\ref{fig:cache_controller}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.9]{contents/figures/III_3_Cache_Controller.pdf}
+  \caption{\label{fig:cache_controller}Cache Controller}
+\end{figure}
+
+
 Coherence states play a crucial role in ensuring that the system operates smoothly. The most commonly used coherence states are modified (M), shared (S), and invalid (I). However, AMD has gone a step further with its MOESI protocol~\cite{devices_amd64} and introduced two additional states, owned (O) and exclusive (E), to improve the system's efficiency. On the other hand, Intel has created its extension called MESIF~\cite{guideintel} to achieve the same goal.
 
 \section{About Fences And Its Use In Concurrent Algorithms}
