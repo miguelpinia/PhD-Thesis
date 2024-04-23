@@ -126,12 +126,14 @@ The role of coherence controllers involves several important responsibilities. T
 \end{figure}
 
 
-Coherence states play a crucial role in ensuring that the system operates smoothly. The most commonly used coherence states are modified (M), shared (S), and invalid (I). However, AMD has gone a step further with its MOESI protocol~\cite{devices_amd64} and introduced two additional states, owned (O) and exclusive (E), to improve the system's efficiency. On the other hand, Intel has created its extension called MESIF~\cite{guideintel} to achieve the same goal.
+Coherence states are essential for ensuring the smooth operation of a system. These states assist the coherence controller in deciding whether it needs to communicate with other controllers to retrieve new data, update existing data, or continue operating with the current data. The most commonly used coherence states are modified (M), shared (S), and invalid (I). However, AMD has gone a step further with its MOESI protocol~\cite{devices_amd64} and introduced two additional states, owned (O) and exclusive (E), to improve the system's efficiency. On the other hand, Intel has created its extension called MESIF~\cite{guideintel} to achieve the same goal. A detailed explanation of how coherence protocols work can be found in the book of Nagarajan et al~\cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \section{About Fences And Its Use In Concurrent Algorithms}
 
-Processors that support the TSO memory model do not guarantee ordering between a store and a subsequent load that comes after it in program order. However, they ensure that the load gets the value of the earlier store.  To order these instructions, the programmer must explicitly specify that ordering by inserting a \emph{fence} instruction between the store and the subsequent load.
+Processors that support the TSO memory model do not guarantee ordering between a store and a subsequent load that comes after it in program order. The reason is because processor cores write to store buffers to hold commited stores until the rest of the memory system could process the stores. However, they ensure that the load gets the value of the earlier store. To order these instructions, the programmer must explicitly specify that ordering by inserting a \emph{fence} instruction between the store and the subsequent load.
+
 %The \emph{fence} instruction ensures that all instructions before it in program order are executed before any instructions after it in program order.
+
 A \emph{memory fence} is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction. These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs (See Example~\ref{ex:reordering}).
 
 \begin{example}[Instruction re-ordering]
@@ -172,7 +174,31 @@ fence();
 z = 1;
 \end{lstlisting}
 
+  Thus, using a fence between possible problematic instructions guarantee that the code executes as expected. So, the instruction reorder as shown in Code~\ref{lst:reordering} can not happen.
+
 \end{example}
+
+\begin{example}[Problems with store buffers]
+  \label{ex:tso-problem}
+
+  Consider the following multi-thread program with two threads, each concurrently running on distinct cores. Each core has its own store buffer. The first thread executes the code shown in~\ref{lst:tso-1}, and the second one executes the code shown in~\ref{lst:tso-2}. Initially, \(x = 0\) and \(y = 0\).
+
+  \begin{lstlisting}[language=c++,label={lst:tso-1}, caption={Code execute by thread 1 on core 1} ,captionpos=b]
+    x = FOO;
+    r1 = y;
+\end{lstlisting}
+
+  \begin{lstlisting}[language=c++,label={lst:tso-2}, caption={Code execute by thread 2 on core 2} ,captionpos=b]
+    y = BAR;
+    r2 = x;
+  \end{lstlisting}
+
+
+
+\end{example}
+
+
+
 
 \section{After Hardware Foundations, What's Up About Programming Languages?}
 
