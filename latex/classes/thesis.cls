@@ -315,6 +315,19 @@
           linewidth=3pt,
           innerbottommargin=12pt]{dBox}
 
+% Example box
+\newmdenv[skipabove=12pt,
+          skipbelow=7pt,
+          linewidth=1.2,
+          backgroundcolor=black!1.2,
+          linecolor=black,
+          innerleftmargin=14pt,
+          innerrightmargin=14pt,
+          innertopmargin=12pt,
+          leftmargin=1cm,
+          rightmargin=1cm,
+          innerbottommargin=5pt]{exBox}
+
 % Proof box
 \newmdenv[skipabove=7pt,
           skipbelow=10pt,
@@ -357,7 +370,7 @@ innerbottommargin=5pt]{cBox}
 \newenvironment{exercise}{\begin{eBox}\begin{exerciseT}}{\hfill{\color{ocre}\tiny\ensuremath{\blacksquare}}\end{exerciseT}\end{eBox}}
 \newenvironment{definition}{\begin{dBox}\begin{definitionT}}{\end{definitionT}\end{dBox}}
 \newenvironment{desc}{\begin{dBox}\begin{descriptionT}}{\end{descriptionT}\end{dBox}}
-\newenvironment{example}{\begin{dBox}\begin{exampleT}}{\end{exampleT}\end{dBox}}
+\newenvironment{example}{\begin{exBox}\begin{exampleT}}{\end{exampleT}\end{exBox}}
 \newenvironment{corollary}{\begin{cBox}\begin{corollaryT}}{\end{corollaryT}\end{cBox}}
 \newenvironment{mydescription}[1]{\begin{dBox}\textbf{#1}}{\end{dBox}\smartsmallskip}
 
