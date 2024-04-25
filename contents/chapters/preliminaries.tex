@@ -178,9 +178,11 @@ fence();
 z = 1;
 \end{lstlisting}
 
-  Thus, using a fence between possible problematic instructions guarantee that the code executes as expected. So, the instruction reorder as shown in Code~\ref{lst:reordering} can not happen.
-
+Thus, the system cannot print 30 without set \(z\) to 1. Using a fence between potentially problematic instructions ensures that the code executes correctly; therefore, the instruction reorder, as shown in Code~\ref{lst:reordering}, cannot occur.
 \end{example}
+
+
+
 
 \begin{example}[Problems with store buffers]
   \label{ex:tso-problem}
