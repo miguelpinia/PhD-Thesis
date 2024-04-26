@@ -184,26 +184,37 @@ Thus, the system cannot print 30 without set \(z\) to 1 before. Using a fence be
 
 In the case of processors that support the TSO memory model, reordering instructions is not always necessary to produce unpredictable behavior in concurrent programs. This is because the cores of the processors contain store buffers. To better understand this, let's consider Example~\ref{ex:tso-problem}.
 
-
-\begin{example}[Problems with store buffers]
+\begin{example}[Dealing with store buffers]
   \label{ex:tso-problem}
 
-  Consider the following multi-thread program with two threads, each concurrently running on distinct cores. Each core has its own store buffer. The first thread executes the code shown in~\ref{lst:tso-1}, and the second one executes the code shown in~\ref{lst:tso-2}. Initially, \(x = 0\) and \(y = 0\).
+  Consider the following multi-thread program with two threads, each concurrently running on distinct cores. Each core has its own store buffer. The first thread executes the code shown in~\ref{lst:tso-1}, and the second one executes the code shown in~\ref{lst:tso-2}. Initially, \(x = 0\) and \(y = 0\). Is it possible that \((r1, r2) = (0, 0)\) at the end of the execution?
 
   \begin{lstlisting}[language=c++,label={lst:tso-1}, caption={Code execute by thread 1 on core 1} ,captionpos=b]
-    x = FOO;
-    r1 = y;
+    S1: x = FOO;
+    L1: r1 = y;
 \end{lstlisting}
 
-  \begin{lstlisting}[language=c++,label={lst:tso-2}, caption={Code execute by thread 2 on core 2} ,captionpos=b]
-    y = BAR;
-    r2 = x;
-  \end{lstlisting}
+\begin{lstlisting}[language=c++,label={lst:tso-2}, caption={Code execute by thread 2 on core 2} ,captionpos=b]
+    S2: y = BAR;
+    L2: r2 = x;
+\end{lstlisting}
 
+  If we analyze the possible execution of these codes, we can identify four potential outcomes for the values of \(r1\) and \(r2\). These outcomes are \((BAR, FOO)\), \((BAR, 0)\), \((0, FOO)\), and \((0, 0)\). However, it is important to note that the last outcome is not valid in a Sequential Consistent memory model. In contrast, in the TSO memory model, the final outcome is considered valid. One might wonder how it is possible to arrive at this value. Consider the following sequence of events:
 
+  \begin{itemize}
+    \item Core 1 executes store S1, but FOO is stored in the core's write buffer.
+    \item Similarly, Core 2 executes store S2 and holds BAR in its write buffer.
+    \item Next, both cores perform their respective load, L1 and L2 and obtain the old values of 0 from x and y.
+    \item Finally, both core's write buffers update memory with FOO and BAR.
+    \end{itemize}
+
+    At the end, the result of the execute the program is \((r1, r2) = (0, 0)\), which is an invalid result in Sequential Consistency. In order to prevent undesirable results, a programmer should use fences in a similar manner as in Example~\ref{ex:reordering}. Using Code~\ref{lst:tso-1} as a basis, we can add a fence between store S1 and load L1 to ensure that write buffers are emptied into memory and that later loads are not permitted to execute until an earlier fence has been committed. We can use a similar reasoning for Code~\ref{lst:tso-2}.
 
 \end{example}
 
+TSO allows the use of a FIFO write buffer, which helps improve performance by hiding the latency of stores that have been committed. Although a FIFO write buffer can be helpful, an even more optimized design would use a non-FIFO write buffer that allows coalescing of writes. This means that two stores that are not consecutive in program order can write to the same entry in the write buffer. However, using a non-FIFO coalescing write buffer violates TSO because TSO requires stores to appear in program order~\cite{DBLP_series_synthesis_2020Nagarajan}.
+
+TSO behaves similarly to Sequential Consistency, permitting only one type of reordering. Hence, the use of fences is fairly infrequent, and the implementation is not too critical. For consistency models that permit far more reordering, the use of fences is more frequent, and their implementation can have a significant impact on performance.
 
 
 
