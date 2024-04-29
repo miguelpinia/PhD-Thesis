@@ -178,7 +178,7 @@ fence();
 z = 1;
 \end{lstlisting}
 
-Thus, the system cannot print 30 without set \(z\) to 1 before. Using a fence between potentially problematic instructions ensures that the code executes correctly; therefore, the instruction reorder, as shown in Code~\ref{lst:reordering}, cannot occur.
+Thus, the system cannot print 30 without setting \(z\) to 1 before. Using a fence between potentially problematic instructions ensures that the code executes correctly; therefore, the instruction reorders, as shown in Code~\ref{lst:reordering}, cannot occur.
 \end{example}
 
 
@@ -199,7 +199,7 @@ In the case of processors that support the TSO memory model, reordering instruct
     L2: r2 = x;
 \end{lstlisting}
 
-  If we analyze the possible execution of these codes, we can identify four potential outcomes for the values of \(r1\) and \(r2\). These outcomes are \((BAR, FOO)\), \((BAR, 0)\), \((0, FOO)\), and \((0, 0)\). However, it is important to note that the last outcome is invalid in a Sequential Consistent memory model. In contrast, the final outcome is considered valid in the TSO memory model. One might wonder how it is possible to arrive at this value. Consider the following sequence of events:
+  If we analyze the possible execution of these codes, we can identify four potential outcomes for the values of \(r1\) and \(r2\). These outcomes are \((BAR, FOO)\), \((BAR, 0)\), \((0, FOO)\), and \((0, 0)\). However, it is important to note that the last outcome is invalid in a Sequential Consistent memory model. In contrast, the TSO memory model considers the final outcome valid. One might wonder how it is possible to arrive at this value. Consider the following sequence of events:
 
   \begin{itemize}
     \item Core 1 executes store S1, but FOO is stored in the core's write buffer.
@@ -219,14 +219,14 @@ TSO behaves similarly to Sequential Consistency, permitting only one type of reo
 \begin{itemize}
   \item \texttt{MFENCE}:\@ is a full memory fence that ensures that no later loads or stores are observable globally before any earlier loads or stores. It empties the store buffer before later loads can execute.
   \item \texttt{SFENCE}:\@ only prevents the reordering of writes (it is a store-store barrier), it works well with \textit{non-temporal stores}\footnote{Non-temporal stores means that the data being stored is not going to be read again soon (i.e., no ``temporal locality'').  \url{https://sites.utexas.edu/jdm4372/2018/01/01/notes-on-non-temporal-aka-streaming-stores/}} and other instructions listed as exceptions.
-  \item \texttt{LFENCE}:\@ is designed to prevent the reordering of reads with subsequent reads and writes, effectively combining load-load and load-store barriers. However, according to x86 specification, load-load and load-store barriers are always present. As a result, LFENCE by itself is not enough for memory ordering; however, there is a larger discussion about its use far beyond the scope of this thesis.
+  \item \texttt{LFENCE}:\@ is designed to prevent the reordering of reads with subsequent reads and writes, effectively combining load-load and load-store barriers. However, according to x86 specification, load-load, and load-store barriers are always present. As a result, LFENCE by itself is not enough for memory ordering; however, there is a larger discussion about its use far beyond the scope of this thesis.
 \end{itemize}
 
-For consistency models that permit far more reordering, the use of fences is more frequent, and their implementation can have a significant impact on performance. In programming languages, memory models are defined to provide a consistent interface for developers to implement concurrent programs, regardless of the different hardware models provided by different processor architectures. We will delve deeper into this topic in the next section.
+For consistency models that permit far more reordering, fences are used more frequently, and their implementation can significantly impact performance. In programming languages, memory models are defined to provide a consistent interface for developers to implement concurrent programs, regardless of the different hardware models provided by different processor architectures. We will delve deeper into this topic in the next section.
 
 \section{After Hardware Foundations, What's Up About Programming Languages?}
 
-The preceding sections provided an introduction to the foundational hardware concepts needed to comprehend the memory consistency models and cache protocols that are required to create accurate concurrent programs. The model discussed earlier is situated at the hardware level and low-level software. However, defining or redefining memory models for high-level languages is equally important as it creates a standardized interface between a program and any software or hardware that might modify that program. A memory model also enables us to understand how the program will behave in a multi-core environment, making it easier to reason about its behavior~\cite{DBLP_journals_cacm_AdveB10, DBLP_series_synthesis_2020Nagarajan}.
+The preceding sections introduced the foundational hardware concepts needed to comprehend the memory consistency models and cache protocols required to create accurate concurrent programs. The model discussed earlier is situated at the hardware level and low-level software. However, defining or redefining memory models for high-level languages is equally important as it creates a standardized interface between a program and any software or hardware that might modify that program. A memory model also enables us to understand how the program will behave in a multi-core environment, making it easier to reason about its behavior~\cite{DBLP_journals_cacm_AdveB10, DBLP_series_synthesis_2020Nagarajan}.
 
 In recent years, memory models have been specified for two of the most widely used programming languages, C++~\cite{DBLP_conf_pldi_BoehmA08} and Java~\cite{DBLP_conf_popl_MansonPA05}. These models describe the expected behavior of language-level threads, locks, atomics, and \RMW{} instructions. They help specify what high-level language programmers should expect and what implementers of compilers, runtime systems, and hardware can provide. Figure~\ref{fig:memory-models} illustrates the difference between (a) high-level and (b) low-level memory models.
 
@@ -236,25 +236,25 @@ ta-Race Freedom (SC for DRF)}''~\cite{DBLP_conf_isca_AdveH90}.  A data race occu
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.9\linewidth]{contents//figures/III_3_memory_model.pdf}
-    \caption{(a) High-level and (b) low level memory models.}
+    \caption{(a) High-level and (b) low-level memory models.}
     \label{fig:memory-models}
 \end{figure}
 
-The memory model of C++ specifies the order in which memory accesses, including regular, non-atomic memory accesses, should occur around an atomic operation~\cite{memoryOrderCpp2020}. In the absence of any constraints on a multi-core system, when multiple threads simultaneously read and write to multiple variables, one thread may observe the values change in a different order than the order in which another thread wrote them. This can also occur among multiple reader threads~\cite{memoryOrderCpp2020}. Similar effects can occur even on uniprocessor systems due to compiler transformations allowed by the memory model. By default, all atomic operations provided by the library follow sequentially consistent ordering. However, this default can negatively impact performance. To specify precise constraints beyond atomicity that the compiler and processor must enforce for a specific operation, the library's atomic operations can be given an additional memory order argument. This argument specifies the precise constraints the compiler and processor must enforce for a given operation beyond just ensuring atomicity~\cite{memoryOrderCpp2020}. Six memory orders are defined in the specification, ranging from the weakest order (specified as \texttt{std::memory\_order\_relaxed}) to the strongest one (specified as \texttt{std::memory\_order\_seq\_cst}), which is a sequentilly-consistent ordering. Table~\ref{table:memoryorders} shows the description of each memory order as in the C++ specification~\cite{memoryOrderCpp2020}.
+The memory model of C++ specifies the order in which memory accesses, including regular, non-atomic memory accesses, should occur around an atomic operation~\cite{memoryOrderCpp2020}. Without constraints on a multi-core system, when multiple threads simultaneously read and write to multiple variables, one thread may observe the values change in a different order than the order in which another thread wrote them. This can also occur among multiple reader threads~\cite{memoryOrderCpp2020}. Similar effects can occur even on uniprocessor systems due to compiler transformations allowed by the memory model. By default, all atomic operations provided by the library follow sequentially consistent ordering. However, this default can negatively impact performance. The library's atomic operations can be given an additional memory order argument to specify precise constraints beyond atomicity that the compiler and processor must enforce for a specific operation. This argument specifies the precise constraints the compiler and processor must enforce for a given operation beyond just ensuring atomicity~\cite{memoryOrderCpp2020}. Six memory orders are defined in the specification, ranging from the weakest order (specified as \texttt{std::memory\_order\_relaxed}) to the strongest one (specified as \texttt{std::memory\_order\_seq\_cst}), which is a sequentially-consistent ordering. Table~\ref{table:memoryorders} shows the description of each memory order as in the C++ specification~\cite{memoryOrderCpp2020}.
 
 \afterpage{
   \begin{longtable}{|c|p{.65\linewidth}|}
     \hline
     \textbf{Value} & \textbf{Explanation}\\ \hline
-    \texttt{memory\_order\_relaxed} & Relaxed operation: there are no synchronization or ordering constraints imposed on other reads or writes, only this operation's atomicity is guaranteed.	\\
+    \texttt{memory\_order\_relaxed} & Relaxed operation: no synchronization or ordering constraints are imposed on other reads or writes; only this operation's atomicity is guaranteed.	\\
     \hline
-    \texttt{memory\_order\_consume} & A load operation with this memory order performs a consume operation on the affected memory location: no reads or writes in the current thread dependent on the value currently loaded can be reordered before this load. Writes to data-dependent variables in other threads that release the same atomic variable are visible in the current thread. On most platforms, this affects compiler optimizations only.\\
+    \texttt{memory\_order\_consume} & A load operation with this memory order performs a consume operation on the affected memory location: no reads or writes in the current thread dependent on the value currently loaded can be reordered before this load. Writes to data-dependent variables in other threads that release the same atomic variable are visible in the current thread. On most platforms, this only affects compiler optimizations.\\
     \hline
     \texttt{memory\_order\_acquire} & A load operation with this memory order performs the acquire operation on the affected memory location: no reads or writes in the current thread can be reordered before this load. All writes in other threads that release the same atomic variable are visible in the current thread.\\
     \hline
-    \texttt{memory\_order\_release} & A store operation with this memory order performs the release operation: no reads or writes in the current thread can be reordered after this store. All writes in the current thread are visible in other threads that acquire the same atomic variable (see Release-Acquire ordering below) and writes that carry a dependency into the atomic variable become visible in other threads that consume the same atomic.\\
+    \texttt{memory\_order\_release} & A store operation with this memory order performs the release operation: no reads or writes in the current thread can be reordered after this store. All writes in the current thread are visible in other threads that acquire the same atomic variable (see Release-Acquire ordering below), and writes that carry a dependency into the atomic variable become visible in other threads that consume the same atomic.\\
     \hline
-    \texttt{memory\_order\_acq\_rel} & A read-modify-write operation with this memory order is both an acquire operation and a release operation. No memory reads or writes in the current thread can be reordered before the load, nor after the store. All writes in other threads that release the same atomic variable are visible before the modification and the modification is visible in other threads that acquire the same atomic variable.\\
+    \texttt{memory\_order\_acq\_rel} & A read-modify-write operation with this memory order is both an acquire operation and a release operation. No memory reads or writes in the current thread can be reordered before the load or after the store. All writes in other threads that release the same atomic variable are visible before the modification, and the modification is visible in other threads that acquire the same atomic variable.\\
     \hline
     \texttt{memory\_order\_seq\_cst} & A load operation with this memory order performs an acquire operation, a store performs a release operation, and read-modify-write performs both an acquire operation and a release operation, plus a single total order exists in which all threads observe all modifications in the same order.\\
     \hline
@@ -288,7 +288,7 @@ In the case of Java, for versions less than 9, fences and other low-level operat
 % }
 
 
-It is important to note that the Java Language Specification~\cite{javamemorymodelspec} does not explicitly mention the use of barriers. However, in Java, the usage of barriers may be considered an implementation detail, as its memory model attempts to operate based on \textit{happens-before} semantics. The \textit{happens-before} semantics defines a set of rules about the ordering and visibility guarantees between actions in a program. This helps to show that changes made by one thread become visible to others. As mentioned previously, Java also adopt the relaxed memory model approach of ``\textit{Sequential Consistency for Data-Race Freedom}''~\cite{DBLP_conf_isca_AdveH90}, which is crucial to prevent data-races and ensure the correct behavior of concurrent programs.
+It is important to note that the Java Language Specification~\cite{javamemorymodelspec} does not explicitly mention the use of barriers. However, in Java, the usage of barriers may be considered an implementation detail, as its memory model attempts to operate based on \textit{happens-before} semantics. The \textit{happens-before} semantics defines a set of rules about the ordering and visibility guarantees between actions in a program. This helps to show that changes made by one thread become visible to others. As mentioned previously, Java also adopts the relaxed memory model approach of ``\textit{Sequential Consistency for Data-Race Freedom}''~\cite{DBLP_conf_isca_AdveH90}, which is crucial to prevent data-races and ensure the correct behavior of concurrent programs.
 
 Definition~\ref{def:happens-before} is a term used in the Java Language Specification to explain what the \textit{happens-before} semantic means. It refers to the main operations that establish this relationship, which include (1) program order, (2) volatile variables, (3) locks, (4) fork-join pattern on threads, (5) thread interruptions, and (6) thread terminations. In certain unforeseen situations not specified in the Java Language Specification, the use of \texttt{UNSAFE} or \texttt{VarHandle} classes becomes necessary.
 
@@ -300,7 +300,7 @@ If we have two actions \(x\) and \(y\), we write \(hb(x, y)\) to indicate that \
 
 If \(x\) and \(y\) are actions of the same thread and \(x\) comes before y in program order, then \(hb(x, y)\).
 
-There is a happens-before edge from the end of a constructor of an object to the start of a finalizer for that object.
+There is a happens-before edge from the end of an object's constructor to the start of a finalizer for that object.
 
 If an action \(x\) synchronizes-with a following action \(y\), then we also have \(hb(x, y)\).
 
