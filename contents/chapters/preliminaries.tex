@@ -80,7 +80,7 @@ Given a set-sequential execution S of a set-sequential object, the partial order
     We say that \(\mathcal{A}\) is \emph{set-linearizable with respect to} \(T\), or just \emph{set-linearizable} if \(T\) is clear from the context if each of its executions is set-linearizable.
   \end{definition}
 
-A comparison between Linearizability and Set-Linearizability can be found in Figures~\ref{fig-example-linear} and~\ref{fig-example-set-linear} respectively.
+A comparison between Linearizability and Set-Linearizability can be found in Figures~\ref{fig-example-linear} and~\ref{fig-example-set-linear}, respectively.
 
 \section{\label{sec:hardware-foundations}Hardware Foundations}
 
@@ -126,19 +126,19 @@ The role of coherence controllers involves several important responsibilities. T
 \end{figure}
 
 
-Coherence states are essential for ensuring the smooth operation of a system. These states assist the coherence controller in deciding whether it needs to communicate with other controllers to retrieve new data, update existing data, or continue operating with the current data. The most commonly used coherence states are modified (M), shared (S), and invalid (I). However, AMD has gone a step further with its MOESI protocol~\cite{devices_amd64} and introduced two additional states, owned (O) and exclusive (E), to improve the system's efficiency. On the other hand, Intel has created its extension called MESIF~\cite{guideintel} to achieve the same goal. A detailed explanation of how coherence protocols work can be found in the book of Nagarajan et al~\cite{DBLP_series_synthesis_2020Nagarajan}.
+Coherence states are essential for ensuring the smooth operation of a system. These states assist the coherence controller in deciding whether it needs to communicate with other controllers to retrieve new data, update existing data, or continue operating with the current data. The most commonly used coherence states are modified (M), shared (S), and invalid (I). However, AMD has gone a step further with its MOESI protocol~\cite{devices_amd64} and introduced two additional states, owned (O) and exclusive (E), to improve the system's efficiency. On the other hand, Intel has created its extension called MESIF~\cite{guideintel} to achieve the same goal. A detailed explanation of how coherence protocols work can be found in the book of Nagarajan et al. ~\cite{DBLP_series_synthesis_2020Nagarajan}.
 
 \section{About Fences And Its Use In Concurrent Algorithms}
 
-In many processor architectures, it is common to see cores reordering memory accesses to different addresses to perform efficient computations according to certain rules~\cite{DBLP_series_synthesis_2020Nagarajan}. These reorders do not affect the execution of a single-thread program. There are three possible reorder cases that we can consider: load-load, store-store, and load-store or store-load. Processors that support the sequential consistency model require each core to preserve the program order in any of those combinations.
+In many processor architectures, it is common to see cores reordering memory accesses to different addresses to perform efficient computations according to certain rules~\cite{DBLP_series_synthesis_2020Nagarajan}. These reorders do not affect the execution of a single-thread program. We can consider three possible reorder cases: load-load, store-store, and load-store or store-load. Processors that support the sequential consistency model require each core to preserve the program order in any of those combinations.
 
-However, processors that support the TSO memory model do not guarantee ordering between a store and a subsequent load that comes after it in program order~\cite{DBLP_conf_tphol_OwensSS09,DBLP_journals_cacm_SewellSONM10}. The reason behind this is that processor cores write to store buffers to hold commited stores until the rest of the memory system could process the stores. Nevertheless, they ensure that the load gets the value of the earlier store.
+However, processors that support the TSO memory model do not guarantee ordering between a store and a subsequent load that comes after it in program order~\cite{DBLP_conf_tphol_OwensSS09,DBLP_journals_cacm_SewellSONM10}. The reason behind this is that processor cores write to store buffers to hold committed stores until the rest of the memory system can process the stores. Nevertheless, they ensure that the load gets the value of the earlier store.
 
 Compilers can reorder instructions and memory accesses to enhance performance and reduce the cost of certain loads and stores to and from memory. In some cases, if the programmer knows what he is doing, he can use some compilation flags to indicate to the compiler to use instruction reordering, allowing data races of stores in multi-threaded environments\footnote{See, for example, the options that control optimizations in the GCC compiler, in specific the flag -Os, which enables all -O3 optimizations, but also turn on the option of \texttt{-fallow-store-data-races}: \url{https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html}, and the discussion about its lack of clear documentation: \url{https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97309}.}.
 % To order these instructions, the programmer must explicitly specify that ordering by inserting a \emph{fence} instruction between the store and the subsequent load.
 % The \emph{fence} instruction ensures that all instructions before it in program order are executed before any instructions after it in program order.
 
-A widely used mechanism to avoid reordering (memory accesses, instructions) are the memory fences. A \emph{memory fence} is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction. These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs (See Example~\ref{ex:reordering}).
+A widely used mechanism to avoid reordering (memory accesses, instructions) is the use of memory fences. A \emph{memory fence} is a barrier instruction that causes a CPU or compiler to enforce an ordering constraint on memory operations (loads and stores) issued before and after the barrier instruction. These instructions are necessary because most modern CPUs or compilers employ performance optimizations, changing the order of the instructions on one program, which could result in out-of-order execution. Typically, these optimizations are unnoticed in a single-thread program but can cause unpredictable behavior in concurrent programs (See Example~\ref{ex:reordering}).
 
 \begin{example}[Instruction re-ordering]
 \label{ex:reordering}
@@ -199,12 +199,12 @@ In the case of processors that support the TSO memory model, reordering instruct
     L2: r2 = x;
 \end{lstlisting}
 
-  If we analyze the possible execution of these codes, we can identify four potential outcomes for the values of \(r1\) and \(r2\). These outcomes are \((BAR, FOO)\), \((BAR, 0)\), \((0, FOO)\), and \((0, 0)\). However, it is important to note that the last outcome is not valid in a Sequential Consistent memory model. In contrast, in the TSO memory model, the final outcome is considered valid. One might wonder how it is possible to arrive at this value. Consider the following sequence of events:
+  If we analyze the possible execution of these codes, we can identify four potential outcomes for the values of \(r1\) and \(r2\). These outcomes are \((BAR, FOO)\), \((BAR, 0)\), \((0, FOO)\), and \((0, 0)\). However, it is important to note that the last outcome is invalid in a Sequential Consistent memory model. In contrast, the final outcome is considered valid in the TSO memory model. One might wonder how it is possible to arrive at this value. Consider the following sequence of events:
 
   \begin{itemize}
     \item Core 1 executes store S1, but FOO is stored in the core's write buffer.
     \item Similarly, Core 2 executes store S2 and holds BAR in its write buffer.
-    \item Next, both cores perform their respective load, L1 and L2 and obtain the old values of 0 from x and y.
+    \item Next, both cores perform their respective load, L1 and L2, and obtain the old values of 0 from x and y.
     \item Finally, both core's write buffers update memory with FOO and BAR.
     \end{itemize}
 
@@ -212,7 +212,7 @@ In the case of processors that support the TSO memory model, reordering instruct
 
 \end{example}
 
-TSO allows the use of a FIFO write buffer, which helps improve performance by hiding the latency of stores that have been committed. Although a FIFO write buffer can be helpful, an even more optimized design would use a non-FIFO write buffer that allows coalescing of writes. This means that two stores that are not consecutive in program order can write to the same entry in the write buffer. However, using a non-FIFO coalescing write buffer violates TSO because TSO requires stores to appear in program order~\cite{DBLP_series_synthesis_2020Nagarajan}.
+TSO allows the use of a FIFO write buffer, which helps improve performance by hiding the latency of stores that have been committed. Although a FIFO write buffer can be helpful, an even more optimized design would use a non-FIFO write buffer that allows the coalescing of writes. This means that two stores that are not consecutive in program order can write to the same entry in the write buffer. However, using a non-FIFO coalescing write buffer violates TSO because TSO requires stores to appear in program order~\cite{DBLP_series_synthesis_2020Nagarajan}.
 
 TSO behaves similarly to Sequential Consistency, permitting only one type of reordering. Hence, the use of fences is fairly infrequent, and the implementation is not too critical. However, x86 architecture provide three types of fences: \texttt{LFENCE}, \texttt{SFENCE} and, \texttt{MFENCE}~\cite{devices_amd64,guideintel}:
 
@@ -226,7 +226,7 @@ For consistency models that permit far more reordering, the use of fences is mor
 
 \section{After Hardware Foundations, What's Up About Programming Languages?}
 
-The preceding sections provided an introduction to the foundational hardware concepts needed to comprehend the memory consistency models and cache protocols that are required to create accurate concurrent programs. The model discussed earlier is situated at the hardware level and low-level software. However, it is equally important to define or redefine memory models for high-level languages as it creates a standardized interface between a program and any software or hardware that might modify that program. A memory model also enables us to understand how the program will behave in a multi-core environment, making it easier to reason about its behavior~\cite{DBLP_journals_cacm_AdveB10, DBLP_series_synthesis_2020Nagarajan}.
+The preceding sections provided an introduction to the foundational hardware concepts needed to comprehend the memory consistency models and cache protocols that are required to create accurate concurrent programs. The model discussed earlier is situated at the hardware level and low-level software. However, defining or redefining memory models for high-level languages is equally important as it creates a standardized interface between a program and any software or hardware that might modify that program. A memory model also enables us to understand how the program will behave in a multi-core environment, making it easier to reason about its behavior~\cite{DBLP_journals_cacm_AdveB10, DBLP_series_synthesis_2020Nagarajan}.
 
 In recent years, memory models have been specified for two of the most widely used programming languages, C++~\cite{DBLP_conf_pldi_BoehmA08} and Java~\cite{DBLP_conf_popl_MansonPA05}. These models describe the expected behavior of language-level threads, locks, atomics, and \RMW{} instructions. They help specify what high-level language programmers should expect and what implementers of compilers, runtime systems, and hardware can provide. Figure~\ref{fig:memory-models} illustrates the difference between (a) high-level and (b) low-level memory models.
 
