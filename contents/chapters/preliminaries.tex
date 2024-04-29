@@ -240,10 +240,7 @@ ta-Race Freedom (SC for DRF)}''~\cite{DBLP_conf_isca_AdveH90}.  A data race occu
     \label{fig:memory-models}
 \end{figure}
 
-
-
-
-The memory model of C++ specifies the order in which memory accesses, including regular, non-atomic memory accesses, should occur around an atomic operation~\cite{memoryOrderCpp2020}. In the absence of any constraints on a multi-core system, when multiple threads simultaneously read and write to multiple variables, one thread may observe the values change in a different order than the order in which another thread wrote them. This can also occur among multiple reader threads~\cite{memoryOrderCpp2020}. Similar effects can occur even on uniprocessor systems due to compiler transformations allowed by the memory model. By default, all atomic operations provided by the library follow sequentially consistent ordering. However, this default can negatively impact performance. To specify precise constraints beyond atomicity that the compiler and processor must enforce for a specific operation, the library's atomic operations can be given an additional memory order argument. This argument specifies the precise constraints the compiler and processor must enforce for a given operation beyond just ensuring atomicity~\cite{memoryOrderCpp2020}. Six memory orders are defined in the specification, ranging from the weakest order (specified as \texttt{std::memory\_order\_relaxed}) to the strongest one (specified as \texttt{std::memory\_order\_seq\_cst}), which is a sequentilly-consistent ordering. Table~\ref{table:memoryorders} shows the description of each memory order as in the C++ specification. In the Table~\ref{table:memoryorders}, we can see the definition of each memory order like is specified in the specification of C++~\cite{memoryOrderCpp2020}.
+The memory model of C++ specifies the order in which memory accesses, including regular, non-atomic memory accesses, should occur around an atomic operation~\cite{memoryOrderCpp2020}. In the absence of any constraints on a multi-core system, when multiple threads simultaneously read and write to multiple variables, one thread may observe the values change in a different order than the order in which another thread wrote them. This can also occur among multiple reader threads~\cite{memoryOrderCpp2020}. Similar effects can occur even on uniprocessor systems due to compiler transformations allowed by the memory model. By default, all atomic operations provided by the library follow sequentially consistent ordering. However, this default can negatively impact performance. To specify precise constraints beyond atomicity that the compiler and processor must enforce for a specific operation, the library's atomic operations can be given an additional memory order argument. This argument specifies the precise constraints the compiler and processor must enforce for a given operation beyond just ensuring atomicity~\cite{memoryOrderCpp2020}. Six memory orders are defined in the specification, ranging from the weakest order (specified as \texttt{std::memory\_order\_relaxed}) to the strongest one (specified as \texttt{std::memory\_order\_seq\_cst}), which is a sequentilly-consistent ordering. Table~\ref{table:memoryorders} shows the description of each memory order as in the C++ specification~\cite{memoryOrderCpp2020}.
 
 \afterpage{
   \begin{longtable}{|c|p{.65\linewidth}|}
@@ -265,104 +262,56 @@ The memory model of C++ specifies the order in which memory accesses, including 
   \end{longtable}
 }
 
-In the previous section, we talked about memory fences as an essential element of concurrent programming. Both C++ and Java offer memory fences to ensure the correct execution of concurrent programs. In C++, the function \texttt{std::atomic\_thread\_fence} establishes memory synchronization ordering of non-atomic and relaxed atomic accesses as instructed by the order, without an associated atomic operation. However, it is worth noting that on x86 systems (x86\_64), these functions do not issue any CPU instructions and only affect compile-time code. The exception to this is \texttt{std::atomic\_thread\_fence(std::memory\_order::seq\_cst)}, which issues a full memory fence instruction.
-
-In the case of Java, the latest versions provide the class \texttt{VarHandle}\footnote{\texttt{java.lang.invoke.VarHandle}}, which exposes the memory fence methods~\cite{varHandleJdk92017} shown in the table~\ref{table:fences}. Many of these fences try to be similar to those defined by the specification of C++~\cite{memoryOrderCpp2020}.
-
-\begin{table}[ht!]
-\begin{tabular}{@{}ll@{}}
-\toprule
-\multicolumn{1}{l}{\textbf{Fence}} & \textbf{Description} \\ \midrule
-\texttt{fullFence} & \begin{tabular}[c]{@{}l@{}}Ensures that loads and stores before the fence will \\not be reordered with loads and stores after the fence.\\ This method has memory ordering effects compatible with \\  \texttt{atomic\_thread\_fence(memory\_order\_seq\_cst)}.\end{tabular} \\
-\midrule
-\texttt{acquireFence} & \begin{tabular}[c]{@{}l@{}}Ensures that loads before the fence will not be reordered\\ with loads and stores after the fence. This method has\\ memory ordering effects compatible with \\\texttt{atomic\_thread\_fence(memory\_order\_acquire)}.\end{tabular} \\
-\midrule
-\texttt{releaseFence} & \begin{tabular}[c]{@{}l@{}}Ensures that loads and stores before the fence will\\ not be reordered with stores after the fence. \\ This method has memory ordering effects compatible with\\  \texttt{atomic\_thread\_fence(memory\_order\_release)}.\end{tabular} \\
-\midrule
-\texttt{loadLoadFence} & \begin{tabular}[c]{@{}l@{}}Ensures that loads before the fence will\\ not be reordered with loads after the fence.\end{tabular} \\
-\midrule
-\texttt{storeStoreFence} & \begin{tabular}[c]{@{}l@{}}Ensures that stores before the fence will\\ not be reordered with stores after the fence.\end{tabular} \\ \bottomrule
-\end{tabular}
-\caption{\label{table:fences}Memory fences provided by Java}
-\end{table}
-
-%\subsection{Memory management}
-%\label{sec:org1ca9ee9}
-
-%To implement efficiently the idempotent algorithms in an environment without garbage collection, it's necessary to use some technique or methodology to provide garbage collection when atomic pointers are used or when distinct threads want to reclaim the memory of the object associated with the pointer.
-
-%\begin{enumerate}
-%\item Strategies to delete shared pointers
-%\label{sec:org36ce5a6}
-
-%\begin{itemize}
-%\item Add pointers to list to safety delete.
-%\item Do this when there aren't more threads accessing methods.
-%\begin{itemize}
-%\item Increase the counter when a thread enters the method and decrease when
-%it exits.
-%\item Delete all pointers when the counter is equal to zero.
-%\end{itemize}
-%\end{itemize}
+In the previous section, we talked about memory fences as an essential element of concurrent programming. Both C++ and Java offer memory fences to ensure the correct execution of concurrent programs. In C++, the function \texttt{std::atomic\_thread\_fence} establishes memory synchronization ordering of non-atomic and relaxed atomic accesses as instructed by the memory order, without an associated atomic operation. However, it is worth noting that on x86 systems (x86\_64), these functions do not issue any CPU instructions and only affect compile-time code. The exception to this is \texttt{std::atomic\_thread\_fence(std::memory\_order::seq\_cst)}, which issues the full memory fence instruction \texttt{MFENCE}.
 
 
-%\item Hazard pointers
-%\label{sec:org3992578}
-
-%The \emph{Hazard Pointers} is a technique to manage language memory without garbage collectors. Maged proposed this technique Michael \cite{DBLP_journals_tpds_Michael04}. They are so-called because deleting a pointer that might be referenced by other thread(s) is dangerous. If another thread keeps holding references to that pointer and proceeds to access that pointer after being deleted, you have an undefined behavior \cite{DBLP_journals_tpds_Michael04}.
-
-%The basic idea of this technique is the following:
-
-%\begin{itemize}
-%\item If a thread wants to use a pointer that another thread might want to delete, it first sets a hazard pointer to the pointer, informing the other thread that deleting it would be dangerous. Once the object is no longer needed, the hazard pointer is cleared.
-%\item When a thread wants to delete the pointer, it must check if the hazard pointers belong to the other threads in the system. If no one has a reference to the pointer, then it's safe to delete it. Otherwise, it must be left until later.
-%\item Periodically, we must check the list of objects left until later to see if any of them can be deleted now.
-%\end{itemize}
-
-%A general pseudocode for this technique could be the following:
-
-%\begin{lstlisting}[language=c++,label= ,caption= ,captionpos=b,numbers=none]
-%void func() {
-%    std::atomic<void*>& hp = get_hazard_pointer_for_current_thread();
-%    void* old_data = data.load();
-%    do {
-%        void* temp;
-%        do{ // Loop until you've set the hazard pointer
-%            temp = old_data;
-%            hp.store(old_data);
-%            old_data = data.load();
-%        } while (old_data != temp);
-%          }while (old_data &&
-%            !data.compare_exchange_strong(old_data, old_data->next);
-%    // Do something with old_data
-%    hp.store(nullptr); // clearing usage of hazard pointer
-%    // Trying clearing
-%    if (outstanding_hazard_pointers_for(old_head))
-%    {
-%        reclaim_later(old_data);
-%    }
-%    else
-%    {
-%        delete old_data;
-%    }
-%    delete_nodes_with_no_hazards();
-%}
-%\end{lstlisting}
+In the case of Java, for versions less than 9, fences and other low-level operations were restricted to the use of a class named \texttt{UNSAFE}\footnote{sun.misc.UNSAFE}. \texttt{UNSAFE} was the most powerful tool on the platform because it allowed users to violate established rules and perform otherwise impossible actions. In the latest versions, the Java platform provides the class \texttt{VarHandle}\footnote{\texttt{java.lang.invoke.VarHandle}}, which exposes the memory fence methods~\cite{varHandleJdk92017} shown in Table~\ref{table:fences}, additionally to provide access to another low-level operation. Many of these fences try to behave similarly according to the memory orders defined by the specification of C++~\cite{memoryOrderCpp2020}.
 
 
-%\item Atomic Smart Pointers (Herlihy, Chapter 19) (Not available for GCC and CLang)
-%\label{sec:org58c7cdb}
+% \afterpage{
+  \begin{longtable}{|c|p{.72\linewidth}|}
+    \hline
+    \textbf{Fence} & \textbf{Description} \\
+    \hline
+    \texttt{fullFence} & Ensures that loads and stores before the fence will not be reordered with loads and stores after the fence. This method has memory ordering effects compatible with \texttt{atomic\_thread\_fence(memory\_order\_seq\_cst)}.\\
+    \hline
+    \texttt{acquireFence} & Ensures that loads before the fence will not be reordered with loads and stores after the fence. This method has memory ordering effects compatible with \texttt{atomic\_thread\_fence(memory\_order\_acquire)}.\\
+    \hline
+    \texttt{releaseFence} & Ensures that loads and stores before the fence will\ not be reordered with stores after the fence. This method has memory ordering effects compatible with  \texttt{atomic\_thread\_fence(memory\_order\_release)}.\\
+    \hline
+    \texttt{loadLoadFence} & Ensures that loads before the fence will not be reordered with loads after the fence.\\
+    \hline
+    \texttt{storeStoreFence} & Ensures that stores before the fence will not be reordered with stores after the fence.\\
+    \hline
+    \caption{\label{table:fences}Memory fences provided by Java}
+  \end{longtable}
+% }
 
 
-%When a memory region is reclaimed, the programmer cannot know how that region of memory will be reused or whether it will be reused. We need a way of developing a (general) solution to prevent the sorts of races when a memory region is reclaimed by many threads asynchronously. We can do this by delaying reclamation. Considering pending operations on a concurrent data structure, a sufficient condition is that \emph{memory is only reclaimed when it is impossible for any pending operation to access in the future}.
+It is important to note that the Java Language Specification~\cite{javamemorymodelspec} does not explicitly mention the use of barriers. However, in Java, the usage of barriers may be considered an implementation detail, as its memory model attempts to operate based on \textit{happens-before} semantics. The \textit{happens-before} semantics defines a set of rules about the ordering and visibility guarantees between actions in a program. This helps to show that changes made by one thread become visible to others. As mentioned previously, Java also adopt the relaxed memory model approach of ``\textit{Sequential Consistency for Data-Race Freedom}''~\cite{DBLP_conf_isca_AdveH90}, which is crucial to prevent data-races and ensure the correct behavior of concurrent programs.
 
-%This property could also be achieved by \emph{reference counting}. In a reference counted implementation of a data structure (like a list), a counter of type atomic<int> is associated with each node. Whenever a reference to node N is created
-%\end{enumerate}
+Definition~\ref{def:happens-before} is a term used in the Java Language Specification to explain what the \textit{happens-before} semantic means. It refers to the main operations that establish this relationship, which include (1) program order, (2) volatile variables, (3) locks, (4) fork-join pattern on threads, (5) thread interruptions, and (6) thread terminations. In certain unforeseen situations not specified in the Java Language Specification, the use of \texttt{UNSAFE} or \texttt{VarHandle} classes becomes necessary.
+
+\begin{definition}[\label{def:happens-before}Happens-before semantics\cite{javamemorymodelspec}]
+
+Two actions can be ordered by a \textit{happens-before} relationship. If one action \textit{happens-before} another, then the first is visible to and ordered before the second.
+
+If we have two actions \(x\) and \(y\), we write \(hb(x, y)\) to indicate that \(x\) happens-before \(y\).
+
+If \(x\) and \(y\) are actions of the same thread and \(x\) comes before y in program order, then \(hb(x, y)\).
+
+There is a happens-before edge from the end of a constructor of an object to the start of a finalizer for that object.
+
+If an action \(x\) synchronizes-with a following action \(y\), then we also have \(hb(x, y)\).
+
+If \(hb(x, y)\) and \(hb(y, z)\), then \( hb(x, z)\).
+\end{definition}
+
+% To finish this section, we will give an example why the use of memory barriers are costly in
 
 \section{\label{sec:methodology}Experimental Methodology}
 
 One of the goals of this thesis is to assess our algorithms' performance. In experimental computer science research and development, benchmarking plays a vital role. Developers perform benchmarking tests on their products under development to evaluate their performance, while researchers use benchmarking to assess the impact on the performance of their novel research ideas~\cite{DBLP_conf_oopsla_GeorgesBE07}.
-
 In this thesis, we have followed and adapted the guidelines presented in the following sources \cite{forsyth2018probability, DBLP_conf_oopsla_GeorgesBE07,lilja2005measuring}. These guidelines provide fundamental techniques for measuring computer performance and strategies for analyzing and interpreting the resulting data. Topics covered include performance metrics, benchmarking programs, and statistical tools. By following these guidelines, we can perform rigorous statistical evaluation, better understand the performance of our algorithm implementations, and compare them against other algorithms.
 
 A common method of evaluating experimental results is by measuring performance or throughput. But what do these terms mean? \emph{Throughput}, as defined by the Cambridge Dictionary, is the amount of work completed in a given period. In contrast, \emph{performance} refers to how well something functions or works. Specifically, performance is measured by the amount of useful work a system accomplishes, typically determined by its accuracy, efficiency, and speed of executing instructions. One or more of the following factors might be involved when performance is measured:
