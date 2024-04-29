@@ -60,6 +60,8 @@
 \usepackage{ifthen}
 \usepackage{float}
 \usepackage{lmodern}
+\usepackage{afterpage}
+\usepackage{longtable}
 %\usepackage[framed]{ntheorem}
 %\usepackage{palatino}
 %\usepackage{kpfonts}
@@ -316,8 +318,8 @@
           innerbottommargin=12pt]{dBox}
 
 % Example box
-\newmdenv[skipabove=12pt,
-          skipbelow=7pt,
+\newmdenv[skipabove=14pt,
+          skipbelow=14pt,
           linewidth=1.2,
           backgroundcolor=black!1.2,
           linecolor=black,
