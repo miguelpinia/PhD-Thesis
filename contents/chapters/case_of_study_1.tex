@@ -275,7 +275,9 @@ Observe that the second and third items in Definition~\ref{def-ws-nc-mult} corre
 
 The specification of work-stealing with concurrent weak multiplicity admits trivial solutions. A simple solution is obtained by replacing \(Head\) in \WFWSM with one local persistent variable \(head\) per process (each initialized to 1); \Put remains the same, and \Take and \Steal instead of reading from \(Head\), they locally read the current value of \(head\) and increment it whenever a task is taken. It is not hard to verify that the resulting algorithm is indeed linearizable.
 
+\begin{remark}
 To avoid this kind of simple solution (which can be very inefficient in practice, as every process might execute every task), we restrict our attention to \textit{sequentially-exact} algorithms; namely, every sequential execution of the algorithm is a sequential execution of the specification of (FIFO) work-stealing.\footnote{Alternatively, work-stealing with weak multiplicity can be specified using the interval-linearizability formalism in~\cite{DBLP_journals_jacm_CastanedaRR18}, which allows us to specify that a \Take/\Steal operation can exhibit a non-exact behavior only in the presence of concurrency. Interval-linearizability would imply that any interval-linearizable solution provides an exact solution in sequential executions. Roughly speaking, in interval-linearizability, operations are linearized at intervals that can overlap each other.}  It is easy to see that the algorithm described above does not have this property.
+\end{remark}
 
 Finally, we stress that, differently from work-stealing with multiplicity, two distinct non-concurrent \Take/\Steal operations can extract the same task in an execution, which can happen only if \emph{some} operations are concurrent in the execution due to the sequentially-exact requirement. Particularly, in our algorithms, this relaxed behavior can occur when processes are concurrently updating the head of the queue.
 
@@ -377,7 +379,7 @@ Figure~\ref{figure-algo-range-max-reg} contains a simple sequentially-exact line
   }
 \end{figure}
 % =================================================================
-
+\vspace{1cm}
 \begin{theorem}\label{theo-range-max-reg}
   The algorithm in Figure~\ref{figure-algo-range-max-reg} is a sequentially-exact linearizable wait-free and fence-free algorithm for \RangeMaxReg using only \R/\W instructions and with constant step complexity in all its operations.
 \end{theorem}
