@@ -302,8 +302,8 @@
           linewidth=4pt]{eBox}
 
 % Definition box
-\newmdenv[skipabove=14pt,
-          skipbelow=14pt,
+\newmdenv[skipabove=7pt,
+          skipbelow=7pt,
           rightline=false,
           leftline=true,
           topline=false,
