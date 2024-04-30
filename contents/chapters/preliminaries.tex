@@ -312,7 +312,7 @@ If \(hb(x, y)\) and \(hb(y, z)\), then \( hb(x, z)\).
 \section{\label{sec:methodology}Experimental Methodology}
 
 One of the goals of this thesis is to assess our algorithms' performance. In experimental computer science research and development, benchmarking plays a vital role. Developers perform benchmarking tests on their products under development to evaluate their performance, while researchers use benchmarking to assess the impact on the performance of their novel research ideas~\cite{DBLP_conf_oopsla_GeorgesBE07}.
-In this thesis, we have followed and adapted the guidelines presented in the following sources \cite{forsyth2018probability, DBLP_conf_oopsla_GeorgesBE07,lilja2005measuring}. These guidelines provide fundamental techniques for measuring computer performance and strategies for analyzing and interpreting the resulting data. Topics covered include performance metrics, benchmarking programs, and statistical tools. By following these guidelines, we can perform rigorous statistical evaluation, better understand the performance of our algorithm implementations, and compare them against other algorithms.
+In this thesis, we have followed and adapted the guidelines presented in the work of Forsyth et al.\cite{forsyth2018probability}, Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07} and Lilja~\cite{lilja2005measuring}. These guidelines provide fundamental techniques for measuring computer performance and strategies for analyzing and interpreting the resulting data. Topics covered include performance metrics, benchmarking programs, and statistical tools. By following these guidelines, we can perform rigorous statistical evaluation, better understand the performance of our algorithm implementations, and compare them against other algorithms.
 
 A common method of evaluating experimental results is by measuring performance or throughput. But what do these terms mean? \emph{Throughput}, as defined by the Cambridge Dictionary, is the amount of work completed in a given period. In contrast, \emph{performance} refers to how well something functions or works. Specifically, performance is measured by the amount of useful work a system accomplishes, typically determined by its accuracy, efficiency, and speed of executing instructions. One or more of the following factors might be involved when performance is measured:
 
@@ -352,8 +352,7 @@ We can combine those strategies with interval timers to measure how long it take
 
 \subsection{\label{subsec:statistics}Statistic tools for experiments}
 
-As computer science researchers, we aim to measure and compare the performance of novel and existing algorithms. To evaluate the effectiveness of these algorithms, we need to establish an experimental methodology that allows us to measure their performance and throughput and determine whether they are competitive. This thesis proposes various versions of the same algorithm for different studies. We will divide our experiments into two categories. The first category is related to measuring the performance of the different algorithm versions.
-In contrast, the second category is focused on comparing our best algorithm (or the two best) to other algorithms in the literature. To evaluate the performance of our algorithms, we will measure the time required to execute a set of operations over a given interval of time, i.e., this will help us determine how quickly the program can complete its execution. The technique used to measure the time of an event is the following:
+As researchers in computer science and engineering, our goal is to measure and compare the performance of novel and existing algorithms. To evaluate the effectiveness of these algorithms, we require an experimental methodology that enables us to measure their performance and throughput, and determine whether they are competitive. This thesis proposes various concrete implementations of the same algorithm for different studies. Our experiments will be categorized into two groups. The first category will measure the performance of different versions of the algorithm, while the second category will focus on comparing our best algorithm (or the two best) with other algorithms mentioned in the literature. To evaluate the performance of our algorithms, we will measure the time taken to execute a set of operations over a specified time interval. This will help us determine how quickly the program can complete its execution. The technique used to measure the time of an event is the following:
 
 \begin{itemize}
 \item Read the current time and store it in a variable \texttt{start\_count}.
@@ -364,60 +363,61 @@ total time required to execute the event.
 \end{itemize}
 
 This technique for measuring the execution time of any portion of a program
-is known as the \emph{wall clock} time~\cite{lilja2005measuring}. We will use this technique to measure all the events we want to track. However, remember that this measurement includes time spent on other system operations, such as memory paging, thread interleaving, input/output operations, and network communication, if applicable. These external events can introduce uncertainty, errors, or noise into our measurements. To quantify the uncertainty, we need to use probability and statistics tools. To summarize a collection of measures, we can use indices of central tendency such as the mean, median, and mode. The most commonly used index is the sample arithmetic mean or average, which can summarize all the measurements into a single value that represents the center of the distribution of these values.  To quantify the precision of our measurements, we can use a \emph{confidence interval} for the mean value~\cite{DBLP_conf_oopsla_GeorgesBE07, lilja2005measuring}. Other tools we need are the \emph{sample variance}, the \emph{standard deviation}, and the \emph{coefficient of variation}.
+is known as the \emph{wall clock} time~\cite{lilja2005measuring}. We will use this technique to measure all the events we want to track. However, remember the measurements from this technique include time spent on other system operations, such as memory paging, thread interleaving, input/output operations, and network communication, if applicable. These external events can introduce uncertainty, errors, or noise into our measurements. To quantify the uncertainty, we need to use probability and statistics tools.
 
+To summarize a collection of measures, we can use indices of central tendency such as the mean (Definition~\ref{def:mean}), median, and mode. The most commonly used index is the sample arithmetic mean or average, which can summarize all the measurements into a single value representing the center of these values' distribution. To quantify the precision of our measurements, we can use a \emph{confidence interval} for the mean value~\cite{DBLP_conf_oopsla_GeorgesBE07, lilja2005measuring}. Other tools we need are the \emph{sample variance} (Definition~\ref{def:variance}), the \emph{standard deviation} (Definition~\ref{def:standard-deviation}), and the \emph{coefficient of variation} (Definition~\ref{def:cov}).
+
+\begin{definition}[\label{def:mean}(Sample arithmetic) Mean]
 Formally, the \emph{(sample arithmetic) mean} is defined to be:
 
-\begin{equation}
+\begin{equation}\label{eq:mean}
 \bar{x}_A = \frac{1}{n}\sum^n_{i = 1}x_i
 \end{equation}
 
-Where \(x_i\) values are the individual measurements. The \emph{sample variance}
+\noindent Where \(x_i\) values are the individual measurements.
+\end{definition}
+
+\begin{definition}[\label{def:variance}Sample Variance]
+ The \emph{sample variance}
 represent our calculated estimate of the actual variance. It is defined to be:
 
-\begin{equation}
-s^2 = \frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}
+\begin{equation}\label{eq:variance}
+V = \frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}
 \end{equation}
 
-Where the \(x_i\) are the \(n\) independent measurements and \(\bar{x}\) is
-the corresponding sample mean. From the previous equation, the standard
+\noindent Where the \(x_i\) are the \(n\) independent measurements and \(\bar{x}\) is
+the corresponding sample mean.
+\end{definition}
+
+\begin{definition}[\label{def:standard-deviation}Standard Deviation]
+ From the Equation~\ref{eq:variance} described in Definition~\ref{def:variance}, the standard
 deviation is defined as the positive square root of the variance:
 
-\begin{equation}
-s = \sqrt{s^2} = \sqrt{\frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}}
+\begin{equation}\label{eq:standard-deviation}
+s = \sqrt{V} = \sqrt{\frac{\sum_{i = 1}^n(x_i - \bar{x}^2)}{n - 1}}
 \end{equation}
 
-The coefficient of variation (COV) is defined to be:
+\end{definition}
 
-\begin{equation}
+\begin{definition}[\label{def:cov}Coefficient of Variation]
+  The coefficient of variation (COV) is defined as the standard deviation (Equation~\ref{eq:standard-deviation}) divided by the mean (Equation~\ref{eq:mean}):
+
+\begin{equation}\label{eq:cov}
   COV = \frac{s}{\bar{x}}
 \end{equation}
+\end{definition}
 
-Suppose we can approximate the distribution of random errors by a Gaussian
-distribution. In that case, we determine how well our estimate of the true value is concerning the actual true value using the properties of the distribution. We use
-confidence intervals to find a range of values with a probability
-of including the true value. To do that, we must consider two cases:
+
+Experimental evaluation assummes that errors that occurs during an experiment follow a \textit{Gaussian} (a.k.a. normal) distribution. This implies that if multiple measurements are taken of the same value, they will tend to follow a Gaussian distribution centered around the true mean value  \(x\)~\cite{lilja2005measuring}. If we assume that the random errors follow a Gaussian distribution, then we can use the properties of the distribution to evaluate the accuracy of our estimate of the true value. Confidence intervals can help us determine a range of values that has a high probability of containing the true value. To do so, we need to consider two cases:
 
 \begin{enumerate}
 \item When the number of measurements is large \((n \ge 30)\).
 \item When the number of measurements is small \((n < 30)\).
 \end{enumerate}
 
-For the first case, we use the sample mean \((\bar{x})\) as the best
-approximation of the true value. If the \(n\) samples used to calculate
-\(\bar{x}\) are all independents with mean \(\mu\) y standard deviation
-\(s\), the central limit theorem then assures us that, for large values of
-\(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed with
-mean \(\mu\) and standard deviation \(s / \sqrt{n}\). We can quantify the
-precision of the measurements searching two values \(c_1\) and \(c_2\), such
-that the probability of the mean value being between those two values is \(1 -
-   \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 - \alpha\). \(c_1\) and
-\(c_2\) are chosen to form a symmetric interval around \(\bar{x}\) such that
-\(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The interval \([c_1, c_2]\)
-is called \textit{confidence interval} for \(\bar{x}\) and \(\alpha\) is
-called the \textit{significance level} and the value \((1 - \alpha)\) is
-called the \textit{confidence level}. From the central limit theorem, we
-have:
+The number 30 is typically chosen by convention as the minimum sample size required for the central limit theorem to hold true. This theorem in probability theory explains that as the sample size increases, the distribution of a sample variable should approximante a normal distribution, regardless of the actual shape of the population. As a result, confidence intervals can be used to estimate the overall mean of these averaged values~\cite{DBLP_conf_oopsla_GeorgesBE07,lilja2005measuring}.
+
+For the first case, we use the sample mean \((\bar{x})\) as the best approximation of the true value. If the \(n\) samples used to calculate \(\bar{x}\) are all independents with mean \(\mu\) y standard deviation \(s\), the central limit theorem then assures us that, for large values of \(n\), the sample mean \(\bar{x}\) is approximately Gaussian distributed with mean \(\mu\) and standard deviation \(s / \sqrt{n}\). We can quantify the precision of the measurements searching two values \(c_1\) and \(c_2\), such that the probability of the mean value being between those two values is \(1 - \alpha\). That is \(PR[c_1 \le \bar{x} \le c_2] = 1 - \alpha\). \(c_1\) and \(c_2\) are chosen to form a symmetric interval around \(\bar{x}\) such that \(Pr[x < c_1] = Pr[x > c_2] = \frac{\alpha}{2}\). The interval \([c_1, c_2]\) is called \textit{confidence interval} for \(\bar{x}\) and \(\alpha\) is called the \textit{significance level} and the value \((1 - \alpha)\) is called the \textit{confidence level}~\cite{DBLP_conf_oopsla_GeorgesBE07,lilja2005measuring}. From the central limit theorem, we have:
 
 \begin{equation}
 c_1 = \bar{x} - z_{1 - \alpha/2}\frac{s}{\sqrt{n}}
@@ -450,7 +450,7 @@ c_2 = \bar{x} + t_{1-\alpha/2;n-1}\frac{s}{\sqrt{n}}
 where \(t_{1 - \alpha/2;n-1}\) defined such that a random variable \(T\) that
 follows the \emph{Student's t}-distribution with \(n - 1\), obeys: \(Pr[T < t_{1 -
    \alpha/2;n - 1}] = 1 - \alpha/2\), where the value \(z_{1 - \alpha/2;n - 1}\)
-is typically obtained from a pre-computed table.
+is typically obtained from a pre-computed table~\cite{DBLP_conf_oopsla_GeorgesBE07,lilja2005measuring}.
 
 Confidence intervals are an interesting concept because they provide insight into how much noise there is in measurements. However, when making decisions about the performance of one or more systems, we need to determine whether changes are due to random fluctuations or if they are statistically significant. To do this, we can use the following two techniques~\cite{DBLP_conf_oopsla_GeorgesBE07, lilja2005measuring}:
 
@@ -459,18 +459,9 @@ Confidence intervals are an interesting concept because they provide insight int
 \item Analysis of variance (ANOVA)
 \end{enumerate}
 
-The first technique is simple. The approach to comparing two alternatives is
-to determine whether the confidence intervals for two groups of measurements
-overlap. If the intervals do not overlap, we can conclude that there is no
-evidence to suggest that there is not a statistically significant
-difference. In another case, we cannot conclude that the differences seen in
-the mean values are not due to random fluctuations. To determine whether
-there is no statistical difference, we need to calculate the confidence
-interval for the difference of the means of the two alternatives. First
-determine the sample mean \(\bar{x_1}\) and \(\bar{x_2}\) and the sample
-standard deviation \(s_1\) and \(s_2\). Then, compute the difference of the
-means as \(\bar{x} = \bar{x_1} - \bar{x_2}\). The standard deviation \(s_x\)
-of the difference of the mean values is computed as:
+The first technique is simple. The approach to comparing two alternatives is to determine whether the confidence intervals for two groups of measurements overlap. If the intervals of two sets of data do not overlap, we can conclude that there is no evidence to suggest that there is not a statistically significant difference between them. The wording of this last sentence is important, because there is still a probability \(\alpha\) that the differences observed in our measurements are due to random effects in our measurements, i.e., we cannot guarantee with absolute certainty that there is a difference between the compared alternatives~\cite{DBLP_conf_oopsla_GeorgesBE07}.
+
+In other hand, if the intervals overlap, we cannot confidently conclude that the differences seen in the mean values are not due to random fluctuations. To determine whether there is no statistical difference, we need to calculate the confidence interval for the difference of the means of the two alternatives. First determine the sample mean \(\bar{x_1}\) and \(\bar{x_2}\) and the sample standard deviation \(s_1\) and \(s_2\). Then, compute the difference of the means as \(\bar{x} = \bar{x_1} - \bar{x_2}\). The standard deviation \(s_x\) of the difference of the mean values is computed as:
 
 \begin{equation}
   s_x = \sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}
@@ -572,7 +563,10 @@ It is possible to split the observed total variation (SST) into a \emph{within} 
     SST = SSA + SSE
 \end{equation}
 
-ANOVA analysis quantifies whether there is a difference in variation across alternatives (SSA) compared to variation within each alternative (SSE) due to random measurement errors. One way to do this is to compare the fractions \(\frac{SSA}{SST}\) and \(\frac{SSE}{SST}\). A more rigorous approach is to use the F-test~\cite{lilja2005measuring}, which tests whether two variances are significantly different.  After conducting an ANOVA test, we may determine a significant difference between the alternatives, but the test does not specify which alternatives have a significant difference. Various techniques can be employed to determine whether there is a statistically significant difference between alternatives. We will describe the techniques we'll use for each of our specific case studies.
+ANOVA analysis quantifies whether there is a difference in variation across alternatives (SSA) compared to variation within each alternative (SSE) due to random measurement errors. One way to do this is to compare the fractions \(\frac{SSA}{SST}\) and \(\frac{SSE}{SST}\).
+
+
+A more rigorous approach is to use the F-test~\cite{lilja2005measuring}, which tests whether two variances are significantly different.  After conducting an ANOVA test, we may determine a significant difference between the alternatives, but the test does not specify which alternatives have a significant difference. Various techniques can be employed to determine whether there is a statistically significant difference between alternatives. We will describe the techniques we will use for each of our specific case studies.
 
 \subsection{\label{subsec:stat-rigor-meth}Statistically rigorous methodology}
 
