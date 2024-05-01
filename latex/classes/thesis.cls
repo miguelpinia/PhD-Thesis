@@ -249,13 +249,19 @@
 \newtheoremstyle{break}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{newline}{}
 \newtheoremstyle{notes}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{newline}{}
 
+
 \definecolor{ocre}{RGB}{191,191,191}
 \newcounter{dummy}
 \numberwithin{dummy}{section}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
 \theoremstyle{ocrenumbox}
 \newtheorem{theoremeT}[dummy]{Theorem}
 \newtheorem{problem}{Problem}[chapter]
 \newtheorem{exerciseT}{Exercise}[chapter]
+
+
 \theoremstyle{blacknumex}
 
 \theoremstyle{blacknumbox}
@@ -264,11 +270,11 @@
 \newtheorem{descriptionT}{Description}[chapter]
 \newtheorem{vocabulary}{Vocabulary}[chapter]
 \newtheorem{corollaryT}[dummy]{Corollary}
-\newtheorem{remark}[dummy]{Remark}
 \newtheorem{note}[dummy]{Note}
 \newtheorem{noteT}{Note}
 \theoremstyle{ocrenum}
 \newtheorem{proposition}[dummy]{Proposition}
+
 
 \RequirePackage[framemethod=default]{mdframed} % Required for creating the theorem, definition, exercise and corollary boxes
 
