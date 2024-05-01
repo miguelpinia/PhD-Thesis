@@ -257,7 +257,7 @@
 \newtheorem{remark}{Remark}
 
 \theoremstyle{ocrenumbox}
-\newtheorem{theoremeT}[dummy]{Theorem}
+\newtheorem{theoremeT}{Theorem}[chapter]
 \newtheorem{problem}{Problem}[chapter]
 \newtheorem{exerciseT}{Exercise}[chapter]
 
