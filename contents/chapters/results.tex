@@ -4,6 +4,47 @@ In this chapter, we will present the results of our experimental evaluation of o
 
 \section{Work-Stealing with Multiplicity}
 
+\subsection{\label{sec-experiments}Experiments}
+
+In this section, we discuss the outcome of an experimental evaluation of \NCWSM and its bounded version, \BNCWSM.  Using the approaches discussed in Section~\ref{sec-removing-infinite-arrays}, two versions of each algorithm were implemented, one using simple arrays and the other using dynamic arrays. The suffix Lists was added to the dynamic array versions. For example, \NCWSM denotes the version with resizable arrays, and \NCWSM List denotes the version with dynamic arrays.  \NCWSM and \BNCWSM were compared to the following algorithms: Cilk THE~\cite{DBLP_conf_pldi_FrigoLR98}, Chase-Lev~\cite{circular.work.stealing}, and the three idempotent work-stealing algorithms~\cite{maged.vechev.2009}.  Three benchmarks were employed to evaluate the performance of the algorithms, following the evaluation methodology by Georges, Buytaert, and Eeckhout~\cite{DBLP_conf_oopsla_GeorgesBE07}, as described in the section~\ref{subsec:stat-rigor-meth}.
+
+\subsection{\label{subsec-experimental-setup}Experimental Setup}
+
+\subsubsection{\label{subsec:implementation}Platforms and Implementation}
+
+The experiments were conducted on a machine with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. The algorithms were implemented in Java~17, which allowed us to ignore tasks such as garbage collection.  As mentioned, two versions of \NCWSM and \BNCWSM were implemented. The other tested algorithms, Cilk THE, Chase-Lev, and the three idempotent work-stealing, were implemented following their specification, i.e., inserting fences where required.; all these algorithms use resizable arrays to store tasks.
+
+\subsubsection{\label{subsec:methodology}Methodology}
+
+To analyze the performance of the algorithms, the experimental evaluation is divided into the following three benchmarks, where the first two have been used before~\cite{DBLP_conf_pldi_FrigoLR98, maged.vechev.2009, fencefreework} and the third is an application to a problem that naturally admits parallelization: (1)~\textit{Zero cost experiments}, (2)~\textit{Parallel spanning tree}, and (3) \textit{Parallel SAT}. Below, we briefly describe each benchmark.  Performance was measured using the statistically rigorous methodology by Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07}, described in Section~\ref{subsec:stat-rigor-meth}.  Repeated work was measured in the second and third benchmarks using a more straightforward methodology.
+
+\paragraph*{Zero cost experiments\label{zero-cost-experiment}}
+
+This benchmark shows the performance of a given algorithm in a single core with a single process. Why do we want to evaluate the algorithms in a single core? The experiment results show that the mere presence of heavy synchronization mechanisms in an algorithm slows down the computation, even in sequential executions. We measure the time required for performing a sequence of operations that work-stealing algorithms provide. First, the time needed for \Put-\Take operations is measured, where a process performs a sequence of \Put operations followed by an equal number of \Takes. Unlike previous work~\cite{maged.vechev.2009, fencefreework}, it also measured the time for \Put-\Steal operations, all performed by the same process. In both experiments, the number of \Put operations is \(10,000,000\), followed by the same number of \Take or \Steal operations; no operation performs any work associated with a task. The algorithms were evaluated considering distinct data structures' initial sizes to test the effect of resizing structures. The considered initial sizes are \(256\), \(1,000,000\), and \(10,000,000\).  For the case of the implementations based on dynamic arrays, \NCWSM Lists, and \BNCWSM Lists, these sizes correspond to the size of the arrays in each structure node.
+
+\paragraph*{Parallel spanning tree\label{irregular-graph}}
+As Michael, Vechev, and Saraswat~\cite{maged.vechev.2009}, and Morrison and Afek~\cite{fencefreework}, we consider the parallel spanning tree algorithm of Bader and Cong~\cite{1302951}. The algorithm, which uses a form of work-stealing to ensure dynamic load-balancing, was adapted to work with all tested work-stealing implementations. In the algorithm, each process places the tasks it generates (i.e., vertices whose adjacent vertices remain to be explored) in its work-stealing data structure. When it runs out of tasks, it tries to steal tasks from other processes' structures in a round-robin fashion. The algorithms are tested on several types of directed and undirected graphs with $1,000,000$ vertices each:
+
+\begin{itemize}
+    \item \textit{2D Torus}. The vertices are on a 2D mesh, where each vertex connects to its four neighbors in the mesh.
+    \item \textit{2D60 Torus}. The random graph obtained from the previous one, where each edge has a probability of $60\%$
+to be present.
+    \item \textit{3D Torus}. The vertices are on a 3D mesh, where each vertex connects to its six neighbors in the mesh.
+    \item \textit{3D40 Torus}. The random graph obtained from the previous one, where each edge has a probability of $40\%$
+    \item \textit{Random}. Graph with each vertex having six randomly picked neighbors.
+\end{itemize}
+
+
+The graphs have been considered in previous work~\cite{1302951, maged.vechev.2009, fencefreework}.  All graphs are represented using the adjacency lists representation. The experiment is executed as follows: The parallel spanning tree algorithm is executed independently on each possible graph, with all combinations of work-stealing algorithms and several available threads.  As in the zero-cost experiment, the impact of resizing structures was tested. The experiment is independently executed for each graph, work-stealing algorithm and several threads with initial structure sizes $250$ and $1,000,000$. Hence, the latter requires no resizing structures.
+
+It also measured the amount of repeated work in both relaxations of work-stealing.  Computing this number is not straightforward.  The parallel spanning tree algorithm may execute repeated work even with non-related work-stealing algorithms. The reason is that a vertex can be discovered (i.e., put in a work-stealing structure) concurrently by several distinct processes, and later, each of them can take the vertex from its structure and execute the work associated with the vertex (i.e., explore its neighborhood).  One more difficulty is that computing the \emph{exact} number of processes that \Take/\Steal the same task in \emph{each} work-stealing structures would incur in time and space overheads.  Therefore, a simple approach was adopted where the total number of \Puts (i.e., the total number of tasks stored in all work-stealing structures) and the total number of \Takes (i.e., the total number of tasks executed) are counted.  Each process locally counts its number of \Puts/\Takes, and the counters are added up at the end of the experiment.  These quantities allowed us to estimate the amount of repeated work in the relaxations of work-stealing and its impact.  To avoid disturbing performance measurements, the experiments for measuring repeated work were executed independently, following a simpler methodology: each experiment was run five times from which average values were computed.
+
+\paragraph*{Parallel SAT}
+We consider parallel SAT solvers (e.g.,~\cite{DBLP_journals_amai_BohmS96, DBLP_journals_entcs_FeldmanDH05, DBLP_books_sp_HS2018}). It was implemented as a simple single-producer multi-consumer solver with a single instance of one of the tested work-stealing algorithms. The implementation is straightforward: the processes test every possible binary assignment to determine if any of them satisfies a given formula. Each task in the work-stealing structure consists of a range of assignments to be evaluated.  The main process (i.e., the main thread in the Java program) is the owner of the work-stealing structure and generates all tasks at the beginning of the experiment. Once all tasks are generated, the main process and the rest of the processes collaborate to identify if there is a satisfying assignment.  The input to the experiment is an unsatisfiable formula in conjunctive normal form (CNF). The formula was generated from an SAT formula generator\footnote{https://cnfgen.readthedocs.io/en/latest/cnfgen.families.pigeonhole.html}.  The experiment is executed independently for each number of available threads.  Multiple size assignment ranges are tested independently: 50, 100, 250, 500, 1,000, and 2,500.
+
+It was also measured the amount of repeated work in each experiment.  In this case, it is easy to compute the exact number as there is a single work-stealing structure. It suffices to compare the total number of \Puts and the total number of successful \Takes/\Steals. These quantities are computed as in the previous benchmark, and, as before, the experiments for measuring repeated work were executed independently so as not to disturb performance measurements. Each experiment was run five times, from which average values were computed.
+
+
 First, we present a summary of the experimental evaluation results from the Case of Study presented in Chapter~\ref{chapter:4_work-stealing}:
 
 \begin{itemize}
@@ -176,6 +217,68 @@ The outcomes of the rest of the experiments, for range assignment sizes 100, 500
 
 
 \section{\label{sec:results-modular-basket-queue}Modular Basket Queues}
+
+\subsection{\label{sec:queue-experiments}Experiments}
+
+This section describes the methodology used to evaluate the queue performance developed in the Chapter~\ref{chapter:5_modular-basket-queues}. To evaluate the performance of our queue, we have designed a set of experiments that allowed us to determine whether it is competitive with queues in the state-of-the-art literature.
+We divide our experiments into two classes: \emph{inner experiments} and \emph{outer experiments}.
+Inner experiments evaluate the performance of the modular queue using \LL/\IC objects and baskets. These experiments allow us to consider which of our implementations (combinations of \LL/\IC objects and baskets to build the modular queue) have the best performance and throughput. Also, this allows us to know if using more relaxed objects can compete with the classical synchronization objects. Once the inner experiments have been evaluated and the best combination to build the queue is chosen, we asses the selected queue against state-of-the-art queues \emph{(outer experiments)} to assess its performance and throughput. The list of queue
+algorithms against which we evaluate our chosen queue are:
+
+\begin{itemize}
+    \item Wait-Free queue by Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}.
+    \item Lock-Free LCRQ queue by Morrison and Afek~\cite{ppopp2013x86queues}.
+    \item Lock-Free queue by Michael and Scott~\cite{DBLP_conf_podc_MichaelS96}.
+    \item Lock-Free queue by Ramalhete~\cite{Ramalhete_Correia_MPMC_2016}, which was strongly inspired by the obstruction\hyp{}free queue shown in the work of Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}
+    \item Lock-Free queue by Ostrovsky and Morrison~\cite{scalingconcurrent2020}\footnote{We implemented only the version that use simple \CAS}.
+\end{itemize}
+
+\subsection{\label{subsec:queue-experimental-setup}Experimental Setup}
+\subsubsection{Platforms and Implementations}
+
+The experiments were conducted on a machine with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. This gives a total of 64 hardware threads for the evaluation.  We have developed the algorithms and infrastructure to carry out experimental evaluation using the C++20 programming language. This allows us to benefit from the new concurrency and parallelism features integrated with this version, including updates to atomics and synchronization facilities.
+
+For the \textit{inner experiments}, we did not use any advanced memory reclamation protocol while implementing the modular queue variants. Instead, we only added basic memory reclamation after each evaluation. During these experiments, we followed only the specifications of the queue, \LL/\IC objects, and \textit{baskets} mentioned in Section~\ref{sec-basket-queue} for implementing the distinct variants. This experiment aimed to understand how different implementations of the same object (\LL/\IC, \textit{baskets}) can affect the performance of the modular queue. Later in this section, we have provided a detailed explanation of how the experiment will be conducted.
+
+In the case of \textit{outer experiments}, in multiple algorithms~\cite{ DBLP_conf_podc_MichaelS96,ppopp2013x86queues, Ramalhete_Correia_MPMC_2016} (including the implementation of our modular queue) we use Hazard Pointers~\cite{DBLP_conf_podc_Michael02} to reclaim memory during the evaluation of these experiments, and for the others~\cite{scalingconcurrent2020, DBLP_conf_ppopp_YangM16}, we used their memory reclamation algorithms, like epoch-based memory reclamation~\cite{DBLP_phd_ethos_Fraser04,mckenney2001read}. We implemented the modular queue for these experiments using the specifications for dynamic arrays and the list of the arrays described in Section~\ref{sec:coping-with-realistic-assumptions} and compared these implementations to the prior queues. Below, we have provided a detailed explanation of how the experiments will be conducted.
+
+\subsubsection{\label{subsubsec:queues-experiment-methodology}Methodology}
+
+To analyze the performance of the queue and its components, the experimental evaluation is divided into the following two benchmarks, where the first one is an evaluation of the \LL/\IC objects declared in the section~\ref{subsec:ll-ic-implementations} with the baskets described in the section~\ref{subsec:basket-implementation}. The second one is an evaluation of the performance of our queue using the best \LL/\IC object and basket against the queues in the state-of-the-art literature. Below, we briefly describe each benchmark. Performance was measured using the statistically rigorous methodology by Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07}, as described in the section~\ref{subsec:stat-rigor-meth}. In both benchmarks, each thread is pinned to some hardware thread.
+
+\subsubsection{\label{subsubsec:queue-experiments-inner-experiments}Inner Experiments}
+
+To evaluate the performance of our distinct variants for the \LL/\IC objects and the baskets, which are fundamental for the construction of the modular queue, we perform the following experiments:
+
+\begin{enumerate}
+    \item For the case of the \LL/\IC object implementations, we measure the time for executing \(5 \cdot 10^6\) interspersed \LL - \IC calls to the same object by multiple threads, with a respective random work, i.e., each thread calls a \LL followed by \IC, and between each call to these methods, work of some length is executed to avoid artificial long-run scenarios (see for example~\cite{DBLP_conf_ppopp_YangM16}). This artificial work consists of spinning a small amount of time (approximately \(6\ \mu{}s\)) in an empty loop. The \emph{false sharing} problem~\cite{BoloskyMichael93} was taken into account in the array-based \LL/\IC implementations (i.e., \R/\W and the mixed one). The following versions were tested:
+
+    \begin{itemize}
+        \item \CAS-based implementation.
+        \item \R/\W-based implementation with distinct padding sizes for each array entry (16, 32, 64 bytes of padding).
+        \item \R/\W-based implementation with no padding.
+    \end{itemize}
+
+  \item For the case of the combinations of \LL/\IC objects and baskets to build the modular queue, we did a similar evaluation to the previous, but testing interspersed calls to enqueue and dequeue in a shared queue by all threads. We measure the time for executing \(5\cdot 10^6\) interspersed calls to enqueue and dequeue, and similar to the previous test, we perform some artificial work to avoid artificial long-run scenarios, using the same technique as described previously. From the following combinations, we will choose one from the experimental evaluation to compete against the state-of-the-art queue listed in Section~\ref{subsubsec:queue-experiments-outer-experiments}. The \(K\) chosen for the \(K\)-basket was \(\sqrt{N}\). The combinations of \LL/\IC objects with baskets are the following:
+    \begin{itemize}
+        \item \LL/\IC{} \R/\W (with padding) with \(N\)-basket
+        \item \LL/\IC{} \CAS with \(N\)-basket
+        \item \LL/\IC{} mixed with \(N\)-basket
+        \item \LL/\IC{} \R/\W (with padding) with \(K\)-basket
+        \item \LL/\IC{} \CAS with \(K\)-basket
+        \item \LL/\IC{} mixed with \(K\)-basket
+    \end{itemize}
+\end{enumerate}
+
+
+
+\subsubsection{\label{subsubsec:queue-experiments-outer-experiments}Outer Experiments}
+
+After selecting the best combination of \LL/\IC object and its respective basket of the modular queue, three versions of the modular queuewill be evaluated against the following queues: Wait-Free queue by Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16},  Lock-Free LCRQ queue by Morrison and Afek~\cite{ppopp2013x86queues}, Lock-Free queue by Michael and Scott~\cite{DBLP_conf_podc_MichaelS96}, Lock-Free queue by Ramalhete~\cite{Ramalhete_Correia_MPMC_2016}, inspired in the obstruction-free queue shown in the work of Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}, Lock-Free queue by Ostrovsky and Morrison~\cite{scalingconcurrent2020}.
+
+There are three versions of the modular queue: the \textit{classic version} specified in Section~\ref{sec-basket-queue}, which has a fixed size\footnote{1,000,000 of baskets} and does not have the option to resize\footnote{It is the same used for the inner experiments}; the \textit{dynamic array} version, which has an initial size of 1024 baskets and doubles its size whenever the array becomes full; and the \textit{list of arrays} version from which use Hazard Pointers[59] for memory management and utilize nodes with basket arrays of size 1024. The last two versions are specified in Section~\ref{sec:coping-with-realistic-assumptions}.
+
+To evaluate all the queues, we adopt a benchmark similar to that used by Ostrovsky and Morrison~\cite{scalingconcurrent2020}. This benchmark consists of three workloads: producer-only, consumer-only, and a mixed producer/consumer workload. During the experimental evaluation, each process can have the role either of a producer, which calls the \Enq function, or a consumer, which calls the \Deq function. Similar to the experiments performed in the section~\ref{subsubsec:queue-experiments-inner-experiments}, we measure the time it takes until all threads complete \(1\cdot 10^6\) operations. We use the statistically rigorous methodology as described in the section~\ref{subsec:stat-rigor-meth} that follows the methodology of Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07} for the experimental evaluation.
 
 First, we present a summary of the experimental evaluation results from the Case Of Study presented in Chapter~\ref{chapter:5_modular-basket-queues}.
 
