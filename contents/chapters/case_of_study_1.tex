@@ -4,7 +4,7 @@ In this chapter, we will begin with a case of study related to the topic of rela
 
 We will focus on First-In-First-Out (FIFO) data structures with single-producer multi-consumer semantics and in two relaxation methods for work-stealing, known as multiplicity~\cite{DBLP_journals_dc_CastanedaRR23} and weak-multiplicity. These relaxation methods allow a task to be extracted by more than one \Take/\Steal operation, but each process can only take the same task at most once. However, this relaxation can only occur in a concurrent environment. The first relaxation's property is directly guaranteed by the definition of set-linearizability. The second relaxation follows from the requirement that solutions must be sequentially exact. We will present two read/write, wait-free algorithms for these relaxations that do not require read-after-write synchronization patterns. Additionally, the second algorithm is fence-free with constant step complexity.
 
- %In Chapter~\ref{chapter:6_Results}, we describe a set of experiments related to this case of study to know if practical implementations of the algorithms presented in this chapter can compete or even be better than other work-stealing algorithms in state-of-the-art
+Chapter~\ref{chapter:6_Results} presents an experimental evaluation using three benchmarks related to this case study and the results obtained from the evaluation. Our goal is to determine whether implementation of the algorithms presented in this chapter can compete with or even surpass other state-of-the-art work-stealing algorithms. We implemented the algorithms using Java programming language.
 
 \section{Introduction}
 
@@ -448,8 +448,8 @@ Suppose now that \(E\) is sequential. By induction of the number of operations, 
 \end{figure}
 % =================================================================
 
-We are now able to present our main result:
-
+We are now able to present the main result of this chapter:
+\vspace{1cm}
 \begin{theorem}\label{theo-wf-fully}
 If \(Head\) is replaced with an instance of the algorithm in Figure~\ref{figure-algo-range-max-reg}, \NCWSM is \R/\W, fence-free, wait-free, sequentially-exact, and linearizable with constant step complexity in all its operations.
 \end{theorem}
