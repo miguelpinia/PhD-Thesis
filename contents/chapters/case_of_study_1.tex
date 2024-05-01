@@ -464,15 +464,73 @@ Figure~\ref{figure-w-mult} contains an optimized \NCWSM algorithm with the \Rang
 
 This section discusses simple variants of our algorithms that bound the number of operations that can extract the same task.  We only discuss the case of \WFWSM as the variants for \NCWSM are similar.
 
-\paragraph*{Bounding multiplicity}
+\begin{figure}[H]
+  \centering
+  \fbox{
+    \begin{minipage}[t]{150mm} \footnotesize
+      \renewcommand{\baselinestretch}{2.5} \resetline
+      \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
 
-We call this variant \BNCWSM. The modification consists of an extra array \(A\) of the same length as \(Tasks\) array, with its first two entries initialized to $\true$.  $\Steal$ is modified as follows: after Line~\ref{A14}, a thief performs \(A[head].\SWAP(\false)\), and it executes Lines~\ref{A16} and~\ref{A17} only if the $\SWAP$ successfully takes the \true value in \(A[head]\); otherwise, it goes to the Line~\ref{A12} to start over.  The modified algorithm guarantees no two distinct $\Steal$ operations take the same task. However, a \Take and a $\Steal$ can take the same task.  Note that $\Steal$ is only nonblocking in the modified algorithm.  The new algorithm is a set-linear solution to the work-stealing variant with multiplicity (Definition~\ref{def-ws-mult}), where every concurrency class has at most one \Take and one \Steal that return the same task. The set-linearizability proof is the same as the difference in the sizes of concurrency classes.
+        {\bf Shared Variables:}\\
+        \> \> \(Head\): atomic $\MaxReg$ object initialized to \(1\)\\
+        \> \> \(Tasks[1, 2, \hdots]\): array of atomic $\R/\W$ objects
+        with\\ \>\>\>\>\>\>\> the first two objects initialized to \(\bot\)\\
+        \> \> \(A[1, 2, \hdots]\): array of booleans, the first two entries\\
+        \>\>\>\>\>\>\>initialized to true.\\
+
+        {\bf Local Variables of the Owner:}\\
+        \> \> \(tail \leftarrow 0\)\\ \\
+
+        {\bf Operation} \(\Put(x)\): \\
+        \line{BW01} \> \> \(tail \leftarrow tail + 1\)\\
+        \line{BW02} \> \> \(\{Tasks[tail].\W(x),\ Tasks[tail + 2].\W(\bot)\}\)\\
+        \line{BW03} \> \> {\bf return } $\true$\\
+        {\bf end} $\Put$ \\ \\
+
+        {\bf Operation} \(\Take()\): \\
+        \line{BW04} \> \> \(head \leftarrow Head.\MaxR()\)\\
+        \line{BW05} \> \> {\bf if \(head \leq tail\) then}\\
+        \line{BW06} \> \> \> \(\{ x \leftarrow Tasks[head].\R(),
+        Head.\MaxW(head+1)\}\)\\
+        % \line{A07} \> \> $head \leftarrow head+1$\\
+        % AC: Miguel ya habia observado que la sigueinte linea no es
+        % necesaria. Yo no habia entendido
+        % \line{A08} \> \> $Head.\MaxW(head)$\\
+        \line{BW07} \> \> \> {\bf return} \(x\)\\
+        \line{BW08} \> \> {\bf end if}\\
+        \line{BW09} \> \> {\bf return} $\epty$\\
+        {\bf end} $\Take$ \\ \\
+
+
+        {\bf Operation} \(\Steal()\): \\
+        \line{BW10} \> \> \(head \leftarrow Head.\MaxR()\)\\
+        \line{BW11} \> \> \(x \leftarrow Tasks[head].\R()\) \\
+        \line{BW12} \> \> {\bf if \(x \neq \bot\) and \(A[head].\SWAP(false)\) then}\\
+        % \line{A15}\>  \> \> $head \leftarrow head+1$\\
+        \line{BW13} \> \> \> \(Head.\MaxW(head+1)\)\\
+
+        \line{BW14} \> \> \> {\bf return} \(x\)\\
+        \line{BW15} \> \> {\bf else } \\
+        \line{BW16} \> \> \> {\bf go to line~\ref{BW10}} \\
+        \line{BW17} \> \> {\bf end if}\\
+        \line{BW18} \> \> {\bf return} $\epty$\\
+        {\bf end} $\Steal$
+
+      \end{tabbing}
+    \end{minipage}
+  }
+  \caption{\label{figure-b-w-mult}\BNCWSM: algorithm obtained from modify the algorithm \WFWSM as specified in Section~\ref{par:bounding-multiplicity}.}
+\end{figure}
+
+\paragraph*{\label{par:bounding-multiplicity}Bounding multiplicity}
+
+We call this variant \BNCWSM. The modification consists of an extra array \(A\) of the same length as \(Tasks\) array, with its first two entries initialized to $\true$.  $\Steal$ is modified as follows: after Line~\ref{A14}, a thief performs \(A[head].\SWAP(\false)\), and it executes Lines~\ref{A16} and~\ref{A17} only if the $\SWAP$ successfully takes the \true value in \(A[head]\); otherwise, it goes to the Line~\ref{A12} to start over.  The modified algorithm guarantees no two distinct $\Steal$ operations take the same task. However, a \Take and a $\Steal$ can take the same task.  Note that $\Steal$ is only nonblocking in the modified algorithm.  The new algorithm is a set-linear solution to the work-stealing variant with multiplicity (Definition~\ref{def-ws-mult}), where every concurrency class has at most one \Take and one \Steal that return the same task. The set-linearizability proof is the same as the difference in the sizes of concurrency classes. Figure~\ref{figure-b-w-mult} illustrates the changes made to the algorithm in Figure~\ref{figure-max-reg-mult} to produce the \BNCWSM version.
+
 
 
 \paragraph*{Removing multiplicity}
 
 The \Take operation of \BNBWSM can be modified similarly to obtain an algorithm for exact (FIFO) work-stealing, i.e., every task is taken \emph{exactly} once (Definition~\ref{def-ws-mult} with singleton concurrency classes). The modified \Take operation is only nonblocking.
-
 
 \paragraph*{Multiplicity on demand}
 
