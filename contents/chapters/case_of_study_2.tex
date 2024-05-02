@@ -233,17 +233,17 @@ Algorithm~\ref{basket-1} is a wait-free linearizable implementation of a $K$-bas
 \begin{proofT}
 It is not hard to see that the algorithm is wait-free. Always that the value of the variables \(PUTS\) or \(TAKES\) is greater than \(K\) or the state of the basket is \closed, the algorithm finishes. The total of cycles will always be bounded by \(K\).
 
-For the linearizability proof, given an entry $A[i]$, we will say that a \Put operation \emph{successfully puts} its item in $A[i]$ if it gets $\bot$ when it performs \SWAP on $A[i]$, and that a \Take operation \emph{successfully cancels} $A[i]$ if it gets $\bot$ when it performs \SWAP on $A[i]$, otherwise (i.e. it gets a value distinct from $\bot$), we say that the \Take operation \emph{successfully takes} an item from $A[i]$.
+For the linearizability proof, given an entry $A[i]$, we will say that a \Put{} operation \emph{successfully puts} its item in $A[i]$ if it gets $\bot$ when it performs \SWAP{} on $A[i]$, and that a \Take{} operation \emph{successfully cancels} $A[i]$ if it gets $\bot$ when it performs \SWAP{} on $A[i]$, otherwise (i.e., it gets a value distinct from $\bot$), we say that the \Take{} operation \emph{successfully takes} an item from $A[i]$.
 
-From the specification of \FAI, for every $A[i]$, at most one \Put operations tries to put its item in $A[i]$ successfully, and at most one \Take operation tries to either successfully cancel $A[i]$ or successfully take an item from $A[i]$. By the specification of \SWAP, if $A[i]$ is canceled, no \Put operation successfully puts an item in it, and no \Take operation successfully takes an item from it.
+From the specification of \FAI, for every $A[i]$, at most one \Put{} operations tries to put its item in $A[i]$ successfully, and at most one \Take{} operation tries to either successfully cancel $A[i]$ or successfully take an item from $A[i]$. By the specification of \SWAP, if $A[i]$ is canceled, no \Put{} operation successfully puts an item in it, and no \Take{} operation successfully takes an item from it.
 
-Given any execution of the algorithm, the operations are linearized as follows. A \Put operation that successfully puts its item is linearized at its last \FAI instruction before returning. A \Take operation that successfully takes an item from $A[i]$ is linearized right after the \Put operation that successfully puts its item in $A[i]$. A \Put that returns \full is linearized at its return step, and similarly, a \Take that returns \closed is linearized at its return step. Note that, in both cases, at that moment of the execution, every entry of $A$ has been or will be either canceled or a \Take operation has or will successfully take an item from it. It can be shown that these linearization points induce a valid linearization of the execution.
+Given any execution of the algorithm, the operations are linearized as follows. A \Put{} operation that successfully puts its item is linearized at its last \FAI{} instruction before returning. A \Take{} operation that successfully takes an item from $A[i]$ is linearized right after the \Put{} operation that successfully puts its item in $A[i]$. A \Put{} that returns \full{} is linearized at its return step, and similarly, a \Take{} that returns \closed{} is linearized at its return step. Note that, in both cases, at that moment of the execution, every entry of $A$ has been or will be either canceled or a \Take{} operation has or will successfully take an item from it. It can be shown that these linearization points induce a valid linearization of the execution.
 \end{proofT}
 
 \begin{figure}[ht!]
 \centering{ \fbox{
   \begin{minipage}[t]{180mm} \footnotesize
-\renewcommand{\baselinestretch}{2.5} \resetline
+\renewcommand{\baselinestretch}{2.5} \resetline{}
 \begin{tabbing} aaaa\=aa\=aa\=aa\=aa\=aa\=aa\=\kill %~\\
 
 {\bf Shared Variables:}\\
@@ -296,7 +296,7 @@ Algorithm~\ref{basket-2} is a wait-free linearizable implementation of an $n$-ba
 \end{theorem}
 
 \begin{proofT}
-Clearly, \Put is wait-free. It is not difficult to see that \Take is wait-free because the number of iterations is limited by the size of the set \(takes_p\).
+Clearly, \Put{} is wait-free. It is not difficult to see that \Take{} is wait-free because the number of iterations is limited by the size of the set \(takes_p\).
 
 For the linearizability proof, given an entry $A[i]$, we will say that a \Put operation of a process $p$, \emph{successfully puts} its item in $A[p]$ if its \CAS is successful. A \Take operation \emph{successfully cancels} $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being $\bot$; and it \emph{successfully takes} an item from $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being distinct to $\bot$ and $\top$.
 
@@ -358,11 +358,11 @@ Given any execution of the algorithm, the operations are linearized as follows. 
 
 \section{\label{sec:coping-with-realistic-assumptions}Coping with realistic assumptions}
 
-The previous construction was suitable for the analysis of properties that we desired in our concurrent queue. However, a realistic implementation will not rely on infinite arrays~\footnote{We refer to the infinite basket array of the queue.}. As noted in a previous footnote, two common approaches for implementing arrays can be considered ``infinity''. The first approach involves using circular dynamic arrays, which can expand or shrink as needed. The second approach uses linked lists, where each node contains a finite-sized array that grows on demand during execution. To maintain consistency, each node is appended to the list using a \CAS operation.
+The previous construction was suitable for the analysis of properties that we desired in our concurrent queue. However, a realistic implementation will not rely on infinite arrays~\footnote{We refer to the infinite basket array of the queue.}. As noted in previous chapters, two common approaches for implementing arrays can be considered ``infinite''. The first approach involves using circular dynamic arrays, which can expand or shrink as needed. The second approach uses linked lists, where each node contains a finite-sized array that grows on demand during execution. To maintain consistency, each node is appended to the list using a \CAS operation.
 
 The first implementation requires straightforward changes, which rely on a mechanism to double the array size and copy from one array to another. This will be similar to the strategy followed by the Chase-Lev Work-Stealing~\cite{circular.work.stealing} or the Idempotent Work-Stealing~\cite{maged.vechev.2009} algorithms presented in Chapter~\ref{chapter:4_work-stealing}.
 
-For the second implementation, we need to make more complex changes. Unlike the single-producer multi-consumer queue used for work-stealing in Chapter~\ref{chapter:4_work-stealing}, we are now dealing with a multi-producer multi-consumer environment. This means we must incorporate a mechanism to ensure that node insertion in the queue is executed correctly.  Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq}\footnote{We use the operator \(\rightarrow\) to denote the access to elements in a structure.} show the necessary changes to convert the Algorithm~\ref{chapter-5:alg:basket-queue} to a queue capable of handling long-run executions where the algorithm may be running.
+For the second implementation, we need to make more complex changes. Unlike the single-producer multi-consumer queue used for work-stealing in Chapter~\ref{chapter:4_work-stealing}, we are now dealing with a multi-producer multi-consumer environment. This means we must incorporate a mechanism to ensure that node insertion in the queue is executed correctly.  Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} show the necessary changes to convert the Algorithm~\ref{chapter-5:alg:basket-queue} to a queue capable of handling long-run executions. We use the operator \(\rightarrow\) to denote the access to elements in a structure.
 
 This update defines a new data structure called \texttt{Segment}. It serves as a node that comprises a small segment of the infinite basket array, a pair of objects of type \LL/\IC that denote the Head and Tail similar to what is stated in Algorithm~\ref{chapter-5:alg:basket-queue} and a pointer to the next node. For simplicity, this node does not perform any circular assignment or deletion over the array as is done in LCRQ queue~\cite{ppopp2013x86queues}. This makes it easier to determine when the segment is full or marked as closed for memory management tasks, using only the state of \LL/\IC objects. Additionally, we have defined two auxiliary functions that help identify when a segment is full or closed.
 
