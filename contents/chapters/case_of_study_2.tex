@@ -19,7 +19,7 @@ We observe that \RMW{} instructions are unnecessary to consistently manipulate t
 \section{\label{sec-basket-queue}The Modular Basket Queue}
 
 
-The Modular Basket Queue appears in Algorithm~\ref{chapter-5:alg:basket-queue}. It is based on two concurrent objects: baskets and \LL/\IC. Roughly speaking, the baskets hold groups of items that were enqueued concurrently and can be dequeued in any order. Two \LL/\IC objects store the head and the tail of the queue. For simplicity, the baskets queue algorithm is presented using an infinite shared array\footnote{There are two common approaches to implement an infinite array. One is to use a circular dynamic array that can expand and shrink as needed. The other is to use a linked list where each node contains a finite-sized array. During execution, the list grows on demand, and each node is appended to the list using the Compare-And-Swap (\CAS) operation to maintain consistency.}.
+The Modular Basket Queue appears in Algorithm~\ref{chapter-5:alg:basket-queue}. It is based on two concurrent objects: baskets and \LL/\IC. Roughly speaking, the baskets hold groups of items that were enqueued concurrently and can be dequeued in any order. Two \LL/\IC objects store the head and the tail of the queue. For simplicity, the baskets queue algorithm is presented using an infinite shared array\footnote{There are two common approaches to implement an infinite array. One is to use a circular dynamic array that can expand and shrink as needed. The other is to use a linked list where each node contains a finite-sized array. During execution, the list grows on demand, and each node is appended to the list using the \CAS operation to maintain consistency.}.
 
 \begin{figure}[ht!] \centering{ \fbox{
 
