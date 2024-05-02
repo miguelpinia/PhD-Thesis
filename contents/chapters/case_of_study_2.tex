@@ -64,11 +64,9 @@ The Modular Basket Queue appears in Algorithm~\ref{chapter-5:alg:basket-queue}. 
 }
 \end{figure}
 
-The Modular Basket Queue appears in Algorithm~\ref{chapter-5:alg:basket-queue}. It is based on two concurrent objects: baskets and \LL/\IC. Roughly speaking, the baskets hold groups of items that were enqueued concurrently and can be dequeued in any order. Two \LL/\IC objects store the head and the tail of the queue.
-
 \begin{definition}[\(K\)-Basket]
 \label{chapter-5:def:k-basket}
-A \emph{basket of capacity $K$} or \emph{$K$-basket} is a data structure that can hold up to $K$ items. The state of the basket is represented by a pair $(S, C)$ where $S$ is the set of items that can be added concurrently and $C$ is the number of items in the basket. A \emph{$K$-basket} is initialized to $(\emptyset, 0)$. The sequential specification of a \emph{$K$-basket} satisfies the following properties:
+A \emph{basket of capacity $K$} or ``\emph{$K$-basket}'', is a data structure that can hold up to $K$ items. The state of the basket is represented by a pair $(S, C)$ where $S$ is the set of items that can be added concurrently and $C$ is the number of items in the basket. A \emph{$K$-basket} is initialized to $(\emptyset, 0)$. The sequential specification of a \emph{$K$-basket} satisfies the following properties:
 
 \begin{enumerate}
     \item $\Put(x)$. Non-deterministically can return \full (regardless of the state) or \ok. If $C = K$, then return \full, in another case do $S = S \cup \{x\}$, $C = C +1$ and return $\ok$.
@@ -116,7 +114,7 @@ The algorithm's scalability depends on the scalability of the concrete implement
 \subsection{\label{subsec:ll-ic-implementations}\LL/ \IC implementations.}
 
 \subsubsection{A \CAS-based implementation.}
-Let $p$ denote the process that invokes an operation on the object. This implementation uses a shared register $R$ initialized to 0.  \LL first reads $R$ and stores the value in a persistent variable $r_p$ of $p$, and then returns $r_p$.  \IC first reads $R$ and if that value is equal to $r_p$, then it performs $\CAS(R, r_p, r_p+1)$; in any it case returns \ok.
+Let $p$ denote a process that invokes an operation on the object. This implementation uses a shared register $R$ initialized to 0.  \LL first reads $R$ and stores the value in a persistent variable $r_p$ of $p$, and then returns $r_p$.  \IC first reads $R$ and if that value is equal to $r_p$, then it performs $\CAS(R, r_p, r_p+1)$; in any it case returns \ok. The pseudocode for this implementation is shown in Figure~\ref{alg:ll-ic-cas}.
 
 \begin{figure}[ht!]
 \centering{ \fbox{
@@ -155,7 +153,7 @@ The \CAS-based \LL/\IC implementation from the algorithm~\ref{alg:ll-ic-cas} is 
 \end{proofT}
 
 \subsubsection{A \R/\W implementation.}
-This implementation uses a shared array $M$ with $n$ entries initialized to 0.  \LL first reads all entries of $M$ (in some order), stores the maximum value in a persistent variable $max_p$ of $p$, and then returns $max_p$.  \IC first reads all entries of $M$, and if the maximum among those values is equal to $max_p$, it performs $\W(M[p], max_p + 1)$; in any it case returns \ok.
+This implementation uses a shared array $M$ with $n$ entries initialized to 0.  \LL first reads all entries of $M$ (in some order), stores the maximum value in a persistent variable $max_p$ of $p$, and then returns $max_p$.  \IC first reads all entries of $M$, and if the maximum among those values is equal to $max_p$, it performs $\W(M[p], max_p + 1)$; in any it case returns \ok.  The pseudocode for this implementation is shown in Figure~\ref{alg:ll-ic-read-write}.
 
 \begin{figure}[ht!]
 \centering{ \fbox{
@@ -220,11 +218,11 @@ Let \op denote any \LL that returns $R \in \{0, 1, \hdots, MAX-1\}$ and let $e$ 
 %\end{proofT}
 
 \subsection{\label{subsec:basket-implementation}Basket implementations.}
-The basket implementations appear in Algorithms~\ref{basket-1} and~\ref{basket-2}. Both implementations have a shared array where the items are put and taken. A \Put operation tries to put its item in a location, while a \Take operation either take an item from a location or marks it as "canceled."  The first implementation follows an approach similar to that of the LCRQ algorithm~\cite{ppopp2013x86queues}, while the second implementation is reminiscent of locally linearizable generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
+The basket implementations appear in Algorithms~\ref{basket-1} and~\ref{basket-2}. Both implementations have a shared array where the items are put and taken. A \Put{} operation tries to put its item in a location, while a \Take{} operation either take an item from a location or marks it as ``canceled''.  The first implementation follows an approach similar to that of the LCRQ algorithm~\cite{ppopp2013x86queues}, while the second implementation is reminiscent of locally linearizable generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}.
 
 \subsubsection{K-Basket}
 
-For this implementation, the processes use \FAI to guarantee that at most two ``\textit{opposite}'' operations ``\textit{compete}'' for the same location in the shared array, which can be resolved with a \SWAP; the idea of this algorithm is similar to the approach in the LCRQ algorithm~\cite{ppopp2013x86queues}. We called \(K\)-basket to this implementation, shown in the Algorithm~\ref{basket-1}.
+For this implementation, the processes use \FAI{} to guarantee that at most two ``\textit{opposite}'' operations ``\textit{compete}'' for the same location in the shared array, which can be resolved with a \SWAP; the idea of this algorithm is similar to the approach in the LCRQ algorithm~\cite{ppopp2013x86queues}. We called \(K\)-basket to this implementation, shown in the Algorithm~\ref{basket-1}.
 
 
 
