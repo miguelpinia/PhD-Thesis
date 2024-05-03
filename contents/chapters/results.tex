@@ -1,10 +1,11 @@
-\chapter{\label{chapter:6_Results}Results}
+\chapter{\label{chapter:6_Results}Experimental Evaluation and Results}
 
-In this chapter, we will present the results of our experimental evaluation of our cases of study presented in Chapters~\ref{chapter:4_work-stealing} and~\ref{chapter:5_modular-basket-queues}. We will provide an in-depth analysis of the data we collected. We have gained valuable insights into our research topic through rigorous testing and analysis. We believe that the results presented in this chapter will contribute to a better understanding of the subject matter and will pave the way for future research in this field. So, let us dive in and explore the outcomes of our study in detail.
+In this chapter, we discuss the results of our experimental evaluation of the algorithms presented in Chapter~\ref{chapter:4_work-stealing} and Chapter~\ref{chapter:5_modular-basket-queues}. The chapter is divided into two sections. The first section (Section~\ref{sec:exp-work-stealing}) is about the work-stealing case study. The second section (Section~\ref{sec:results-modular-basket-queue}) deals with the experimental evaluation of the modular baskets queue.
 
-\section{Work-Stealing with Multiplicity}
+In the first section, we analyze the performance of the work-stealing algorithms presented in Chapter~\ref{chapter:4_work-stealing}, dividing the experimental evaluation into three benchmarks. The first two have been used before in other articles~\cite{DBLP_conf_pldi_FrigoLR98,maged.vechev.2009,fencefreework}, and the is an application to a problem that naturally admits parallelization. In the second section, we analyze the performance of the modular baskets queue algorithms presented in Chapter~\ref{chapter:5_modular-basket-queues}. We divide the experimental evaluation into two benchmarks. The first benchmark is designed to evaluate the performance of the modular baskets queue variants, i.e., the combinations of baskets and \LL/\IC objects. From the result of this first benchmark, we pick up the best performant version, and then we implement the array-based version and the list-of-arrays version as described in Section~\ref{sec:coping-with-realistic-assumptions}. Finally, these variants are compared against many state-of-the-art queues.
 
-\subsection{\label{sec-experiments}Experiments}
+For both evaluations, we use the statistically rigorous methodology by Georges et al.~\cite{DBLP_conf_oopsla_GeorgesBE07}, we measure the performance as described in Section~\ref{subsec:stat-rigor-meth}. In this experimental evaluation, we provide an in-depth analysis of the data we collected. We have gained valuable insights into our research topic through rigorous testing and analysis. We believe that the results presented in this chapter will contribute to a better understanding of the subject matter and will pave the way for future research in this field. So, let us dive in and explore the outcomes of our study in detail.
+
 \section{\label{sec:exp-work-stealing}Work-Stealing with Multiplicity}
 
 % \subsection{\label{sec-experiments}Experiments}
