@@ -291,20 +291,6 @@ Given any execution of the algorithm, the operations are linearized as follows. 
 
 In the second implementation, each process has a dedicated location in the shared array where it tries to put its item when it invokes \Put. When a process invokes \Take, it first tries to take an item from its dedicated location. If it does not succeed, it randomly picks a non-previously-picked location, does the same, and repeats until it takes an item or all locations have been canceled. Since several operations might ``compete'' for the same location, \CAS is needed. This implementation is reminiscent of \emph{locally linearizable} generic data structure implementations of~\cite{DBLP_conf_concur_HaasHHKLPSSV16}. We called \(N\)-basket to this implementation, shown in the Algorithm~\ref{basket-2}.
 
-\begin{theorem}\label{theorem:N-basket}
-Algorithm~\ref{basket-2} is a wait-free linearizable implementation of an $n$-basket.
-\end{theorem}
-
-\begin{proofT}
-Clearly, \Put{} is wait-free. It is not difficult to see that \Take{} is wait-free because the number of iterations is limited by the size of the set \(takes_p\).
-
-For the linearizability proof, given an entry $A[i]$, we will say that a \Put operation of a process $p$, \emph{successfully puts} its item in $A[p]$ if its \CAS is successful. A \Take operation \emph{successfully cancels} $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being $\bot$; and it \emph{successfully takes} an item from $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being distinct to $\bot$ and $\top$.
-
-The linearizability proof is similar to the linearizability proof in the previous theorem, with the following main differences. (1) If a \Put operation returns \full, it can be the case that some of the other entries of $A$ will never be canceled or store an item; the response of the \Put operation is, however, correct because the sequential specification of $n$-basket allows \Put to return \full in any state of the object. (2) Several \Take operations might try to cancel the same entry $A[i]$ or successfully take an item from it; this is not a problem because the specification of \CAS guarantees that, at most, one succeeds.
-
-Given any execution of the algorithm, the operations are linearized as follows. A \Put operation that successfully puts its item is linearized at its (successful) \CAS. A \Take operation that successfully takes an item from $A[i]$ is linearized right after the \Put operation that successfully puts its item in $A[i]$. A \Put that returns \full is linearized at its return step, and similarly, a \Take that returns \closed is linearized at its return step. Note that at the execution, a \Take that returns \closed, every entry of $A$ has been either canceled, or a \Take operation has successfully taken an item from it. It can be shown that these linearization points induce a valid linearization of the execution.
-\end{proofT}
-
 \begin{figure}[ht!]
 \centering{ \fbox{
 
@@ -356,6 +342,20 @@ Given any execution of the algorithm, the operations are linearized as follows. 
 }
 \end{figure}
 
+\begin{theorem}\label{theorem:N-basket}
+Algorithm~\ref{basket-2} is a wait-free linearizable implementation of an $n$-basket.
+\end{theorem}
+
+\begin{proofT}
+Clearly, \Put{} is wait-free. It is not difficult to see that \Take{} is wait-free because the number of iterations is limited by the size of the set \(takes_p\).
+
+For the linearizability proof, given an entry $A[i]$, we will say that a \Put operation of a process $p$, \emph{successfully puts} its item in $A[p]$ if its \CAS is successful. A \Take operation \emph{successfully cancels} $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being $\bot$; and it \emph{successfully takes} an item from $A[i]$ if its $\CAS(A[i], x, \top)$ (in the \compete function) is successful, with $x$ being distinct to $\bot$ and $\top$.
+
+The linearizability proof is similar to the linearizability proof in the previous theorem, with the following main differences. (1) If a \Put operation returns \full, it can be the case that some of the other entries of $A$ will never be canceled or store an item; the response of the \Put operation is, however, correct because the sequential specification of $n$-basket allows \Put to return \full in any state of the object. (2) Several \Take operations might try to cancel the same entry $A[i]$ or successfully take an item from it; this is not a problem because the specification of \CAS guarantees that, at most, one succeeds.
+
+Given any execution of the algorithm, the operations are linearized as follows. A \Put operation that successfully puts its item is linearized at its (successful) \CAS. A \Take operation that successfully takes an item from $A[i]$ is linearized right after the \Put operation that successfully puts its item in $A[i]$. A \Put that returns \full is linearized at its return step, and similarly, a \Take that returns \closed is linearized at its return step. Note that at the execution, a \Take that returns \closed, every entry of $A$ has been either canceled, or a \Take operation has successfully taken an item from it. It can be shown that these linearization points induce a valid linearization of the execution.
+\end{proofT}
+
 \section{\label{sec:coping-with-realistic-assumptions}Coping with realistic assumptions}
 
 The previous construction was suitable for the analysis of properties that we desired in our concurrent queue. However, a realistic implementation will not rely on infinite arrays~\footnote{We refer to the infinite basket array of the queue.}. As noted in previous chapters, two common approaches for implementing arrays can be considered ``infinite''. The first approach involves using circular dynamic arrays, which can expand or shrink as needed. The second approach uses linked lists, where each node contains a finite-sized array that grows on demand during execution. To maintain consistency, each node is appended to the list using a \CAS operation.
@@ -367,6 +367,11 @@ For the second implementation, we need to make more complex changes. Unlike the 
 This update defines a new data structure called \texttt{Segment}. It serves as a node that comprises a small segment of the infinite basket array, a pair of objects of type \LL/\IC that denote the Head and Tail similar to what is stated in Algorithm~\ref{chapter-5:alg:basket-queue} and a pointer to the next node. For simplicity, this node does not perform any circular assignment or deletion over the array as is done in LCRQ queue~\cite{ppopp2013x86queues}. This makes it easier to determine when the segment is full or marked as closed for memory management tasks, using only the state of \LL/\IC objects. Additionally, we have defined two auxiliary functions that help identify when a segment is full or closed.
 
 Besides the new Segment structure, now the shared variables are pointers to nodes of type Segment that represent Head and Tail similar to those used in Michael-Scott's lock-free queue~\cite{DBLP_conf_podc_MichaelS96}. We will prove that the queue defined in Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} is lock-free and linearizable.
+
+\begin{theorem}
+    Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} are a linearizable lock-free implementation of a concurrent queue.
+\end{theorem}
+
 
 \begin{figure}[H] \centering{ \fbox{
 
@@ -479,11 +484,6 @@ Besides the new Segment structure, now the shared variables are pointers to node
 }
 \end{figure}
 
-
-\begin{theorem}
-    Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} are a linearizable lock-free implementation of a concurrent queue.
-\end{theorem}
-
 \begin{proofT}
   To see that the queue algorithm composed of the Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} is lock-free, we must analyze the \Enq function shown in the Algorithm~\ref{alg:basket-queue-linked-list-enq} and the \Deq function shown in the Algorithm~\ref{alg:basket-queue-linked-list-deq} are both lock-free.
 
@@ -523,7 +523,7 @@ Besides the new Segment structure, now the shared variables are pointers to node
   Therefore, Algorithms~\ref{alg:basket-queue-linked-list-enq} and~\ref{alg:basket-queue-linked-list-deq} are a linearizable lock-free implementation of a concurrent queue.
 \end{proofT}\footnotetext{We proved that there are linearizable and wait-free \LL/\IC objects in Theorems~\ref{theorem:cas-ll-ic}, and~\ref{theorem:rw-ll-ic}, as well as linearizable and wait-free basket implementations in Theorems~\ref{theorem:k-basket} and~\ref{theorem:N-basket}.}
 
-Another issue in practical settings is memory management. This issue can be delegated to the garbage collector in languages like Java. However, a safe and efficient concurrent memory reclamation protocol should be implemented in programming languages without automatic memory garbage collection. We implemented all the algorithms and the infrastructure for experimental evaluation using C++20. We use popular protocols for memory reclamation are Hazard Pointers~\cite{DBLP_conf_podc_Michael02} and Epoch-based reclamation~\cite{DBLP_phd_ethos_Fraser04,mckenney2001read} according to each algorithm specification of the queues implemented in our experimental evaluation.
+Another issue in practical settings is memory management. This issue can be delegated to the garbage collector in languages like Java. However, a safe and efficient concurrent memory reclamation protocol should be implemented in programming languages without automatic memory garbage collection. For example, we implemented all the algorithms and the necessary infrastructure for experimental evaluation of this chapter using C++20. For memory management, we have utilized popular protocols for memory reclamation, like Hazard Pointers~\cite{DBLP_conf_podc_Michael02} and Epoch-based reclamation~\cite{DBLP_phd_ethos_Fraser04,mckenney2001read}. % according to each algorithm specification of the queues implemented in our experimental evaluation.
 
 %%% Local Variables:
 %%% mode: LaTeX
