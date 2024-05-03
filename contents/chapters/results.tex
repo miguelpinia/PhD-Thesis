@@ -5,6 +5,9 @@ In this chapter, we will present the results of our experimental evaluation of o
 \section{Work-Stealing with Multiplicity}
 
 \subsection{\label{sec-experiments}Experiments}
+\section{\label{sec:exp-work-stealing}Work-Stealing with Multiplicity}
+
+% \subsection{\label{sec-experiments}Experiments}
 
 In this section, we discuss the outcome of an experimental evaluation of \NCWSM and its bounded version, \BNCWSM.  Using the approaches discussed in Section~\ref{sec-removing-infinite-arrays}, two versions of each algorithm were implemented, one using simple arrays and the other using dynamic arrays. The suffix Lists was added to the dynamic array versions. For example, \NCWSM denotes the version with resizable arrays, and \NCWSM List denotes the version with dynamic arrays.  \NCWSM and \BNCWSM were compared to the following algorithms: Cilk THE~\cite{DBLP_conf_pldi_FrigoLR98}, Chase-Lev~\cite{circular.work.stealing}, and the three idempotent work-stealing algorithms~\cite{maged.vechev.2009}.  Three benchmarks were employed to evaluate the performance of the algorithms, following the evaluation methodology by Georges, Buytaert, and Eeckhout~\cite{DBLP_conf_oopsla_GeorgesBE07}, as described in the section~\ref{subsec:stat-rigor-meth}.
 
