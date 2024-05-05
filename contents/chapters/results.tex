@@ -10,13 +10,13 @@ For both evaluations, we use the statistically rigorous methodology by Georges e
 
 % \subsection{\label{sec-experiments}Experiments}
 
-In this section, we discuss the outcome of an experimental evaluation of \NCWSM and its bounded version, \BNCWSM.  Using the approaches discussed in Section~\ref{sec-removing-infinite-arrays}, two versions of each algorithm were implemented, one using simple arrays and the other using dynamic arrays. The suffix Lists was added to the dynamic array versions. For example, \NCWSM denotes the version with resizable arrays, and \NCWSM List denotes the version with dynamic arrays.  \NCWSM and \BNCWSM were compared to the following algorithms: Cilk THE~\cite{DBLP_conf_pldi_FrigoLR98}, Chase-Lev~\cite{circular.work.stealing}, and the three idempotent work-stealing algorithms~\cite{maged.vechev.2009}.  Three benchmarks were employed to evaluate the performance of the algorithms, following the evaluation methodology by Georges, Buytaert, and Eeckhout~\cite{DBLP_conf_oopsla_GeorgesBE07}, as described in the section~\ref{subsec:stat-rigor-meth}.
+In this section, we discuss the outcome of an experimental evaluation of \NCWSM and its bounded version, \BNCWSM.  Using the approaches discussed in Section~\ref{sec-removing-infinite-arrays}, two versions of each algorithm were implemented, one using simple arrays and the other using dynamic arrays. The suffix Lists was added to the list of arrays version. For example, \NCWSM denotes the version with resizable arrays, and \NCWSM List denotes the version with list of arrays.  \NCWSM and \BNCWSM were compared to the following algorithms: Cilk THE~\cite{DBLP_conf_pldi_FrigoLR98}, Chase-Lev~\cite{circular.work.stealing}, and the three idempotent work-stealing algorithms~\cite{maged.vechev.2009}.  Three benchmarks were employed to evaluate the performance of the algorithms, following the evaluation methodology by Georges, Buytaert, and Eeckhout~\cite{DBLP_conf_oopsla_GeorgesBE07}, as described in the Section~\ref{subsec:stat-rigor-meth}.
 
 \subsection{\label{subsec-experimental-setup}Experimental Setup}
 
 \subsubsection{\label{subsec:implementation}Platforms and Implementation}
 
-The experiments were conducted on a machine with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. The algorithms were implemented in Java~17, which allowed us to ignore tasks such as garbage collection.  As mentioned, two versions of \NCWSM and \BNCWSM were implemented. The other tested algorithms, Cilk THE, Chase-Lev, and the three idempotent work-stealing, were implemented following their specification, i.e., inserting fences where required.; all these algorithms use resizable arrays to store tasks.
+The experiments were conducted on a machine with an AMD Ryzen Threadripper 3970X processor with 64GB of memory and 32 cores, each capable of executing two hardware threads. The algorithms were implemented in Java~17, which allowed us to ignore tasks such as garbage collection.  As mentioned, two versions of \NCWSM and \BNCWSM were implemented. The other tested algorithms, Cilk THE, Chase-Lev, and the three idempotent work-stealing, were implemented following their specification, i.e., inserting fences where required; all these algorithms use resizable arrays to store tasks.
 
 \subsubsection{\label{subsec:methodology}Methodology}
 
@@ -49,7 +49,9 @@ We consider parallel SAT solvers (e.g.,~\cite{DBLP_journals_amai_BohmS96, DBLP_j
 It was also measured the amount of repeated work in each experiment.  In this case, it is easy to compute the exact number as there is a single work-stealing structure. It suffices to compare the total number of \Puts and the total number of successful \Takes/\Steals. These quantities are computed as in the previous benchmark, and, as before, the experiments for measuring repeated work were executed independently so as not to disturb performance measurements. Each experiment was run five times, from which average values were computed.
 
 
-First, we present a summary of the experimental evaluation results from the Case of Study presented in Chapter~\ref{chapter:4_work-stealing}:
+\subsection{Experimental Evaluation Results}
+
+First, we present a summary of the experimental evaluation results of the case study from Chapter~\ref{chapter:4_work-stealing}:
 
 \begin{itemize}
 \item Zero cost experiments. In both experiments, \Puts{}-\Takes{} and \Puts-\Steals{}, overall, the algorithm with the best performance was \NCWSM, followed by \NCWSM Lists and then idempotent FIFO, regardless of the initial array size. This result is expected because \NCWSM does not use either costly primitives or memory fences. It was also observed that idempotent FIFO performed better than \NCWSM Lists when no resizing was needed. \BNCWSM and \BNCWSM Lists performed worst among all algorithms. However, this did not preclude them from exhibiting a competitive performance in the second and third benchmarks.
@@ -62,7 +64,7 @@ First, we present a summary of the experimental evaluation results from the Case
 
 The following subsections explain the results of the experiments in detail.
 
-\subsection{Zero Cost Experiment}
+\subsubsection{Zero Cost Experiment}
 
 
 The outcome of the \Puts{}-\Takes{} experiment appears in Figures~\ref{fig:putstakes:256}, \ref{fig:putstakes:1000000} and \ref{fig:putstakes:10000000}.  Overall, the absence of fences in \NCWSM derived an improvement over idempotent algorithms that range between 9\% to 65\%. Table~\ref{puts-takes-percentage} contains the percentage improvement of \NCWSM over all algorithms. In all cases, \BNCWSM and \BNCWSM Lists performed worst. This is arguably attributed to the extra array of boolean flags used for bounding multiplicity.~\footnote{Implementations where the two arrays are consolidated in a single array of objects with two entries, a task, and a flag, performed even worse. Hence, these implementations were discarded.}  It was also observed that the data structure's initial size impacts performance. When the initial size exceeds the number of operations in the experiment (Figure~\ref{fig:putstakes:10000000}), no resizes are needed, \BNCWSM's performance improved considerably. Still, it was affected by the use of two distinct arrays. The outcome of the \Puts{}-\Steal{}{} experiment is similar, and shown in Figures~\ref{fig:putssteals:256}, \ref{fig:putssteals:1000000} and \ref{fig:putssteals:10000000}, and Table~\ref{puts-steals-percentage}. %\ref{sec:results-zero-cost} contains the detailed measurements of each algorithm in each experiment.
@@ -99,7 +101,7 @@ The outcome of the \Puts{}-\Takes{} experiment appears in Figures~\ref{fig:putst
 \end{figure}
 
 
-\subsection{Parallel Spanning Tree}
+\subsubsection{Parallel Spanning Tree}
 
 
 Except for the case of Random graphs, where practically all algorithms performed equally, in general, \NCWSM{} outperformed all algorithms.  \NCWSM Lists and idempotent FIFO overall performed second and third best. The improvement of \NCWSM{} over \NCWSM Lists and idempotent FIFO was small, between 0.5\% and 4\%, depending on the graph. Thus, the absence of fences in \NCWSM{} resulted in a minor improvement over idempotent FIFO. It merits mentioning that \BNCWSM and its lists-based version generally showed a competitive performance, in some cases close to the first three algorithms. Usually, Cilk THE and Chase-Lev performed worst, which is expected as they use costly synchronization mechanisms, although this is not the only factor (more on this below).  \NCWSM outperformed Cilk THE by a margin between $1\%$ and $21\%$, and Chase-Lev by a margin between $0.14\%$ and $32\%$.  The lowest margins occurred in the case of Random graphs, where, as mentioned, all algorithms performed almost equally. Figure~\ref{fig:graphapplication} depicts the result of the experiment in some representative cases. In a few cases (e.g., Directed 2D Torus), Chase-Lev, Cilk THE, and idempotent LIFO performed best with few processes. This seems to be related to the topology of the graph and the algorithm's insert/extract task policy (the owner follows LIFO).
@@ -213,21 +215,24 @@ In all algorithms, not all tasks are executed. Processes are constantly checking
   \caption{\label{fig:satapplication} Mean times of the Parallel SAT benchmark for range assignment sizes 50, 250, and 1,000.}
 \end{figure}
 
-\subsection{Parallel SAT}
+\subsubsection{Parallel SAT}
 
 The outcomes for range assignment sizes 50, 250, and 1,000 are depicted in Figures~\ref{fig:sat:50:1},~\ref{fig:sat:250:1}, and~\ref{fig:sat:1000:1}, respectively. All algorithms speeded up sequential computation by 70\%, and generally, all performed very similarly. However, repeated work (the difference between the number of \Puts and the number of successful \Takes/\Steals) slightly impacted the performance of \NCWSM. Contrary to previous benchmarks, whose tasks are simple, tasks in this benchmark require more computation; hence, repeated work is costly. In the experiment with range size 50, \NCWSM's repeated work was larger than other algorithms, and this tendency became more pronounced as the number of processes increased. This happens because (1) a small range size increases the possibilities of concurrent \Puts/\Takes and (2) interleavings of \Puts/\Takes of \NCWSM, where multiplicity arises, are arguably not too complex. However, repeated work was always low, less than $1\%$. Still, the small amount of repeated work had some minor impact on \NCWSM's performance (see Figure~\ref{fig:sat:50:2}). For larger range sizes, 250 and 1,000, the amount of repeated work of \NCWSM decreased to almost zero (as concurrent \Puts/\Takes are less likely to happen), and hence its impact became negligible (see Figures~\ref{fig:sat:250:2} and~\ref{fig:sat:1000:2}). In contrast, idempotent algorithms had low amounts of repeated work in all cases (always close to zero), which arguably happened because the interleavings where the relaxation occurs are less likely to occur. All algorithms exhibited the same performance when the range sizes were more significant, with ranges sizes of 250 and 1,000. It is worth stressing that insert/extract policies did not affect performance, as all tasks were generated at the beginning of the experiment; hence, basically, every \Take/\Steal had to read from main memory at all times.
 
-The outcomes of the rest of the experiments, for range assignment sizes 100, 500, and 2,500, are similar.% ~\ref{sec:sat-appendix} contains all results of the benchmark.
+The outcomes of the rest of the experiments, for range assignment sizes 100, 500, and 2,500, are similar. ------ Apenddix ?? %~\ref{sec:sat-appendix}
+contains all results of the benchmark. (Deshabilitado hasta compilar la última versión)
+
+%% TODO: Compilar versión con apéndice al terminar el documento.
 
 
 \section{\label{sec:results-modular-basket-queue}Modular Basket Queues}
 
-\subsection{\label{sec:queue-experiments}Experiments}
+% \subsection{\label{sec:queue-experiments}Experiments}
 
-This section describes the methodology used to evaluate the queue performance developed in the Chapter~\ref{chapter:5_modular-basket-queues}. To evaluate the performance of our queue, we have designed a set of experiments that allowed us to determine whether it is competitive with queues in the state-of-the-art literature.
-We divide our experiments into two classes: \emph{inner experiments} and \emph{outer experiments}.
-Inner experiments evaluate the performance of the modular queue using \LL/\IC objects and baskets. These experiments allow us to consider which of our implementations (combinations of \LL/\IC objects and baskets to build the modular queue) have the best performance and throughput. Also, this allows us to know if using more relaxed objects can compete with the classical synchronization objects. Once the inner experiments have been evaluated and the best combination to build the queue is chosen, we asses the selected queue against state-of-the-art queues \emph{(outer experiments)} to assess its performance and throughput. The list of queue
-algorithms against which we evaluate our chosen queue are:
+In this section, we discuss the outcome of an experimental evaluation of the modular baskets queue algorithms presented in Chapter~\ref{chapter:5_modular-basket-queues}. To evaluate the modular queue's performance, we have designed a set of experiments that allow us to determine whether it is competitive with queues in the state-of-the-art literature. We divide our experiments into two classes: \textit{inner experiments} and \textit{outer experiments}.
+
+
+Inner experiments evaluate the performance of the modular queue using distinct implementations of \LL/\IC objects and baskets. These experiments allow us to consider which implementations (combinations of LL/IC objects and baskets to build the modular queue) perform best. Also, this allows us to know if using more relaxed objects, queue's performance can compete with the classical synchronization objects. Once the inner experiments have been evaluated and the best combination to build the queue is chosen, we asses the selected queue against state-of-the-art queues (\textit{outer experiments}) to assess its performance and throughput. The list of queue algorithms against which we evaluate our chosen queue are:
 
 \begin{itemize}
     \item Wait-Free queue by Yang and Mellor-Crummey~\cite{DBLP_conf_ppopp_YangM16}.
