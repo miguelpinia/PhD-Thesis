@@ -1,9 +1,11 @@
 \chapter{Discussion and Conclussions}
 
+This thesis delves into the evolution of concurrent computing and the shift from traditional to more flexible approaches when programming concurrent algorithms. The primary objective of this study was to determine whether it is possible to implement meaningful and useful objects using only synchronization mechanisms among the simplest ones without compromising performance in practical settings.
 
-\section{\label{sec:experiment-conclussions} Conclussions of case of study 1}
+In Chapter~\ref{chapter:4_work-stealing}, the problem of work-stealing was addressed, and the limits of the standard asynchronous Read/Write wait-free, shared memory model were explored. In Chapter~\ref{chapter:5_modular-basket-queues}, the focus shifted towards building objects from a modular perspective while keeping in mind the use of simple synchronization mechanisms. Specifically, a modular queue was built, where some components can be implemented using only Read/Write operations.
 
-In Chapter~\ref{chapter:4_work-stealing}, we studied the use of multiplicity applied to work-stealing. We can conclude, in general, that relaxed work-stealing algorithms enhanced performance in the benchmarks with lightweight tasks. In the case of graph exploration, the FIFO insert/extract policy provided better improvements. In the benchmark with heavy tasks, all algorithms performed equally.
+
+In Chapter~\ref{chapter:6_Results} we present an experimental evaluation to measure the performance of the algorithms presented in Chapters~\ref{chapter:4_work-stealing} and~\ref{chapter:5_modular-basket-queues}. For work-stealing, the study reveals that the use of simple mechanisms can compete and even in some cases, outperform state-of-the-art algorithms. In the case of the modular queue, the study reveals that the queue cannot compete directly against the fastest state-of-the-art queues. However, its performance is good enough, and the performance lies in particular implementations of its modules.
 
 %%% Local Variables:
 %%% mode: LaTeX
