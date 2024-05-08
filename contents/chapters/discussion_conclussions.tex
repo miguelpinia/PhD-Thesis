@@ -8,7 +8,7 @@ In Chapter~\ref{chapter:4_work-stealing}, the problem of work-stealing was addre
 In Chapter~\ref{chapter:6_Results} we present an experimental evaluation to measure the performance of the algorithms presented in Chapters~\ref{chapter:4_work-stealing} and~\ref{chapter:5_modular-basket-queues}. For work-stealing, the study reveals that the use of simple mechanisms can compete and even in some cases, outperform state-of-the-art algorithms. In the case of the modular queue, the study reveals that the queue cannot compete directly against the fastest state-of-the-art queues. However, its performance is good enough, and the performance lies in particular implementations of its modules.
 
 
-\section{\label{sec:experiment-conclussions} Case Study: Work-Stealing}
+\paragraph{\label{sec:experiment-conclussions} Case Study: Work-Stealing}
 
 In Chapter~\ref{chapter:4_work-stealing}, we studied the use of multiplicity applied to work-stealing. We studied two relaxations for work-stealing, called multiplicity and weak multiplicity. Both of them allow a task to be extracted by more than one $\Take/\Steal$ operation, but each process can take the same task at most once; however, the relaxation can arise only in concurrency. For the first relaxation, this property is directly guaranteed by the definition of set-linearizability. The second relaxation follows from the fact that solutions are required to be sequentially-exact. We presented two $\R/\W$, wait-free algorithms for the relaxations, both devoid of \RAW synchronization patterns.
 Moreover, the second algorithm is fence-free with constant step complexity. To our knowledge, these are the first algorithms for relaxations of work-stealing having all these properties, evading the known impossibility result~\cite{DBLP_conf_popl_AttiyaGHKMV11} in all their high-level operations. From the theoretical perspective of the consensus number hierarchy~\cite{DBLP_journals_toplas_Herlihy91}, we have thus shown that work-stealing with multiplicity and weak multiplicity lay at the lowest level with objects whose consensus number is one. We also argued that the idempotent work-stealing~\cite{maged.vechev.2009} does not solve either work-stealing with multiplicity or weak multiplicity. Therefore, the relaxations and algorithms proposed here provide stronger guarantees. An experimental evaluation showed that the benefits in the performance of work-stealing with relaxed semantics depend on the type of application and the complexity of the work associated with a task. Therefore, it cannot be guaranteed that relaxations of work-stealing will always lead to improvements.
@@ -16,7 +16,7 @@ Moreover, the second algorithm is fence-free with constant step complexity. To o
 Viewed collectively, our results show that the simplest synchronization mechanisms suffice to solve non-trivial coordination problems without compromising performance in some practical applications.
 % We can conclude, that relaxed work-stealing algorithms enhanced performance in the benchmarks with lightweight tasks. In the case of graph exploration, the FIFO insert/extract policy provided better improvements. In the benchmark with heavy tasks, all algorithms performed equally.
 
-\section{Case Study: Modular Baskets Queue}
+\paragraph{Case Study: Modular Baskets Queue}
 
 In Chapter~\ref{chapter:5_modular-basket-queues}, we adopted a modular approach to building concurrent objects using simple synchronization mechanisms.
 % The aim of using a modular design is to enable developers to focus on a small subset of the system's complexity at any given time to deliver new features. They should be able to work in any given module while knowing little about the rest of the system.
@@ -28,9 +28,14 @@ The results of an experimental evaluation revealed that the most efficient appro
 
 Viewed collectively, our results show that modular and concurrent algorithms can be built whose performance depends only on the performance of the algorithm's modules. They also show that a simple synchronization mechanism can still be used to develop such algorithms.
 
-\section{Future Research}
+\paragraph{Future Research}
 
 The study of the simplest synchronization mechanisms to solve concurrency problems is an ongoing field of research. Attiya, et al.'s work~\cite{DBLP_conf_popl_AttiyaGHKMV11} has shown that it is impossible to eliminate expensive synchronization in classic and ubiquitous specifications, which raises the question of whether it is possible to bypass this impossibility result in any way. We have considered two possible ways to circumvent this result: (1) by considering relaxed semantics and (2) by making additional assumptions about the model.
+
+In the case of Work-Stealing, we have considered relaxed semantics like Multiplicity~\cite{DBLP_journals_dc_CastanedaRR23, DBLP_conf_opodis_CastanedaRR20}. For future research, we are interested in designing algorithms for work-stealing with multiplicity and weak-multiplicity that insert/extract tasks in orders different from FIFO. Also, it is interesting to explore if the techniques in the algorithms from Chapter~\ref{chapter:4_work-stealing} can be applied to solve relaxed versions of other concurrent objects efficiently. For FIFO queues with multi-producer multi-consumer semantics, we are interested in exploring if the modular design combined with techniques like those mentioned in Chapter~\ref{chapter:4_work-stealing}, can be used to obtain FIFO queues with multiplicity or weak-multiplicity by manipulating the head and the tail through objects of type \MaxR or \RMaxR.
+
+
+
 
 
 %%% Local Variables:
