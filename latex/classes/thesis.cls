@@ -148,7 +148,7 @@
     \cleardoublepage{}
     \begin{center}
       \vspace*{1.5cm}
-      {\Large \bfseries  Prefacio}
+      {\Large \bfseries  Preface}
     \end{center}
     \vspace{0.5cm}
     \begin{quote}}
@@ -160,7 +160,7 @@
     \cleardoublepage{}
     \begin{center}
       \vspace*{1.5cm}
-      {\Large \bfseries  Resumen}
+      {\Large \bfseries Abstract}
     \end{center}
     \vspace{0.5cm}
     \begin{quote}}
@@ -173,7 +173,7 @@
     \cleardoublepage{}
     \begin{center}
       \vspace*{1.5cm}
-      {\Large \bfseries Agradecimientos}
+      {\Large \bfseries Acknowledgements}
     \end{center}
     \vspace{0.5cm}
     \begin{quote}}
