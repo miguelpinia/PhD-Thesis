@@ -180,14 +180,16 @@
 {\end{quote}\end{alwayssingle}}
 
 % \renewcommand{\thechapter}{\Roman{chapter}}
-\titleformat{\chapter}[display]
-{\bfseries\Large}
-{\filleft\MakeUppercase{\chaptertitlename} \Huge\thechapter}
-{4ex}
+\titleformat
+{\chapter} % Command
+[display] % Shape
+{\bfseries\Large} %format
+{\filleft\MakeUppercase{\chaptertitlename} \Huge\thechapter} %Label
+{4ex} % sep
 {\titlerule
-\vspace{2ex}%
+\vspace{2ex}% before-code
 \filleft}
-[\vspace{2ex}%
+[\vspace{2ex}% after-code
 \titlerule]
 
 \titleformat{\section}[frame]
