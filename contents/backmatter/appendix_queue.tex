@@ -1,7 +1,44 @@
 \clearpage{}
 
 \chapter{Queue evaluation Results}
-\section{\label{sec:appendix-llic-performance}Inner Experiments - \LL/\IC Performance}
+\section{\label{sec:appendix-llic-performance}Results of Inner Experiments (\LL/\IC Evaluation)}
+
+This appendix shows the results obtained by executing the Inner Experiments for the evaluation of the \LL/\IC objects, following the methodology suggested by Georges, Buytaert, and Eeckout~\cite{DBLP_conf_oopsla_GeorgesBE07}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.4]{contents/backmatter/evaluation/llic_64_insert_extract.pdf}
+  \caption{\label{fig:appx-llic-64-insert-extract} 1,000,000 Interspersed Takes and Puts (CAS vs FAI) for 64 threads.}
+\end{figure}
+
+
+\input{contents/backmatter/evaluation/llic_times.tex}
+\input{contents/backmatter/evaluation/llic_percentages.tex}
+
+\section{\label{sec:appendix-inner-queues}Results of Inner Experiments (Module Queue Variants)}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.4]{contents/backmatter/evaluation/64_inner_enq_deq_all.pdf}
+  \caption{\label{fig:appx-64_inner_enq_deq_all} 1,000,000 interspersed enqueue - dequeue calls for 64 threads.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/64_inner_enq_deq_percentages.tex}
+\input{contents/backmatter/evaluation/64_inner_enq_deq_times.tex}
+
+\section{\label{sec:appendix-outer-queue}Results of Outer Experiments}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.4]{contents/backmatter/evaluation/64_outer_enq_deq_all.pdf}
+  \caption{\label{fig:appx-64-outer-enq-deq}1,000,000 of interspersed Enqueue - Dequeue calls for 64 threads.}
+\end{figure}
+
+\input{contents/backmatter/evaluation/64_outer_enq_deq_times.tex}
+\input{contents/backmatter/evaluation/64_outer_enq_deq_percentages.tex}
+
+
+
 
 %%% Local Variables:
 %%% mode: LaTeX
