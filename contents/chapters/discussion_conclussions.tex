@@ -34,9 +34,7 @@ The study of the simplest synchronization mechanisms to solve concurrency proble
 
 In the case of Work-Stealing, we have considered relaxed semantics like Multiplicity~\cite{DBLP_journals_dc_CastanedaRR23, DBLP_conf_opodis_CastanedaRR20}. For future research, we are interested in designing algorithms for work-stealing with multiplicity and weak-multiplicity that insert/extract tasks in orders different from FIFO. Also, it is interesting to explore if the techniques in the algorithms from Chapter~\ref{chapter:4_work-stealing} can be applied to solve relaxed versions of other concurrent objects efficiently. For FIFO queues with multi-producer multi-consumer semantics, we are interested in exploring if the modular design combined with techniques like those mentioned in Chapter~\ref{chapter:4_work-stealing} can be used to obtain FIFO queues with multiplicity or weak-multiplicity by manipulating the head and the tail through objects of type \MaxR or \RMaxR.
 
-
-
-
+In the case of the modular basket queue and the techniques developed in Chapter~\ref{chapter:5_modular-basket-queues}, we are interested in investigating if there are more efficient ways to implement baskets, for example, using concurrent sets instead of arrays to store the concurrent inputs. We are also interested in testing whether the use of baskets in algorithms like LCRQ and Mellor-Crummey’s queue can improve their performance and help with some problems like latency, as pointed out by Ramalhete~\cite{Ramalhete_Correia_MPMC_2016}, which are out of the scope of this work.
 
 %%% Local Variables:
 %%% mode: LaTeX
