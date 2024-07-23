@@ -340,7 +340,7 @@
 
 % Proof box
 \newmdenv[skipabove=7pt,
-          skipbelow=10pt,
+          skipbelow=7pt,
           rightline=false,
           leftline=true,
           topline=false,
@@ -496,6 +496,8 @@ innerbottommargin=5pt]{cBox}
 \newcommand{\full}{{\sf FULL}\xspace}
 \newcommand{\open}{{\sf OPEN}\xspace}
 \newcommand{\compete}{{\sf compete}\xspace}
+\newcommand{\llic}{{\sf Load-Link/Incremental-Conditional}\xspace}
+\newcommand{\llsc}{{\sf Load-Link/Store-Conditional}\xspace}
 
 \newcounter{linecounter}
 \newcommand{\linenumbering}{\ifthenelse{\value{linecounter}<10}{(0\arabic{linecounter})}{(\arabic{linecounter})}}
