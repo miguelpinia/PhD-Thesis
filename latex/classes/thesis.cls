@@ -65,6 +65,7 @@
 %\usepackage[framed]{ntheorem}
 %\usepackage{palatino}
 %\usepackage{kpfonts}
+\usepackage{pdfpages}
 
 \renewcommand{\qedsymbol}{$\blacksquare$}
 
